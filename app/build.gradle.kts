@@ -6,12 +6,13 @@ plugins {
 
 android {
     namespace = "np.com.naxa.saffileexplorer"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "np.com.naxa.saffileexplorer"
         minSdk = 24
-        targetSdk = 34
+        // noinspection EditedTargetSdkVersion
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -49,6 +50,13 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
+    implementation(libs.androidx.compose.runtime.livedata)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.documentfile)
+    implementation(libs.okhttp)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
