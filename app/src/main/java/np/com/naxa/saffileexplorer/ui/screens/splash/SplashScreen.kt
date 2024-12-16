@@ -46,7 +46,7 @@ fun SplashScreen(
                 .graphicsLayer {
                     alpha = alphaAnimation.value
                 },
-            text = "Welcome to MyApp",
+            text = "SAF File Explorer",
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onPrimary
         )
