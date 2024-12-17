@@ -5,12 +5,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -23,8 +23,8 @@ import androidx.navigation.compose.rememberNavController
 import np.com.naxa.saffileexplorer.ui.local_providers.LocalDownloadAndTransferFileViewModel
 import np.com.naxa.saffileexplorer.ui.local_providers.LocalEventsViewModel
 import np.com.naxa.saffileexplorer.ui.local_providers.LocalUsbDeviceListViewModel
-import np.com.naxa.saffileexplorer.ui.navigation.SafFileExplorerNavHost
 import np.com.naxa.saffileexplorer.ui.navigation.Routes
+import np.com.naxa.saffileexplorer.ui.navigation.SafFileExplorerNavHost
 import np.com.naxa.saffileexplorer.ui.theme.SAFFileExplorerTheme
 import np.com.naxa.saffileexplorer.utils.route
 import np.com.naxa.saffileexplorer.viewmodel.DownloadAndTransferFileViewModel
@@ -51,7 +51,7 @@ fun SafFileExplorerApp(
 
     val topBarTitle by remember {
         derivedStateOf {
-            currentRoute?.label ?: "Home"
+            currentRoute?.label ?: "Device"
         }
     }
 
@@ -64,8 +64,8 @@ fun SafFileExplorerApp(
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
                 topBar = {
-                    if (currentRoute != Routes.Splash) {
-                        TopAppBar(
+                    if (currentRoute != Routes.Splash && currentRoute != Routes.Home) {
+                        CenterAlignedTopAppBar(
                             title = {
                                 Text(topBarTitle)
                             },

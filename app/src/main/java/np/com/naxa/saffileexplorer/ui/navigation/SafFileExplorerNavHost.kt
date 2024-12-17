@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import np.com.naxa.saffileexplorer.ui.screens.download_and_transfer.DownloadAndTransferFileScreen
+import np.com.naxa.saffileexplorer.ui.screens.home.HomeScreen
 import np.com.naxa.saffileexplorer.ui.screens.splash.SplashScreen
 import np.com.naxa.saffileexplorer.ui.screens.usb_devices.UsbDeviceListScreen
 
@@ -28,6 +29,15 @@ enum class Routes(
     Splash(
         label = "Splash",
         path = "splash"
+    ),
+
+    /**
+     * Route for displaying the home screen.
+     * Path: /home
+     */
+    Home(
+        label = "Home",
+        path = "home"
     ),
 
     /**
@@ -80,12 +90,27 @@ fun SafFileExplorerNavHost(
         navController = navHostController,
         startDestination = Routes.Splash.path
     ) {
-        // Route for the USB Devices list screen
+        // Route for the Home screen
+        composable(Routes.Home.path) {
+            HomeScreen(
+                modifier = modifier,
+                navigateToDownloadAndTransfer = { device ->
+                    navHostController.navigate(
+                        Routes.DownloadAndTransfer.path.replace(
+                            "{deviceId}",
+                            device.deviceId.toString()
+                        )
+                    )
+                }
+            )
+        }
+
+        // Route for the Splash Screen
         composable(Routes.Splash.path) {
             SplashScreen(
                 modifier = modifier,
                 onNavigate = {
-                    navHostController.navigate(Routes.DevicesList.path) {
+                    navHostController.navigate(Routes.Home.path) {
                         // Prevent back navigation to Splash
                         popUpTo(Routes.Splash.path) {
                             inclusive = true

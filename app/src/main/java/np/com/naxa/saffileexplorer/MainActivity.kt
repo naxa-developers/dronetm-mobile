@@ -291,6 +291,8 @@ class MainActivity : ComponentActivity() {
 
                 usbDeviceConnection?.close()
             }
+
+            fetchUsbDevices()
             return
         }
 
@@ -570,6 +572,7 @@ class MainActivity : ComponentActivity() {
      */
     companion object {
         private const val TAG = "MainActivity"
-        private const val ACTION_USB_DEVICE_PERMISSION = "com.itheamc.djimtpcontroller.USB_PERMISSION"
+        private const val ACTION_USB_DEVICE_PERMISSION =
+            "com.itheamc.djimtpcontroller.USB_PERMISSION"
     }
 }
