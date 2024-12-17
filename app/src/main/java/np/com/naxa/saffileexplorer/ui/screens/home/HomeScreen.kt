@@ -30,7 +30,7 @@ import np.com.naxa.saffileexplorer.ui.local_providers.LocalUsbDeviceListViewMode
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    navigateToDownloadAndTransfer: (UsbDevice) -> Unit
+    navigateToDownloadAndTransfer: (UsbDevice?) -> Unit
 ) {
 
     val scope = rememberCoroutineScope()

@@ -148,9 +148,10 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
                                         device,
                                         // "https://www.youtube.com/watch?v=upFCmUxFNaY"
                                         // "https://sample-videos.com/img/Sample-png-image-30mb.png"
-                                        // "https://sample-videos.com/img/Sample-jpg-image-30mb.jpg"
-                                        // "https://shorturl.at/ip5pG"
-                                        "https://shorturl.at/jKM6c"
+                                        "https://sample-videos.com/img/Sample-jpg-image-30mb.jpg"
+                                        // "https://www-cdn.djiits.com/dps/6c185ab72a935e02e7f943913fd91e45.jpg"
+                                        //"https://shorturl.at/ip5pG"
+                                        // "https://shorturl.at/jKM6c"
                                     )
                                 )
                             }

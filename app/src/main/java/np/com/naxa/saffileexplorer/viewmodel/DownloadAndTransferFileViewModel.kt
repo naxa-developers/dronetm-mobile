@@ -1,23 +1,20 @@
 package np.com.naxa.saffileexplorer.viewmodel
 
-import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.core.net.toFile
-import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import np.com.naxa.saffileexplorer.states.DownloadAndTransferState
-import np.com.naxa.saffileexplorer.utils.FileDownloadHandler
-import np.com.naxa.saffileexplorer.utils.FileTransferHandler
-import np.com.naxa.saffileexplorer.utils.TransferResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import np.com.naxa.saffileexplorer.states.DownloadAndTransferState
+import np.com.naxa.saffileexplorer.utils.FileDownloadHandler
+import np.com.naxa.saffileexplorer.utils.FileTransferHandler
+import np.com.naxa.saffileexplorer.utils.TransferResult
 import java.io.File
 
 class DownloadAndTransferFileViewModel(
@@ -103,7 +100,7 @@ class DownloadAndTransferFileViewModel(
      * @param file The file to be transferred. This function launches a coroutine to handle the transfer asynchronously.
      *             It updates the transfer state to reflect the progress, success, or error of the transfer operation.
      */
-    fun startTransfer(file: File? = null, destinationUri: Uri, context: Context) {
+    fun startTransfer(file: File? = null, destinationUri: Uri) {
         // Update the state to indicate that transferring has started with 0% progress
         update(DownloadAndTransferState.Transferring(0F))
 
@@ -117,27 +114,7 @@ class DownloadAndTransferFileViewModel(
         viewModelScope.launch {
             // Start the transfer process and collect the results
 
-            //log the destination uri's details
-            Log.d("DownloadAndTransferFileViewModel", "startTransfer: ${destinationUri.path}")
-            Log.d("DownloadAndTransferFileViewModel", "startTransfer: ${destinationUri.userInfo}")
-            Log.d("DownloadAndTransferFileViewModel", "startTransfer: ${destinationUri.scheme}")
-            Log.d(
-                "DownloadAndTransferFileViewModel",
-                "startTransfer: ${getDocumentName(context, destinationUri)}"
-            )
-
-
-            val renamedFile = renameFile(
-                (file ?: _file)!!,
-                "${
-                    getDocumentName(
-                        context,
-                        destinationUri
-                    )
-                }.${getFileSuffix((file ?: _file)?.name!!)}"
-            )
-
-            transferHandler.transfer((renamedFile ?: file ?: _file)!!, destinationUri).collect { result ->
+            transferHandler.transfer((file ?: _file)!!, destinationUri).collect { result ->
                 when (result) {
                     is TransferResult.Progress -> {
                         // Update the state with the current transfer progress
@@ -210,71 +187,5 @@ class DownloadAndTransferFileViewModel(
                 return DownloadAndTransferFileViewModel(downloadManager, transferManager) as T
             }
         }
-    }
-
-
-    /**
-     * Retrieves the name of a document from a tree URI using DocumentFile.
-     *
-     * @param context The Android context used to create the DocumentFile
-     * @param uri The tree URI of the document whose name needs to be retrieved
-     * @return The name of the document as a String, or null if:
-     *         - The DocumentFile cannot be created from the URI
-     *         - The document name is not accessible
-     */
-    private fun getDocumentName(context: Context, uri: Uri): String {
-        val documentFile = DocumentFile.fromTreeUri(context, uri)
-        return documentFile!!.name ?: ""
-    }
-
-
-    /**
-     * Attempts to rename a file to a new filename while keeping it in the same directory.
-     *
-     * @param oldFile The existing File object to be renamed
-     * @param newFileName The new name to give the file (just the filename, not the full path)
-     * @return Boolean indicating success (true) or failure (false) of the rename operation.
-     *         Returns false if:
-     *         - The destination already exists
-     *         - The source file cannot be modified
-     *         - The operation is not supported by the file system
-     */
-    private fun renameFile(oldFile: File, newFileName: String): File? {
-
-        // Check if the old file exists
-        if (!oldFile.exists()) {
-            Log.d("DownloadAndTransferFileViewModel", "File does not exist")
-            return null
-        }
-
-        // Create a new file in the same directory with the new name
-        val newFile = File(oldFile.parent, newFileName)
-
-        return if (oldFile.renameTo(newFile)) {
-
-            Log.d("DownloadAndTransferFileViewModel", "renameFile Name: ${newFile.name}")
-            Log.d(
-                "DownloadAndTransferFileViewModel",
-                "renameFile Suffix: ${getFileSuffix(newFile.name)}"
-            )
-
-            newFile // Return the new file if renaming is successful
-        } else {
-            null // Return null if renaming fails
-        }
-    }
-
-
-    /**
-     * Extracts the file suffix (extension) from the given file name.
-     *
-     * @param fileName The name of the file to extract the suffix from.
-     * @return The file suffix as a String, or an empty string if no suffix is found.
-     */
-    private fun getFileSuffix(fileName: String): String {
-        val suffixName =
-            fileName.substringAfterLast('.', "") // Returns empty string if no extension
-        Log.d("DownloadAndTransferFileViewModel", "getFileSuffix: $suffixName")
-        return suffixName;
     }
 }

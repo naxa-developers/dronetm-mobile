@@ -135,10 +135,7 @@ class MainActivity : ComponentActivity() {
                     )
 
                     // Access Granted
-                    downloadAndTransferViewModel.startTransfer(
-                        destinationUri = uri,
-                        context = this@MainActivity
-                    )
+                    downloadAndTransferViewModel.startTransfer(destinationUri = uri)
 
                 } catch (e: Exception) {
                     Log.d(

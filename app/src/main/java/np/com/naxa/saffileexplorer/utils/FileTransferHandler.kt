@@ -7,7 +7,6 @@ import android.os.Build
 import android.os.storage.StorageManager
 import android.provider.DocumentsContract
 import android.util.Log
-import android.webkit.MimeTypeMap
 import androidx.documentfile.provider.DocumentFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -221,7 +220,7 @@ class FileTransferHandler(private val context: Context) {
             val documentFile = DocumentFile.fromTreeUri(context, destinationUri)
 
             // Creating the file name
-            val fileName = getFileNameByDeletingAlreadyExistOne(sourceFile, documentFile)
+            val fileName = deleteFileIfAlreadyExistAndGetName(sourceFile, documentFile)
 
             // Create the destination file
             val destFile = documentFile?.createFile("*/*", fileName)
@@ -279,6 +278,50 @@ class FileTransferHandler(private val context: Context) {
     }
 
     /**
+     * Gets a filename by checking and deleting any existing file with the same name.
+     *
+     * This function takes a source file and a document file directory, checks if a file
+     * with the same name already exists in the target directory, and if found, deletes it.
+     * This ensures there won't be naming conflicts when creating new files.
+     *
+     * @param sourceFile The source file whose name will be used
+     * @param documentFile The target DocumentFile directory where to check for existing files
+     * @return The filename string. Returns the original filename if:
+     *         - The original filename is blank
+     *         - No existing file with the same name is found
+     *         - An exception occurs during the process
+     */
+    private fun deleteFileIfAlreadyExistAndGetName(
+        sourceFile: File,
+        documentFile: DocumentFile?
+    ): String {
+        try {
+
+            // If destination directory is null, return original file name
+            if (documentFile == null) return sourceFile.name
+
+            // Getting extension of the source file
+            val extension = sourceFile.name.substringAfterLast(".", missingDelimiterValue = "kmz")
+
+            // Getting destination directory name
+            val dirName = documentFile.name
+
+            // Creating new file name with same name as destination directory with the source file extension
+            val fileName = "${dirName}.$extension"
+
+            // Checking if file with same name already exist
+            val existingFile = documentFile.findFile(fileName) ?: return fileName
+
+            // If file is already exist, delete it
+            if (existingFile.exists()) existingFile.delete()
+
+            return fileName
+        } catch (e: Exception) {
+            return sourceFile.name
+        }
+    }
+
+    /**
      * Generates a unique filename for a file in a given document directory.
      *
      * This function attempts to create a unique filename by appending incremental numbers
@@ -320,43 +363,6 @@ class FileTransferHandler(private val context: Context) {
         }
     }
 
-
-    /**
-     * Gets a filename by checking and deleting any existing file with the same name.
-     *
-     * This function takes a source file and a document file directory, checks if a file
-     * with the same name already exists in the target directory, and if found, deletes it.
-     * This ensures there won't be naming conflicts when creating new files.
-     *
-     * @param sourceFile The source file whose name will be used
-     * @param documentFile The target DocumentFile directory where to check for existing files
-     * @return The filename string. Returns the original filename if:
-     *         - The original filename is blank
-     *         - No existing file with the same name is found
-     *         - An exception occurs during the process
-     */
-    private fun getFileNameByDeletingAlreadyExistOne(
-        sourceFile: File,
-        documentFile: DocumentFile?
-    ): String {
-        try {
-            val fileName = sourceFile.name
-            if (fileName.isNullOrBlank()) return fileName
-
-            // Check original name first
-            val existingFile = documentFile?.findFile(fileName) ?: return fileName
-
-            // If file is already exist, delete it
-            if (existingFile.exists()) existingFile.delete()
-
-            return fileName
-        } catch (e: Exception) {
-            Log.e(TAG, "getUniqueFileName: ${e.message}", e)
-            return sourceFile.name
-        }
-    }
-
-
     /**
      * Creates a new file in the specified folder using the Storage Access Framework.
      *
@@ -381,60 +387,6 @@ class FileTransferHandler(private val context: Context) {
             Log.e("FileCreation", "Error creating file", e)
             null
         }
-    }
-
-    private fun getMimeType(file: File): String {
-        val extension = MimeTypeMap.getFileExtensionFromUrl(file.name)
-        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
-            ?: "application/octet-stream"
-    }
-
-    /**
-     * Checks if the application has the required access permissions based on the Android SDK version.
-     *
-     * @return true if the application has the necessary access permissions, false otherwise.
-     */
-    private fun hasRequiredAccess(): Boolean {
-        return when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
-                val safAccess = hasSafAccess()
-                Log.d(TAG, "hasRequiredAccess: SafAccess -> $safAccess")
-                safAccess
-            }
-
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
-                val safAccess = hasSafAccess()
-                val fileAccess = PermissionUtils.hasFileAccessPermissions(context)
-                Log.d(
-                    TAG,
-                    "hasRequiredAccess: SafAccess -> $safAccess, FileAccess -> $fileAccess"
-                )
-
-                safAccess || fileAccess
-            }
-
-            else -> {
-                val fileAccess = PermissionUtils.hasFileAccessPermissions(context)
-                Log.d(TAG, "hasRequiredAccess: FileAccess -> $fileAccess")
-                fileAccess
-            }
-        }
-    }
-
-    /**
-     * Checks if the application has access to the Storage Access Framework (SAF)
-     * for the specified directory.
-     *
-     * This function verifies if there are any persisted URI permissions that
-     * contain the specified path, indicating that the app has access to the
-     * directory managed by the SAF.
-     *
-     * @return True if the app has SAF access to the specified directory;
-     *         false otherwise.
-     */
-    private fun hasSafAccess(): Boolean {
-        return context.contentResolver.persistedUriPermissions
-            .any { it.uri.path?.contains(djiAppPath) == true }
     }
 
     companion object {

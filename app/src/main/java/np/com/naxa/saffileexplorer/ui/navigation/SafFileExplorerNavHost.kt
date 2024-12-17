@@ -98,7 +98,7 @@ fun SafFileExplorerNavHost(
                     navHostController.navigate(
                         Routes.DownloadAndTransfer.path.replace(
                             "{deviceId}",
-                            device.deviceId.toString()
+                            device?.deviceId.toString()
                         )
                     )
                 }
