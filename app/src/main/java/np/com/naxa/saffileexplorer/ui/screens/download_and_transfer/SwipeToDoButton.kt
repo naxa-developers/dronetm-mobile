@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -31,7 +30,8 @@ import kotlinx.coroutines.launch
 fun SwipeToDoButton(
     labelText: String = "Swipe",
     labelTextOnFullySwiped: String = "Transfer",
-    height: Int = 48,
+    height: Int = 42,
+    radius: Dp = 4.dp,
     onTransferComplete: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -52,9 +52,8 @@ fun SwipeToDoButton(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
             .height(height.dp)
-            .background(Color.Gray.copy(alpha = 0.2f), RoundedCornerShape(50))
+            .background(Color.Gray.copy(alpha = 0.2f), RoundedCornerShape(radius))
             .onGloballyPositioned { layoutCoordinates ->
                 parentWidth = layoutCoordinates.size.width.toFloat()
             }
@@ -70,7 +69,7 @@ fun SwipeToDoButton(
                         )
                     )
                 )
-                .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(50))
+                .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(radius))
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures(
                         onHorizontalDrag = { _, dragAmount ->

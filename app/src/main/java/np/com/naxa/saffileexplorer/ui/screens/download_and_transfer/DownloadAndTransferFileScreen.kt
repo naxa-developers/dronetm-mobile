@@ -11,13 +11,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -25,9 +30,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -35,12 +42,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import np.com.naxa.saffileexplorer.ui.local_providers.LocalDownloadAndTransferFileViewModel
-import np.com.naxa.saffileexplorer.ui.local_providers.LocalEventsViewModel
-import np.com.naxa.saffileexplorer.ui.local_providers.LocalUsbDeviceListViewModel
 import kotlinx.coroutines.launch
 import np.com.naxa.saffileexplorer.events.SafFileExplorerAppEvent
 import np.com.naxa.saffileexplorer.states.DownloadAndTransferState
+import np.com.naxa.saffileexplorer.ui.local_providers.LocalDownloadAndTransferFileViewModel
+import np.com.naxa.saffileexplorer.ui.local_providers.LocalEventsViewModel
+import np.com.naxa.saffileexplorer.ui.local_providers.LocalUsbDeviceListViewModel
 import np.com.naxa.saffileexplorer.utils.asImageBitmap
 import java.io.File
 
@@ -59,6 +66,18 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
     }
 
     val downloadAndTransferState by downloadAndTransferViewModel.downloadAndTransferState.collectAsState()
+
+    var downloadUrl by rememberSaveable {
+        mutableStateOf(
+            listOf(
+                "https://sample-videos.com/img/Sample-png-image-30mb.png",
+                "https://sample-videos.com/img/Sample-jpg-image-30mb.jpg",
+                "https://www-cdn.djiits.com/dps/6c185ab72a935e02e7f943913fd91e45.jpg",
+                "https://shorturl.at/ip5pG",
+                "https://shorturl.at/jKM6c"
+            ).random()
+        )
+    }
 
     LaunchedEffect(deviceId) {
         scope.launch {
@@ -119,7 +138,7 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary.copy(
-                            alpha = 0.45f
+                            alpha = 0.10f
                         )
                     )
                     Spacer(modifier = Modifier.height(10.dp))
@@ -127,7 +146,7 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
                         text = "to",
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.primary.copy(
-                            alpha = 0.55f
+                            alpha = 0.125f
                         )
                     )
                     Spacer(modifier = Modifier.height(12.dp))
@@ -136,28 +155,48 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.primary.copy(
-                            alpha = 0.65f
+                            alpha = 0.175f
                         )
                     )
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(75.dp))
+                    TextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = downloadUrl,
+                        onValueChange = { downloadUrl = it },
+                        label = { Text("Download URL") },
+                        colors = TextFieldDefaults.colors(
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                            errorIndicatorColor = Color.Transparent
+                        ),
+                        shape = OutlinedTextFieldDefaults.shape
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
                     Button(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(42.dp),
+                        shape = RoundedCornerShape(4.dp),
                         onClick = {
                             scope.launch {
                                 eventsViewModel.sendEvent(
                                     SafFileExplorerAppEvent.OnDownloadInitiated(
                                         device,
-                                        // "https://www.youtube.com/watch?v=upFCmUxFNaY"
-                                        // "https://sample-videos.com/img/Sample-png-image-30mb.png"
-                                        "https://sample-videos.com/img/Sample-jpg-image-30mb.jpg"
-                                        // "https://www-cdn.djiits.com/dps/6c185ab72a935e02e7f943913fd91e45.jpg"
-                                        //"https://shorturl.at/ip5pG"
-                                        // "https://shorturl.at/jKM6c"
+                                        downloadUrl
                                     )
                                 )
                             }
                         }
                     ) {
                         Text("Download")
+                        Icon(
+                            Icons.Default.Download,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .padding(start = 8.dp)
+                        )
                     }
                 }
             }
@@ -253,7 +292,7 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     SwipeToDoButton {
                         downloadedFile = file
                         showDialog = true
@@ -268,15 +307,20 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
 
             // Show error message
             Box(
-                modifier = modifier.fillMaxSize(),
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("DownloadError: $error")
-                    Spacer(modifier = Modifier.height(8.dp))
-
+                    Spacer(modifier = Modifier.height(12.dp))
                     if (url != null) {
                         Button(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(42.dp),
+                            shape = RoundedCornerShape(4.dp),
                             onClick = {
                                 scope.launch {
                                     eventsViewModel.sendEvent(
@@ -367,11 +411,12 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Icon(
-                        imageVector = Icons.Default.CheckCircle,
+                        imageVector = Icons.Default.ThumbUp,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(64.dp)
                     )
+                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = "Transfer Completed",
                         style = MaterialTheme.typography.titleLarge.copy(
@@ -388,7 +433,9 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
             val file = (downloadAndTransferState as DownloadAndTransferState.TransferError).file
             // Show error message
             Box(
-                modifier = modifier.fillMaxSize(),
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -397,6 +444,10 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
 
                     if (file != null) {
                         Button(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(42.dp),
+                            shape = RoundedCornerShape(4.dp),
                             onClick = {
                                 downloadedFile = file
                                 showDialog = true
