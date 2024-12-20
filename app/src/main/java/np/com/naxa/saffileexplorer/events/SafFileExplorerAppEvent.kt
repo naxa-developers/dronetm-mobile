@@ -48,4 +48,9 @@ sealed class SafFileExplorerAppEvent {
     data class OnSafDirectoryAccessRequested(val device: UsbDevice?, val file: File?) :
         SafFileExplorerAppEvent()
 
+    /**
+     * Event triggered when the user requests to pick a file.
+     */
+    data object OnFilePickerRequested : SafFileExplorerAppEvent()
+
 }

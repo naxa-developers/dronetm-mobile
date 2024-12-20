@@ -1,5 +1,6 @@
 package np.com.naxa.saffileexplorer.utils
 
+import android.content.Context
 import android.graphics.BitmapFactory
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
@@ -8,8 +9,12 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.documentfile.provider.DocumentFile
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import np.com.naxa.saffileexplorer.ui.navigation.Routes
 import java.io.File
+import java.io.FileOutputStream
 
 inline fun <reified T : Parcelable> Bundle.parcelable(key: String): T? = when {
     Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> getParcelable(key, T::class.java)
@@ -93,4 +98,28 @@ fun Int.randomWord(): String {
     return (1..this)
         .map { chars.random() }
         .joinToString("")
+}
+
+/**
+ * Converts a [DocumentFile] to a [File] object.
+ *
+ * @param context The context to use for accessing the file system.
+ * @return The [File] object representing the document file, or `null` if the conversion failed.
+ */
+suspend fun DocumentFile.toFile(context: Context): File? = withContext(Dispatchers.IO) {
+    if (!isFile || name == null) return@withContext null
+
+    try {
+        val file = File(context.cacheDir, name!!)
+        val inputStream = context.contentResolver.openInputStream(uri) ?: return@withContext null
+
+        inputStream.use { input ->
+            FileOutputStream(file).use { output ->
+                input.copyTo(output)
+            }
+        }
+        file
+    } catch (e: Exception) {
+        null
+    }
 }

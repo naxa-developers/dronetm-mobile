@@ -90,20 +90,6 @@ fun SafFileExplorerNavHost(
         navController = navHostController,
         startDestination = Routes.Splash.path
     ) {
-        // Route for the Home screen
-        composable(Routes.Home.path) {
-            HomeScreen(
-                modifier = modifier,
-                navigateToDownloadAndTransfer = { device ->
-                    navHostController.navigate(
-                        Routes.DownloadAndTransfer.path.replace(
-                            "{deviceId}",
-                            device?.deviceId.toString()
-                        )
-                    )
-                }
-            )
-        }
 
         // Route for the Splash Screen
         composable(Routes.Splash.path) {
@@ -118,6 +104,21 @@ fun SafFileExplorerNavHost(
                         // Avoid re-creating the DevicesList screen
                         launchSingleTop = true
                     }
+                }
+            )
+        }
+
+        // Route for the Home screen
+        composable(Routes.Home.path) {
+            HomeScreen(
+                modifier = modifier,
+                navigateToDownloadAndTransfer = { device ->
+                    navHostController.navigate(
+                        Routes.DownloadAndTransfer.path.replace(
+                            "{deviceId}",
+                            device?.deviceId.toString()
+                        )
+                    )
                 }
             )
         }

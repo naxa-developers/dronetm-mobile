@@ -24,6 +24,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
+import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -32,10 +33,11 @@ import np.com.naxa.saffileexplorer.events.SafFileExplorerAppEvent
 import np.com.naxa.saffileexplorer.states.DownloadAndTransferState
 import np.com.naxa.saffileexplorer.states.UsbDeviceListState
 import np.com.naxa.saffileexplorer.ui.app.SafFileExplorerApp
-import np.com.naxa.saffileexplorer.utils.PermissionUtils
 import np.com.naxa.saffileexplorer.utils.FileTransferHandler
+import np.com.naxa.saffileexplorer.utils.PermissionUtils
 import np.com.naxa.saffileexplorer.utils.hasCommunicationPermission
 import np.com.naxa.saffileexplorer.utils.isMtpDevice
+import np.com.naxa.saffileexplorer.utils.toFile
 import np.com.naxa.saffileexplorer.viewmodel.DownloadAndTransferFileViewModel
 import np.com.naxa.saffileexplorer.viewmodel.EventsViewModel
 import np.com.naxa.saffileexplorer.viewmodel.UsbDeviceListViewModel
@@ -120,6 +122,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Launcher for directory access using the GetContent contract.
+     * This allows the user to select a directory, and the result is provided as a URI.
+     */
     private val directoryAccessLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -147,6 +153,33 @@ class MainActivity : ComponentActivity() {
             }
         } else {
             Log.d(TAG, "directoryAccessLauncher: Storage access denied")
+        }
+    }
+
+    /**
+     * Launcher for picking a single file from the device's storage using the GetContent contract.
+     * This allows the user to select a file, and the result is provided as a URI.
+     */
+    private val filePickerLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            // Update the state with the Uri
+            try {
+                DocumentFile.fromSingleUri(this@MainActivity, it)?.let {
+                    lifecycleScope.launch {
+                        val file = it.toFile(this@MainActivity) ?: return@launch
+                        downloadAndTransferViewModel.update(
+                            DownloadAndTransferState.DownloadCompleted(
+                                file
+                            )
+                        )
+                    }
+                }
+
+            } catch (e: Exception) {
+                Log.d(TAG, "pickPictureLauncher: ${e.message}")
+            }
         }
     }
 
@@ -236,6 +269,11 @@ class MainActivity : ComponentActivity() {
                         is SafFileExplorerAppEvent.OnSafDirectoryAccessRequested -> {
                             downloadAndTransferViewModel.setFile(file = event.file)
                             requestDirectoryAccess(event.file)
+                        }
+
+                        SafFileExplorerAppEvent.OnFilePickerRequested -> {
+                            downloadAndTransferViewModel.setFile(file = null)
+                            filePickerLauncher.launch("*/*")
                         }
                     }
                 }

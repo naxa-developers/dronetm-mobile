@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -190,6 +191,31 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
                         Text("Download")
                         Icon(
                             Icons.Default.Download,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .padding(start = 8.dp)
+                        )
+                    }
+
+                    // File picker button
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(42.dp),
+                        shape = RoundedCornerShape(4.dp),
+                        onClick = {
+                            scope.launch {
+                                eventsViewModel.sendEvent(
+                                    SafFileExplorerAppEvent.OnFilePickerRequested
+                                )
+                            }
+                        }
+                    ) {
+                        Text("Pick File From Storage")
+                        Icon(
+                            Icons.Default.UploadFile,
                             contentDescription = null,
                             modifier = Modifier
                                 .size(24.dp)
