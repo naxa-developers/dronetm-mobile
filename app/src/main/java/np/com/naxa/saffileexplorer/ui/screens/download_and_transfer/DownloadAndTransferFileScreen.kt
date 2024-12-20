@@ -1,7 +1,6 @@
 package np.com.naxa.saffileexplorer.ui.screens.download_and_transfer
 
 import android.hardware.usb.UsbDevice
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,7 +48,6 @@ import np.com.naxa.saffileexplorer.states.DownloadAndTransferState
 import np.com.naxa.saffileexplorer.ui.local_providers.LocalDownloadAndTransferFileViewModel
 import np.com.naxa.saffileexplorer.ui.local_providers.LocalEventsViewModel
 import np.com.naxa.saffileexplorer.ui.local_providers.LocalUsbDeviceListViewModel
-import np.com.naxa.saffileexplorer.utils.asImageBitmap
 import java.io.File
 
 @Composable
@@ -60,7 +58,7 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
     val downloadAndTransferViewModel = LocalDownloadAndTransferFileViewModel.current
     val eventsViewModel = LocalEventsViewModel.current
     var downloadedFile: File? by remember { mutableStateOf(null) }
-    var showDialog by remember { mutableStateOf(false) }
+    var showDialog by rememberSaveable { mutableStateOf(false) }
 
     var device: UsbDevice? by remember {
         mutableStateOf(null)
@@ -303,19 +301,10 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        "DownloadCompleted: ${file.name}",
+                        "File: ${file.name}",
                         color = MaterialTheme.colorScheme.primary
                     )
-                    // Show file to the image view if image
-                    if (file.name.endsWith(".jpg") || file.name.endsWith(".png")) {
-                        file.asImageBitmap()?.let {
-                            Image(
-                                it,
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    }
+                    FilePreview(file = file)
                     Spacer(modifier = Modifier.height(12.dp))
                     SwipeToDoButton {
                         downloadedFile = file

@@ -26,6 +26,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
+
+/**
+ * A composable function that displays a swipe-to-do button.
+ */
 @Composable
 fun SwipeToDoButton(
     labelText: String = "Swipe",
@@ -53,7 +57,7 @@ fun SwipeToDoButton(
         modifier = Modifier
             .fillMaxWidth()
             .height(height.dp)
-            .background(Color.Gray.copy(alpha = 0.2f), RoundedCornerShape(radius))
+            .background(Color.LightGray.copy(alpha = 0.5f), RoundedCornerShape(radius))
             .onGloballyPositioned { layoutCoordinates ->
                 parentWidth = layoutCoordinates.size.width.toFloat()
             }

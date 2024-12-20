@@ -1,12 +1,18 @@
 package np.com.naxa.saffileexplorer.utils
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Typeface
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.documentfile.provider.DocumentFile
@@ -14,7 +20,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import np.com.naxa.saffileexplorer.ui.navigation.Routes
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
 
 inline fun <reified T : Parcelable> Bundle.parcelable(key: String): T? = when {
     Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> getParcelable(key, T::class.java)
@@ -84,6 +93,25 @@ fun File.asImageBitmap(): ImageBitmap? {
 }
 
 /**
+ * Extension function to convert a given uri instance into an ImageBitmap if of image file.
+ *
+ * This function attempts to decode the file using BitmapFactory and then converts the resulting
+ * Bitmap into an ImageBitmap. If any exceptions occur during the decoding process, null is returned.
+ *
+ * @return The resulting ImageBitmap, or null if an exception occurred during decoding.
+ */
+fun Uri.asImageBitmap(): ImageBitmap? {
+    return try {
+        val options = BitmapFactory.Options()
+        options.inSampleSize = 2 // This will reduce the image size by half
+        val bitmap = BitmapFactory.decodeFile(path, options)
+        bitmap?.asImageBitmap()
+    } catch (e: Exception) {
+        null
+    }
+}
+
+/**
  * Extension function to generate a random word of specified length.
  *
  * This function creates a random string of lowercase letters with a length equal to
@@ -122,4 +150,102 @@ suspend fun DocumentFile.toFile(context: Context): File? = withContext(Dispatche
     } catch (e: Exception) {
         null
     }
+}
+
+
+/**
+ * Suspends the coroutine and asynchronously creates a PNG bitmap representing the folder tree
+ * of a KMZ file.
+ *
+ * This function operates on a background thread using `Dispatchers.IO`.
+ *
+ * @param context The Android context required for accessing the cache directory.
+ * @param bitmapSize The desired size (width and height) of the generated bitmap in pixels.
+ *        Defaults to 1024.
+ * @return A File object representing the generated PNG image file containing the folder tree
+ *         if the file is a KMZ and the processing is successful. Returns null otherwise.
+ * @throws Exception If there are any errors during processing, such as file I/O errors or invalid KMZ format.
+ */
+suspend fun File.folderTreeBitmapIfKmzFile(
+    bitmapWidth: Int = 1024,
+    bitmapHeight: Int = 500,
+    textColor: Color = Color.Black,
+    backgroundColor: Color = Color.White,
+    textSize: Float = 24f
+): ImageBitmap? =
+    withContext(Dispatchers.IO) {
+        try {
+            if (extension.lowercase() != "kmz") return@withContext null
+
+            val zis = ZipInputStream(FileInputStream(this@folderTreeBitmapIfKmzFile))
+            val fileTree = mutableMapOf<String, MutableList<String>>()
+
+            var entry: ZipEntry? = zis.nextEntry
+            while (entry != null) {
+                val fileName = entry.name
+                val folders = fileName.split("/")
+                val file = folders.last()
+
+                val folderPath = folders.dropLast(1).joinToString("/")
+                fileTree.getOrPut(folderPath) { mutableListOf() }.add(file)
+
+                entry = zis.nextEntry
+            }
+            zis.closeEntry()
+            zis.close()
+
+            val bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+            val paint = Paint()
+
+            // Set the background color
+            paint.color = backgroundColor.toColor()
+            canvas.drawRect(0f, 0f, bitmapWidth.toFloat(), bitmapHeight.toFloat(), paint)
+
+            // Set the font and text color
+            paint.color = textColor.toColor()
+
+            // Draw the folder and file hierarchy
+            var y = if (fileTree.keys.firstOrNull()?.isBlank() == true) 0f else 40f
+            fun drawFolderTree(folder: String, indent: String) {
+                paint.textSize = textSize
+                paint.typeface = Typeface.DEFAULT_BOLD
+                canvas.drawText("$indent$folder", 100f, y, paint)
+                y += 40f
+
+                fileTree[folder]?.forEach { file ->
+                    paint.textSize = textSize * 0.9f
+                    paint.typeface = Typeface.DEFAULT
+                    canvas.drawText("$indent- $file", 100f, y, paint)
+                    y += 30f
+                }
+
+                fileTree.keys.filter { it.startsWith("$folder/") }.forEach { subfolder ->
+                    val subfolderName = subfolder.substringAfter("$folder/").substringBefore("/")
+                    drawFolderTree("$folder/$subfolderName", "$indent  ")
+                }
+
+                y += 20f
+            }
+
+            drawFolderTree(fileTree.keys.firstOrNull() ?: "", "")
+
+            bitmap.asImageBitmap()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+
+/**
+ * Converts a Compose UI `Color` to an `android.graphics.Color`.
+ */
+fun Color.toColor(): Int {
+    return android.graphics.Color.argb(
+        (this.alpha * 255).toInt(),
+        (this.red * 255).toInt(),
+        (this.green * 255).toInt(),
+        (this.blue * 255).toInt()
+    )
 }
