@@ -304,7 +304,20 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
                         "File: ${file.name}",
                         color = MaterialTheme.colorScheme.primary
                     )
-                    FilePreview(file = file)
+                    FilePreview(
+                        file = file,
+                        onDelete = {
+                            scope.launch {
+                                try {
+                                    file.delete()
+                                } catch (e: Exception) {
+                                    // Do Nothing
+                                } finally {
+                                    downloadAndTransferViewModel.update(DownloadAndTransferState.Idle)
+                                }
+                            }
+                        }
+                    )
                     Spacer(modifier = Modifier.height(12.dp))
                     SwipeToDoButton {
                         downloadedFile = file

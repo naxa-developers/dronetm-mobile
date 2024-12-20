@@ -1,15 +1,20 @@
 package np.com.naxa.saffileexplorer.ui.screens.download_and_transfer
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.AudioFile
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.FilePresent
 import androidx.compose.material.icons.filled.FolderZip
@@ -18,9 +23,13 @@ import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import np.com.naxa.saffileexplorer.ui.components.ImageFilePreview
@@ -36,7 +45,11 @@ import java.io.File
  * @param file The [File] to be displayed as a preview.
  */
 @Composable
-fun FilePreview(modifier: Modifier = Modifier, file: File?) {
+fun FilePreview(
+    modifier: Modifier = Modifier,
+    file: File?,
+    onDelete: () -> Unit = {}
+) {
     val fileExtension = file?.extension?.lowercase()
 
     Card(
@@ -109,6 +122,26 @@ fun FilePreview(modifier: Modifier = Modifier, file: File?) {
                 else -> {
                     IconPreview(Icons.Default.FilePresent)
                 }
+            }
+
+            // Reset / Remove file ui
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .clip(RoundedCornerShape(bottomStart = 8.dp, topEnd = 8.dp))
+                    .background(MaterialTheme.colorScheme.inversePrimary)
+                    .clickable { onDelete.invoke() }
+                    .padding(4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    modifier = Modifier.size(18.dp),
+                    imageVector = Icons.Default.Close,
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(
+                        color = Color.White
+                    ),
+                )
             }
         }
     }
