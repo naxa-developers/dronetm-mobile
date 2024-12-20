@@ -414,7 +414,6 @@ class FileDownloadHandler(private val context: Context) {
 
                 Log.d(TAG, "filenameIfUrlNotContainsIt: $mimeType")
 
-                // extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType) ?: "tmp"
                 extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType) ?: "kmz"
                 "${15.randomWord()}.$extension"
             } catch (e: Exception) {

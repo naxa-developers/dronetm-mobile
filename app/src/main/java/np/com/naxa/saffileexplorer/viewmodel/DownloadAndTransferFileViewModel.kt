@@ -41,7 +41,7 @@ class DownloadAndTransferFileViewModel(
      * @param url The URL of the file to be downloaded. Defaults to a sample image URL if not provided.
      *            If the URL is empty, the function returns immediately without performing any action.
      */
-    fun startDownload(url: String = "https://www-cdn.djiits.com/dps/5919beda1853e73f3db4c2d3ea0f695c.jpg") {
+    fun startDownload(url: String = "https://dev-dronetm.s3.ap-south-1.amazonaws.com/flight_plan_1.kmz") {
         // Update the state to indicate that downloading has started with 0% progress
         // update(DownloadAndTransferState.Downloading(0F))
 
@@ -55,7 +55,7 @@ class DownloadAndTransferFileViewModel(
         viewModelScope.launch {
 
             // Start the download process and collect the results
-            // downloadManager.download(url).collect { result ->
+            // downloadHandler.download(url).collect { result ->
             //     when (result) {
             //         is DownloadResult.Progress -> {
             //             // Update the state with the current download progress
