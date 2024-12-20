@@ -149,6 +149,10 @@ class DownloadAndTransferFileViewModel(
      */
     fun update(state: DownloadAndTransferState) {
         viewModelScope.launch {
+            if (state == DownloadAndTransferState.Idle) {
+                setFile(null)
+            }
+            
             _downloadAndTransferState.emit(state)
         }
     }
