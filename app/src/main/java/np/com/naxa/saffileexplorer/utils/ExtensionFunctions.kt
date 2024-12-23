@@ -152,6 +152,24 @@ suspend fun DocumentFile.toFile(context: Context): File? = withContext(Dispatche
     }
 }
 
+/**
+ * Extension function that checks if a [Uri] represents a valid document file.
+ *
+ * @param context The context needed to check the URI
+ * @return `true` if this URI represents a document file, `false` otherwise or if an error occurs
+ */
+fun Uri?.isDocumentUri(context: Context): Boolean {
+    return try {
+        if (this == null) {
+            false
+        } else {
+            DocumentFile.isDocumentUri(context, this)
+        }
+    } catch (e: Exception) {
+        false
+    }
+}
+
 
 /**
  * Suspends the coroutine and asynchronously creates a PNG bitmap representing the folder tree
@@ -159,9 +177,16 @@ suspend fun DocumentFile.toFile(context: Context): File? = withContext(Dispatche
  *
  * This function operates on a background thread using `Dispatchers.IO`.
  *
- * @param context The Android context required for accessing the cache directory.
- * @param bitmapSize The desired size (width and height) of the generated bitmap in pixels.
- *        Defaults to 1024.
+ * @param bitmapWidth The desired width of the generated bitmap in pixels.
+ *         Default is 1024
+ * @param bitmapHeight The desired height of the generated bitmap in pixels.
+ *        Defaults to 500.
+ * @param textColor The desired text color of the generated bitmap.
+ *        Defaults to Black.
+ * @param backgroundColor The desired background color of the generated bitmap.
+ *        Defaults to White.
+ * @param textSize The desired text size of the generated bitmap.
+ *        Defaults to 24f.
  * @return A File object representing the generated PNG image file containing the folder tree
  *         if the file is a KMZ and the processing is successful. Returns null otherwise.
  * @throws Exception If there are any errors during processing, such as file I/O errors or invalid KMZ format.

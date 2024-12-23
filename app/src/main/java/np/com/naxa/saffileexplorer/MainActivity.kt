@@ -142,7 +142,12 @@ class MainActivity : ComponentActivity() {
                     )
 
                     // Access Granted
-                    downloadAndTransferViewModel.startTransfer(destinationUri = uri)
+                    downloadAndTransferViewModel.startTransfer(
+                        destinationUri = FileTransferHandler.dJiWaypointUri(
+                            this@MainActivity,
+                            uri
+                        ) ?: uri
+                    )
 
                 } catch (e: Exception) {
                     Log.d(

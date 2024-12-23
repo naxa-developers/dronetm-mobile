@@ -494,6 +494,51 @@ class FileTransferHandler(private val context: Context) {
             }
             return null
         }
+
+        /**
+         * Retrieves the URI of the DJI waypoint directory from the given context and URI.
+         *
+         * @param context the Android context to use for accessing the file system
+         * @param uri the URI of the root directory to start the search from
+         * @return the URI of the DJI waypoint directory, or null if it could not be found
+         */
+        fun dJiWaypointUri(context: Context, uri: Uri): Uri? {
+            try {
+                // Trying to get the root directory from the uri
+                val rootDirectory = DocumentFile.fromTreeUri(context, uri)
+
+                // Get the Android directory
+                val androidDirectory = rootDirectory?.findFile("Android")
+
+                // Get the data directory
+                val dataDirectory = androidDirectory?.findFile("data")
+
+                // Get the DJI app package directory
+                val packageDirectory = dataDirectory?.findFile("dji.go.v5")
+
+                // Get the files directory for the DJI app package
+                val filesDirectory = packageDirectory?.findFile("files")
+
+                // Get the waypoint directory
+                val waypointDirectory = filesDirectory?.findFile("waypoint")
+
+                // Get the files and folders from the waypoint directory
+                val files = waypointDirectory?.listFiles()
+
+                // Get the folders from the files list, excluding "capability" and "map_preview"
+                val folders =
+                    files?.filter { it.isDirectory && it.name != "capability" && it.name != "map_preview" }
+
+                // If the folders list is null or empty, return the waypoint directory URI
+                if (folders.isNullOrEmpty()) return waypointDirectory?.uri
+
+                // Return the folder URI if it's a exist, otherwise return the waypoint directory URI
+                return folders.firstOrNull()?.uri ?: waypointDirectory.uri
+            } catch (e: Exception) {
+                // Return null if any exception occurs
+                return null
+            }
+        }
     }
 
 }
