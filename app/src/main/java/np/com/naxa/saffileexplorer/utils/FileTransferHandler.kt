@@ -487,7 +487,7 @@ class FileTransferHandler(private val context: Context) {
             val connectedPaths = getConnectedDevicePaths(context)
             for (path in connectedPaths) {
                 // Check for expected directory structure
-                val specificPath = "$path/Android/data/com.itheamc.djiapp/files"
+                val specificPath = "$path/Android/data/dji.go.v5/files/waypoint"
                 if (File(specificPath).exists()) {
                     return specificPath
                 }
@@ -497,46 +497,54 @@ class FileTransferHandler(private val context: Context) {
 
         /**
          * Retrieves the URI of the DJI waypoint directory from the given context and URI.
+         * Searches through possible directory structures to find the waypoint folder.
          *
          * @param context the Android context to use for accessing the file system
          * @param uri the URI of the root directory to start the search from
          * @return the URI of the DJI waypoint directory, or null if it could not be found
          */
-        fun dJiWaypointUri(context: Context, uri: Uri): Uri? {
-            try {
-                // Trying to get the root directory from the uri
-                val rootDirectory = DocumentFile.fromTreeUri(context, uri)
+        fun djiWaypointUri(context: Context, uri: Uri): Uri? {
+            return try {
+                val rootDirectory = DocumentFile.fromTreeUri(context, uri) ?: return null
 
-                // Get the Android directory
-                val androidDirectory = rootDirectory?.findFile("Android")
+                // Define possible directory paths to search
+                val possiblePaths = listOf(
+                    listOf("Android", "data", "dji.go.v5", "files", "waypoint"),
+                    listOf("data", "dji.go.v5", "files", "waypoint"),
+                    listOf("dji.go.v5", "files", "waypoint"),
+                    listOf("files", "waypoint")
+                )
 
-                // Get the data directory
-                val dataDirectory = androidDirectory?.findFile("data")
+                // Search through each possible path
+                for (path in possiblePaths) {
+                    var currentDir: DocumentFile? = rootDirectory
+                    var pathValid = true
 
-                // Get the DJI app package directory
-                val packageDirectory = dataDirectory?.findFile("dji.go.v5")
+                    // Navigate through each directory in the path
+                    for (dirName in path) {
+                        currentDir = currentDir?.findFile(dirName)
+                        if (currentDir == null) {
+                            pathValid = false
+                            break
+                        }
+                    }
 
-                // Get the files directory for the DJI app package
-                val filesDirectory = packageDirectory?.findFile("files")
+                    // If we successfully traversed the entire path
+                    if (pathValid && currentDir != null) {
+                        // Get folders excluding "capability" and "map_preview"
+                        val validFolders = currentDir.listFiles().filter {
+                            it.isDirectory &&
+                                    !setOf("capability", "map_preview").contains(it.name)
+                        }
 
-                // Get the waypoint directory
-                val waypointDirectory = filesDirectory?.findFile("waypoint")
+                        // Return the first valid folder's URI if it exists
+                        validFolders.firstOrNull()?.uri?.let { return it }
+                    }
+                }
 
-                // Get the files and folders from the waypoint directory
-                val files = waypointDirectory?.listFiles()
-
-                // Get the folders from the files list, excluding "capability" and "map_preview"
-                val folders =
-                    files?.filter { it.isDirectory && it.name != "capability" && it.name != "map_preview" }
-
-                // If the folders list is null or empty, return the waypoint directory URI
-                if (folders.isNullOrEmpty()) return waypointDirectory?.uri
-
-                // Return the folder URI if it's a exist, otherwise return the waypoint directory URI
-                return folders.firstOrNull()?.uri ?: waypointDirectory.uri
+                null
             } catch (e: Exception) {
-                // Return null if any exception occurs
-                return null
+                null
             }
         }
     }
