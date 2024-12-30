@@ -1,6 +1,5 @@
 package np.com.naxa.saffileexplorer.ui.screens.home
 
-import android.hardware.usb.UsbDevice
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,19 +21,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import np.com.naxa.saffileexplorer.events.SafAppNavigationEvent
 import np.com.naxa.saffileexplorer.events.SafFileExplorerAppEvent
 import np.com.naxa.saffileexplorer.states.UsbDeviceListState
 import np.com.naxa.saffileexplorer.ui.local_providers.LocalEventsViewModel
+import np.com.naxa.saffileexplorer.ui.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.saffileexplorer.ui.local_providers.LocalUsbDeviceListViewModel
 
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    navigateToDownloadAndTransfer: (UsbDevice?) -> Unit
 ) {
 
     val scope = rememberCoroutineScope()
     val eventsViewModel = LocalEventsViewModel.current
+    val navigationEventsViewModel = LocalNavigationEventsViewModel.current
     val usbDeviceListViewModel = LocalUsbDeviceListViewModel.current
 
     val deviceListState by usbDeviceListViewModel.deviceListState.collectAsState()
@@ -106,7 +107,13 @@ fun HomeScreen(
                             .align(Alignment.BottomCenter)
                             .padding(24.dp),
                         onClick = {
-                            navigateToDownloadAndTransfer(device)
+                            scope.launch {
+                                navigationEventsViewModel.sendEvent(
+                                    SafAppNavigationEvent.OnNavigateToDownloadAndTransfer(
+                                        device
+                                    )
+                                )
+                            }
                         }
                     ) {
                         Text("Download & Transfer")

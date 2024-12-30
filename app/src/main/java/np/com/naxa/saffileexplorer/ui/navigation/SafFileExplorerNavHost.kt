@@ -9,7 +9,6 @@ import androidx.navigation.compose.rememberNavController
 import np.com.naxa.saffileexplorer.ui.screens.download_and_transfer.DownloadAndTransferFileScreen
 import np.com.naxa.saffileexplorer.ui.screens.home.HomeScreen
 import np.com.naxa.saffileexplorer.ui.screens.splash.SplashScreen
-import np.com.naxa.saffileexplorer.ui.screens.usb_devices.UsbDeviceListScreen
 
 
 /**
@@ -95,16 +94,6 @@ fun SafFileExplorerNavHost(
         composable(Routes.Splash.path) {
             SplashScreen(
                 modifier = modifier,
-                onNavigate = {
-                    navHostController.navigate(Routes.Home.path) {
-                        // Prevent back navigation to Splash
-                        popUpTo(Routes.Splash.path) {
-                            inclusive = true
-                        }
-                        // Avoid re-creating the DevicesList screen
-                        launchSingleTop = true
-                    }
-                }
             )
         }
 
@@ -112,29 +101,6 @@ fun SafFileExplorerNavHost(
         composable(Routes.Home.path) {
             HomeScreen(
                 modifier = modifier,
-                navigateToDownloadAndTransfer = { device ->
-                    navHostController.navigate(
-                        Routes.DownloadAndTransfer.path.replace(
-                            "{deviceId}",
-                            device?.deviceId.toString()
-                        )
-                    )
-                }
-            )
-        }
-
-        // Route for the USB Devices list screen
-        composable(Routes.DevicesList.path) {
-            UsbDeviceListScreen(
-                modifier = modifier,
-                navigateToDeviceContents = { device ->
-                    navHostController.navigate(
-                        Routes.DownloadAndTransfer.path.replace(
-                            "{deviceId}",
-                            device.deviceId.toString()
-                        )
-                    )
-                }
             )
         }
 

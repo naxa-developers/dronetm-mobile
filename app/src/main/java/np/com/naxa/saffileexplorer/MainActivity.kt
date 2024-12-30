@@ -40,6 +40,7 @@ import np.com.naxa.saffileexplorer.utils.isMtpDevice
 import np.com.naxa.saffileexplorer.utils.toFile
 import np.com.naxa.saffileexplorer.viewmodel.DownloadAndTransferFileViewModel
 import np.com.naxa.saffileexplorer.viewmodel.EventsViewModel
+import np.com.naxa.saffileexplorer.viewmodel.NavigationEventsViewModel
 import np.com.naxa.saffileexplorer.viewmodel.UsbDeviceListViewModel
 import java.io.File
 
@@ -50,6 +51,8 @@ class MainActivity : ComponentActivity() {
     private val downloadAndTransferViewModel by viewModels<DownloadAndTransferFileViewModel> {
         DownloadAndTransferFileViewModel.Factory
     }
+    private val navigationEventsViewModel by viewModels<NavigationEventsViewModel>()
+
 
     private val usbManager by lazy { getSystemService(Context.USB_SERVICE) as UsbManager }
     private var usbDeviceConnection: UsbDeviceConnection? = null
@@ -210,7 +213,8 @@ class MainActivity : ComponentActivity() {
             SafFileExplorerApp(
                 usbDeviceListViewModel = deviceListViewModel,
                 eventsViewModel = eventsViewModel,
-                downloadAndTransferViewModel = downloadAndTransferViewModel
+                downloadAndTransferViewModel = downloadAndTransferViewModel,
+                navigationEventsViewModel = navigationEventsViewModel,
             )
         }
 

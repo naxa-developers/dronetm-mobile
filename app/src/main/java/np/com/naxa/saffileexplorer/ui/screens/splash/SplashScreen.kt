@@ -15,13 +15,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import kotlinx.coroutines.delay
+import np.com.naxa.saffileexplorer.events.SafAppNavigationEvent
+import np.com.naxa.saffileexplorer.ui.local_providers.LocalNavigationEventsViewModel
 
 @Composable
 fun SplashScreen(
     modifier: Modifier = Modifier,
-    onNavigate: () -> Unit = {}
 ) {
     val alphaAnimation = remember { Animatable(0f) }
+    val navigationEventsViewModel = LocalNavigationEventsViewModel.current
 
     LaunchedEffect(Unit) {
         alphaAnimation.animateTo(
@@ -29,7 +31,7 @@ fun SplashScreen(
             animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
         )
         delay(2000)
-        onNavigate()
+        navigationEventsViewModel.sendEvent(SafAppNavigationEvent.OnNavigateToHome)
     }
 
     Box(
