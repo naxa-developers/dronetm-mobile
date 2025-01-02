@@ -34,6 +34,7 @@ import kotlinx.coroutines.launch
 fun SwipeToDoButton(
     labelText: String = "Swipe",
     labelTextOnFullySwiped: String = "Transfer",
+    labelTextOnBackground: String = "To Transfer",
     height: Int = 42,
     radius: Dp = 42.dp,
     onTransferComplete: () -> Unit,
@@ -62,6 +63,12 @@ fun SwipeToDoButton(
                 parentWidth = layoutCoordinates.size.width.toFloat()
             }
     ) {
+        Text(
+            text = labelTextOnBackground,
+            color = Color.Gray,
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.align(Alignment.Center)
+        )
         Box(
             modifier = Modifier
                 .fillMaxHeight()

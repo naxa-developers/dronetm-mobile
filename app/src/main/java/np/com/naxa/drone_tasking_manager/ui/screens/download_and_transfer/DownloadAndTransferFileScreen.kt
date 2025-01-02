@@ -159,28 +159,26 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
                 ) {
                     Text(
                         text = "Connected",
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary.copy(
-                            alpha = 0.10f
+                        color = Color.LightGray.copy(
+                            alpha = 0.8f
                         )
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = "to",
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.primary.copy(
-                            alpha = 0.125f
+                        fontSize = 14.sp,
+                        color = Color.LightGray.copy(
+                            alpha = 0.9f
                         )
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = device?.deviceName ?: "Unknown Device",
-                        fontSize = 24.sp,
+                        text = if (device != null) "${(device?.manufacturerName ?: device?.deviceName)} - ${device?.productName ?: ""}" else "Unknown Device",
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.primary.copy(
-                            alpha = 0.175f
-                        )
+                        color = Color.LightGray
                     )
                     Spacer(modifier = Modifier.height(75.dp))
 
@@ -250,7 +248,9 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
                                             )
                                         )
                                     }
-                                }
+                                },
+                                enabled = downloadUrl.trim()
+                                    .isNotBlank() && Patterns.WEB_URL.matcher(downloadUrl).matches()
                             ) {
                                 Text("Download")
                                 Icon(
