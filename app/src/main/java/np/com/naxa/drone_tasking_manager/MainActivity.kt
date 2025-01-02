@@ -449,7 +449,7 @@ class MainActivity : ComponentActivity() {
                 // Else if list is empty and reconnected is more than zero
                 if (detached) {
                     delay(2000)
-                     if (isActive) deviceViewModel.waitingToConnect()
+                    if (isActive) deviceViewModel.waitingToConnect()
                 }
 
             } catch (e: Exception) {
