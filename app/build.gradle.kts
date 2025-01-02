@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "np.com.naxa.saffileexplorer"
+    namespace = "np.com.naxa.drone_tasking_manager"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "np.com.naxa.saffileexplorer"
+        applicationId = "np.com.naxa.drone_tasking_manager"
         minSdk = 24
         // noinspection EditedTargetSdkVersion
         targetSdk = 35

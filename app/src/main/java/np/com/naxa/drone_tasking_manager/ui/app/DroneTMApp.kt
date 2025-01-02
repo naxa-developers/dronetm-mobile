@@ -1,0 +1,186 @@
+package np.com.naxa.drone_tasking_manager.ui.app
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.launch
+import np.com.naxa.drone_tasking_manager.events.DroneTMAppNavigationEvent
+import np.com.naxa.drone_tasking_manager.states.DownloadAndTransferState
+import np.com.naxa.drone_tasking_manager.ui.local_providers.LocalDownloadAndTransferFileViewModel
+import np.com.naxa.drone_tasking_manager.ui.local_providers.LocalEventsViewModel
+import np.com.naxa.drone_tasking_manager.ui.local_providers.LocalNavigationEventsViewModel
+import np.com.naxa.drone_tasking_manager.ui.local_providers.LocalUsbDeviceViewModel
+import np.com.naxa.drone_tasking_manager.ui.navigation.Routes
+import np.com.naxa.drone_tasking_manager.ui.navigation.DroneTMAppNavHost
+import np.com.naxa.drone_tasking_manager.ui.theme.DroneTMAppTheme
+import np.com.naxa.drone_tasking_manager.utils.route
+import np.com.naxa.drone_tasking_manager.viewmodel.DownloadAndTransferFileViewModel
+import np.com.naxa.drone_tasking_manager.viewmodel.EventsViewModel
+import np.com.naxa.drone_tasking_manager.viewmodel.NavigationEventsViewModel
+import np.com.naxa.drone_tasking_manager.viewmodel.UsbDeviceViewModel
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DroneTMApp(
+    deviceViewModel: UsbDeviceViewModel,
+    eventsViewModel: EventsViewModel,
+    downloadAndTransferViewModel: DownloadAndTransferFileViewModel,
+    navigationEventsViewModel: NavigationEventsViewModel
+) {
+
+    val navController = rememberNavController()
+
+    val snackBarHostState = remember { SnackbarHostState() }
+
+    val scope = rememberCoroutineScope()
+
+    val backStackEntry by navController.currentBackStackEntryFlow.collectAsState(initial = null)
+
+    val currentRoute by remember {
+        derivedStateOf {
+            backStackEntry?.destination?.route?.route()
+        }
+    }
+
+    val topBarTitle by remember {
+        derivedStateOf {
+            currentRoute?.label ?: "Device"
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        navigationEventsViewModel.appEvents.collect { event ->
+            when (event) {
+
+                is DroneTMAppNavigationEvent.OnNavigateToDownloadAndTransfer -> {
+                    navController.navigate(
+                        Routes.DownloadAndTransfer.path.replace(
+                            "{deviceId}",
+                            event.device?.deviceId.toString()
+                        )
+                    )
+                }
+
+                DroneTMAppNavigationEvent.OnNavigateToHome -> {
+                    navController.navigate(Routes.Home.path) {
+                        popUpTo(Routes.Splash.path) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                }
+
+                is DroneTMAppNavigationEvent.OnSnackBarShow -> {
+                    scope.launch {
+                        val result = snackBarHostState.showSnackbar(
+                            message = event.message,
+                            actionLabel = event.actionLabel,
+                            withDismissAction = event.withDismissAction,
+                            duration = event.duration,
+                        )
+                        when (result) {
+                            SnackbarResult.ActionPerformed -> {
+                                event.onActionPerformed()
+                            }
+
+                            SnackbarResult.Dismissed -> {
+                                event.onDismissed()
+                            }
+                        }
+                    }
+                }
+
+                DroneTMAppNavigationEvent.OnPopBackStack -> {
+                    navController.popBackStack()
+                }
+            }
+        }
+    }
+
+    CompositionLocalProvider(
+        LocalUsbDeviceViewModel provides deviceViewModel,
+        LocalEventsViewModel provides eventsViewModel,
+        LocalDownloadAndTransferFileViewModel provides downloadAndTransferViewModel,
+        LocalNavigationEventsViewModel provides navigationEventsViewModel
+    ) {
+        DroneTMAppTheme {
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                snackbarHost = { SnackbarHost(snackBarHostState) },
+                topBar = {
+                    if (currentRoute != Routes.Splash && currentRoute != Routes.Home) {
+                        CenterAlignedTopAppBar(
+                            title = {
+                                Text(topBarTitle)
+                            },
+                            navigationIcon = {
+                                if (currentRoute != null) {
+                                    IconButton(
+                                        onClick = {
+                                            if (currentRoute == Routes.DownloadAndTransfer) {
+                                                if (downloadAndTransferViewModel.downloadAndTransferState.value !is DownloadAndTransferState.Idle) {
+                                                    downloadAndTransferViewModel.update(
+                                                        DownloadAndTransferState.Idle(false)
+                                                    )
+                                                } else {
+                                                    val isShowingUrlInputBox =
+                                                        (downloadAndTransferViewModel.downloadAndTransferState.value as DownloadAndTransferState.Idle).showUrlInputBox
+
+                                                    if (isShowingUrlInputBox) {
+                                                        downloadAndTransferViewModel.update(
+                                                            DownloadAndTransferState.Idle(false)
+                                                        )
+                                                    } else {
+                                                        navController.popBackStack()
+                                                    }
+                                                }
+                                            } else {
+                                                navController.popBackStack()
+                                            }
+                                        }) {
+                                        Icon(
+                                            Icons.AutoMirrored.Filled.ArrowBack,
+                                            contentDescription = null
+                                        )
+                                    }
+                                }
+                            }
+                        )
+                    }
+                }
+            ) { innerPadding ->
+                DroneTMAppNavHost(
+                    modifier = Modifier.padding(
+                        if (currentRoute != Routes.Splash) innerPadding else PaddingValues(
+                            0.dp
+                        )
+                    ),
+                    navHostController = navController,
+                )
+            }
+        }
+
+    }
+}
