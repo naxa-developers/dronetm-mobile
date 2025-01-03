@@ -252,7 +252,7 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
                                 enabled = downloadUrl.trim()
                                     .isNotBlank() && Patterns.WEB_URL.matcher(downloadUrl).matches()
                             ) {
-                                Text("Download")
+                                Text("Download", color = Color.White)
                                 Icon(
                                     Icons.Default.Download,
                                     contentDescription = null,
@@ -275,7 +275,7 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
                                     }
                                 }
                             ) {
-                                Text("Pick File From Storage")
+                                Text("Pick File From Storage", color = Color.White)
                                 Icon(
                                     Icons.Default.UploadFile,
                                     contentDescription = null,
@@ -300,7 +300,7 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
                                     }
                                 }
                             ) {
-                                Text("Pick File From Storage")
+                                Text("Pick File From Storage", color = Color.White)
                                 Icon(
                                     Icons.Default.UploadFile,
                                     contentDescription = null,
@@ -325,7 +325,7 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
                                     }
                                 }
                             ) {
-                                Text("Download with Url")
+                                Text("Download with Url", color = Color.White)
                                 Icon(
                                     Icons.Default.AddLink,
                                     contentDescription = null,
