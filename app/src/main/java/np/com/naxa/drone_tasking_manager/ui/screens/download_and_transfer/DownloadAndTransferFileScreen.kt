@@ -163,7 +163,7 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
 
             // Show loading indicator
             Box(
-                modifier = modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 Column(
@@ -273,7 +273,8 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
                                     contentDescription = null,
                                     modifier = Modifier
                                         .size(24.dp)
-                                        .padding(start = 8.dp)
+                                        .padding(start = 8.dp),
+                                    tint = Color.White
                                 )
                             }
                             Spacer(modifier = Modifier.height(12.dp))
@@ -361,7 +362,7 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
 
             // Show progress indicator
             Box(
-                modifier = modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 Column(
@@ -422,7 +423,7 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
             val file = (downloadAndTransferState as DownloadAndTransferState.DownloadCompleted).file
 
             Box(
-                modifier = modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 Column(
@@ -468,7 +469,7 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
 
             // Show error message
             Box(
-                modifier = modifier
+                modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp),
                 contentAlignment = Alignment.Center
@@ -540,7 +541,7 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
 
             // Show progress indicator
             Box(
-                modifier = modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 Column(
@@ -599,7 +600,7 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
 
         is DownloadAndTransferState.TransferCompleted -> {
             Box(
-                modifier = modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 Column(
@@ -631,7 +632,7 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
             val file = (downloadAndTransferState as DownloadAndTransferState.TransferError).file
             // Show error message
             Box(
-                modifier = modifier
+                modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp),
                 contentAlignment = Alignment.Center
