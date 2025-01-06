@@ -79,7 +79,7 @@ fun DroneTMApp(
                     is DownloadAndTransferState.Transferring -> "Transferring"
                 }
             } else {
-                currentRoute?.label ?: "Device"
+                currentRoute?.label ?: ""
             }
         }
     }
