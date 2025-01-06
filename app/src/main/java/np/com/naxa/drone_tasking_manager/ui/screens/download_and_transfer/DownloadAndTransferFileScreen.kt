@@ -60,6 +60,7 @@ import np.com.naxa.drone_tasking_manager.ui.local_providers.LocalDownloadAndTran
 import np.com.naxa.drone_tasking_manager.ui.local_providers.LocalEventsViewModel
 import np.com.naxa.drone_tasking_manager.ui.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.ui.local_providers.LocalUsbDeviceViewModel
+import np.com.naxa.drone_tasking_manager.utils.FileTransferHandler
 import java.io.File
 
 @Composable
@@ -526,7 +527,7 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
                     items(directory.listFiles().filter { it.isDirectory }) { directory ->
                         DirectoryItem(directory) {
                             downloadAndTransferViewModel.startTransfer(
-                                destinationUri = directory.uri,
+                                destinationUri = FileTransferHandler.djiWaypointUri(context, directory.uri) ?: directory.uri,
                             )
                         }
 
