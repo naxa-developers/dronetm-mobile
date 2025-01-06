@@ -57,6 +57,7 @@ fun DroneTMApp(
     val scope = rememberCoroutineScope()
 
     val backStackEntry by navController.currentBackStackEntryFlow.collectAsState(initial = null)
+    val downloadAndTransferState by downloadAndTransferViewModel.downloadAndTransferState.collectAsState()
 
     val currentRoute by remember {
         derivedStateOf {
@@ -66,7 +67,20 @@ fun DroneTMApp(
 
     val topBarTitle by remember {
         derivedStateOf {
-            currentRoute?.label ?: "Device"
+            if (currentRoute == Routes.DownloadAndTransfer) {
+                when (downloadAndTransferState) {
+                    is DownloadAndTransferState.DownloadCompleted -> "Swipe to Transfer"
+                    is DownloadAndTransferState.DownloadError -> "Download Error"
+                    is DownloadAndTransferState.Downloading -> "Downloading"
+                    is DownloadAndTransferState.Idle -> "Download and Transfer"
+                    is DownloadAndTransferState.SafDirectorySelected -> "Select Directory"
+                    DownloadAndTransferState.TransferCompleted -> "Transferred"
+                    is DownloadAndTransferState.TransferError -> "TransferError"
+                    is DownloadAndTransferState.Transferring -> "Transferring"
+                }
+            } else {
+                currentRoute?.label ?: "Device"
+            }
         }
     }
 
@@ -141,21 +155,38 @@ fun DroneTMApp(
                                         onClick = {
                                             if (currentRoute == Routes.DownloadAndTransfer) {
                                                 if (downloadAndTransferViewModel.downloadAndTransferState.value !is DownloadAndTransferState.Idle) {
+                                                    if (downloadAndTransferViewModel.downloadAndTransferState.value is DownloadAndTransferState.SafDirectorySelected) {
+                                                        if (downloadAndTransferViewModel.file != null) {
+                                                            downloadAndTransferViewModel.update(
+                                                                DownloadAndTransferState.DownloadCompleted(
+                                                                    downloadAndTransferViewModel.file
+                                                                )
+                                                            )
+                                                            return@IconButton
+                                                        }
+                                                    }
+
                                                     downloadAndTransferViewModel.update(
                                                         DownloadAndTransferState.Idle(false)
                                                     )
-                                                } else {
-                                                    val isShowingUrlInputBox =
-                                                        (downloadAndTransferViewModel.downloadAndTransferState.value as DownloadAndTransferState.Idle).showUrlInputBox
-
-                                                    if (isShowingUrlInputBox) {
-                                                        downloadAndTransferViewModel.update(
-                                                            DownloadAndTransferState.Idle(false)
-                                                        )
-                                                    } else {
-                                                        navController.popBackStack()
-                                                    }
+                                                    return@IconButton
                                                 }
+
+                                                val isShowingUrlInputBox =
+                                                    (downloadAndTransferViewModel.downloadAndTransferState.value as DownloadAndTransferState.Idle).showUrlInputBox
+
+                                                if (isShowingUrlInputBox) {
+                                                    downloadAndTransferViewModel.update(
+                                                        DownloadAndTransferState.Idle(false)
+                                                    )
+                                                    return@IconButton
+                                                }
+
+                                                navigationEventsViewModel.sendEvent(
+                                                    DroneTMAppNavigationEvent.OnPopBackStack
+                                                )
+
+
                                             } else {
                                                 navController.popBackStack()
                                             }

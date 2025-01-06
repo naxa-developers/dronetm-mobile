@@ -148,12 +148,25 @@ class MainActivity : ComponentActivity() {
                     )
 
                     // Access Granted
-                    downloadAndTransferViewModel.startTransfer(
-                        destinationUri = FileTransferHandler.djiWaypointUri(
-                            this@MainActivity,
-                            uri
-                        ) ?: uri
-                    )
+                    // downloadAndTransferViewModel.startTransfer(
+                    //     destinationUri = FileTransferHandler.djiWaypointUri(
+                    //         this@MainActivity,
+                    //         uri
+                    //     ) ?: uri
+                    // )
+
+                    val destinationUri = FileTransferHandler.djiWaypointUri(
+                        this@MainActivity,
+                        uri
+                    ) ?: uri
+
+                    DocumentFile.fromTreeUri(this@MainActivity, destinationUri)?.let {
+                        downloadAndTransferViewModel.update(
+                            DownloadAndTransferState.SafDirectorySelected(
+                                it
+                            )
+                        )
+                    }
 
                 } catch (e: Exception) {
                     Log.d(

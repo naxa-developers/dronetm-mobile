@@ -29,6 +29,7 @@ class DownloadAndTransferFileViewModel(
 
     // variable to store file
     private var _file: File? = null
+    val file: File? = _file
 
     fun setFile(file: File?) {
         _file = file

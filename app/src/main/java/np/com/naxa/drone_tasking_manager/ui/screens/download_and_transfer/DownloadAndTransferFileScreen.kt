@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddLink
@@ -85,21 +87,34 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
 
     BackHandler {
         if (downloadAndTransferViewModel.downloadAndTransferState.value !is DownloadAndTransferState.Idle) {
+            if (downloadAndTransferViewModel.downloadAndTransferState.value is DownloadAndTransferState.SafDirectorySelected) {
+                if (downloadedFile != null) {
+                    downloadAndTransferViewModel.update(
+                        DownloadAndTransferState.DownloadCompleted(
+                            downloadedFile!!
+                        )
+                    )
+                    return@BackHandler
+                }
+            }
+
             downloadAndTransferViewModel.update(
                 DownloadAndTransferState.Idle(false)
             )
-        } else {
-            val isShowingUrlInputBox =
-                (downloadAndTransferViewModel.downloadAndTransferState.value as DownloadAndTransferState.Idle).showUrlInputBox
-
-            if (isShowingUrlInputBox) {
-                downloadAndTransferViewModel.update(
-                    DownloadAndTransferState.Idle(false)
-                )
-            } else {
-                navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnPopBackStack)
-            }
+            return@BackHandler
         }
+
+        val isShowingUrlInputBox =
+            (downloadAndTransferViewModel.downloadAndTransferState.value as DownloadAndTransferState.Idle).showUrlInputBox
+
+        if (isShowingUrlInputBox) {
+            downloadAndTransferViewModel.update(
+                DownloadAndTransferState.Idle(false)
+            )
+            return@BackHandler
+        }
+
+        navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnPopBackStack)
     }
 
     LaunchedEffect(deviceId) {
@@ -477,6 +492,43 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
                         ) {
                             Text("Retry Download")
                         }
+                    }
+                }
+            }
+        }
+
+        is DownloadAndTransferState.SafDirectorySelected -> {
+            val directory =
+                (downloadAndTransferState as DownloadAndTransferState.SafDirectorySelected).directory
+            // Show list of directories
+            Column(
+                modifier = modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(
+                    modifier = Modifier.padding(
+                        top = 16.dp,
+                        start = 16.dp,
+                        end = 16.dp
+                    ),
+                    text = ".../.../${directory.name}",
+                    style = MaterialTheme.typography.labelLarge
+                )
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(16.dp),
+                ) {
+                    items(directory.listFiles().filter { it.isDirectory }) { directory ->
+                        DirectoryItem(directory) {
+                            downloadAndTransferViewModel.startTransfer(
+                                destinationUri = directory.uri,
+                            )
+                        }
+
                     }
                 }
             }

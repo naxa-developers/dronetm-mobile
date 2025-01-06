@@ -532,13 +532,15 @@ class FileTransferHandler(private val context: Context) {
                     // If we successfully traversed the entire path
                     if (pathValid && currentDir != null) {
                         // Get folders excluding "capability" and "map_preview"
-                        val validFolders = currentDir.listFiles().filter {
-                            it.isDirectory &&
-                                    !setOf("capability", "map_preview").contains(it.name)
-                        }
+                        // val validFolders = currentDir.listFiles().filter {
+                        //     it.isDirectory &&
+                        //             !setOf("capability", "map_preview").contains(it.name)
+                        // }
 
                         // Return the first valid folder's URI if it exists
-                        validFolders.firstOrNull()?.uri?.let { return it }
+                        // validFolders.firstOrNull()?.uri?.let { return it }
+
+                        return currentDir.uri
                     }
                 }
 
@@ -547,6 +549,59 @@ class FileTransferHandler(private val context: Context) {
                 null
             }
         }
+
+        // /**
+        //  * Retrieves the URI of the DJI waypoint directory from the given context and URI.
+        //  * Searches through possible directory structures to find the waypoint folder.
+        //  *
+        //  * @param context the Android context to use for accessing the file system
+        //  * @param uri the URI of the root directory to start the search from
+        //  * @return the URI of the DJI waypoint directory, or null if it could not be found
+        //  */
+        // fun djiWaypointUri(context: Context, uri: Uri): Uri? {
+        //     return try {
+        //         val rootDirectory = DocumentFile.fromTreeUri(context, uri) ?: return null
+
+        //         // Define possible directory paths to search
+        //         val possiblePaths = listOf(
+        //             listOf("Android", "data", "dji.go.v5", "files", "waypoint"),
+        //             listOf("data", "dji.go.v5", "files", "waypoint"),
+        //             listOf("dji.go.v5", "files", "waypoint"),
+        //             listOf("files", "waypoint")
+        //         )
+
+        //         // Search through each possible path
+        //         for (path in possiblePaths) {
+        //             var currentDir: DocumentFile? = rootDirectory
+        //             var pathValid = true
+
+        //             // Navigate through each directory in the path
+        //             for (dirName in path) {
+        //                 currentDir = currentDir?.findFile(dirName)
+        //                 if (currentDir == null) {
+        //                     pathValid = false
+        //                     break
+        //                 }
+        //             }
+
+        //             // If we successfully traversed the entire path
+        //             if (pathValid && currentDir != null) {
+        //                 // Get folders excluding "capability" and "map_preview"
+        //                 val validFolders = currentDir.listFiles().filter {
+        //                     it.isDirectory &&
+        //                             !setOf("capability", "map_preview").contains(it.name)
+        //                 }
+
+        //                 // Return the first valid folder's URI if it exists
+        //                 validFolders.firstOrNull()?.uri?.let { return it }
+        //             }
+        //         }
+
+        //         null
+        //     } catch (e: Exception) {
+        //         null
+        //     }
+        // }
     }
 
 }

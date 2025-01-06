@@ -1,6 +1,7 @@
 package np.com.naxa.drone_tasking_manager.states
 
 import android.net.Uri
+import androidx.documentfile.provider.DocumentFile
 import java.io.File
 
 /**
@@ -25,12 +26,21 @@ sealed class DownloadAndTransferState {
      *
      * @param error A string describing the error that occurred.
      */
-    data class DownloadError(val error: String, val url: String? = null) : DownloadAndTransferState()
+    data class DownloadError(val error: String, val url: String? = null) :
+        DownloadAndTransferState()
 
     /**
      * Represents the download completed state indicating that the download process has finished successfully.
      */
     data class DownloadCompleted(val file: File) : DownloadAndTransferState()
+
+    /**
+     * Represents the state of the download and transfer process when the destination directories have been listed.
+     *
+     * @param directory The selected directory through saf.
+     */
+    data class SafDirectorySelected(val directory: DocumentFile) :
+        DownloadAndTransferState()
 
     /**
      * Represents the transferring state with the current progress of the transfer.
@@ -44,7 +54,8 @@ sealed class DownloadAndTransferState {
      *
      * @param error A string describing the error that occurred.
      */
-    data class TransferError(val error: String, val file: File?, val destinationUri: Uri? = null) : DownloadAndTransferState()
+    data class TransferError(val error: String, val file: File?, val destinationUri: Uri? = null) :
+        DownloadAndTransferState()
 
     /**
      * Represents the transfer completed state indicating that the transfer process has finished successfully.
