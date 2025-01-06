@@ -273,7 +273,8 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
                                     contentDescription = null,
                                     modifier = Modifier
                                         .size(24.dp)
-                                        .padding(start = 8.dp)
+                                        .padding(start = 8.dp),
+                                    tint = Color.White
                                 )
                             }
                             Spacer(modifier = Modifier.height(12.dp))
