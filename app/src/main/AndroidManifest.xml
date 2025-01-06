@@ -30,7 +30,7 @@
         android:theme="@style/Theme.SAFFileExplorer"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name="np.com.naxa.drone_tasking_manager.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.SAFFileExplorer">
             <intent-filter>
