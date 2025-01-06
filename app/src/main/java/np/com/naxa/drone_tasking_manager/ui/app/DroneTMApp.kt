@@ -74,7 +74,7 @@ fun DroneTMApp(
                     is DownloadAndTransferState.Downloading -> "Downloading"
                     is DownloadAndTransferState.Idle -> "Download and Transfer"
                     is DownloadAndTransferState.SafDirectorySelected -> "Select Directory"
-                    DownloadAndTransferState.TransferCompleted -> "Transferred"
+                    is DownloadAndTransferState.TransferCompleted -> "Transferred"
                     is DownloadAndTransferState.TransferError -> "TransferError"
                     is DownloadAndTransferState.Transferring -> "Transferring"
                 }
