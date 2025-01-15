@@ -1,4 +1,4 @@
-package np.com.naxa.drone_tasking_manager.events
+package np.com.naxa.drone_tasking_manager.navigation.viewmodels.events
 
 import android.hardware.usb.UsbDevice
 import androidx.compose.material3.SnackbarDuration
@@ -31,5 +31,7 @@ sealed class DroneTMAppNavigationEvent {
         val onDismissed: () -> Unit = {},
         val onActionPerformed: () -> Unit = {},
     ) : DroneTMAppNavigationEvent()
+
+    data object onNavigateToLogin : DroneTMAppNavigationEvent()
 
 }

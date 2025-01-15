@@ -1,4 +1,4 @@
-package np.com.naxa.drone_tasking_manager.ui.navigation
+package np.com.naxa.drone_tasking_manager.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -6,50 +6,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import np.com.naxa.drone_tasking_manager.Routes
 import np.com.naxa.drone_tasking_manager.ui.screens.download_and_transfer.DownloadAndTransferFileScreen
 import np.com.naxa.drone_tasking_manager.ui.screens.home.HomeScreen
 import np.com.naxa.drone_tasking_manager.ui.screens.splash.SplashScreen
-
-
-/**
- * Represents the available navigation routes in the application.
- *
- * @property label Human-readable name for the route
- * @property path URL path pattern for the route
- */
-enum class Routes(
-    val label: String,
-    val path: String,
-) {
-    /**
-     * Route for displaying the splash screen.
-     * Path: /splash
-     */
-    Splash(
-        label = "Splash",
-        path = "splash"
-    ),
-
-    /**
-     * Route for displaying the home screen.
-     * Path: /home
-     */
-    Home(
-        label = "Home",
-        path = "home"
-    ),
-
-    /**
-     * Route for displaying the download and transfer contents of a specific device.
-     * Path: /download-and-transfer/{deviceId}
-     * @param {deviceId} The unique identifier of the device
-     */
-    DownloadAndTransfer(
-        label = "Download And Transfer",
-        path = "download-and-transfer/{deviceId}"
-    ),
-}
-
 
 /**
  * Composable function that sets up the navigation host for the DJI MTP Controller.

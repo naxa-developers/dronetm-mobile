@@ -1,4 +1,4 @@
-package np.com.naxa.drone_tasking_manager.ui.app
+package np.com.naxa.drone_tasking_manager.app
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,19 +26,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
-import np.com.naxa.drone_tasking_manager.events.DroneTMAppNavigationEvent
+import np.com.naxa.drone_tasking_manager.Routes
+import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 import np.com.naxa.drone_tasking_manager.states.DownloadAndTransferState
-import np.com.naxa.drone_tasking_manager.ui.local_providers.LocalDownloadAndTransferFileViewModel
-import np.com.naxa.drone_tasking_manager.ui.local_providers.LocalEventsViewModel
-import np.com.naxa.drone_tasking_manager.ui.local_providers.LocalNavigationEventsViewModel
-import np.com.naxa.drone_tasking_manager.ui.local_providers.LocalUsbDeviceViewModel
-import np.com.naxa.drone_tasking_manager.ui.navigation.Routes
-import np.com.naxa.drone_tasking_manager.ui.navigation.DroneTMAppNavHost
+import np.com.naxa.drone_tasking_manager.local_providers.LocalDownloadAndTransferFileViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalEventsViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalUsbDeviceViewModel
+import np.com.naxa.drone_tasking_manager.navigation.DroneTMAppNavHost
 import np.com.naxa.drone_tasking_manager.core.theme.DroneTMAppTheme
 import np.com.naxa.drone_tasking_manager.utils.route
 import np.com.naxa.drone_tasking_manager.viewmodel.DownloadAndTransferFileViewModel
 import np.com.naxa.drone_tasking_manager.viewmodel.EventsViewModel
-import np.com.naxa.drone_tasking_manager.viewmodel.NavigationEventsViewModel
+import np.com.naxa.drone_tasking_manager.navigation.viewmodels.NavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.viewmodel.UsbDeviceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

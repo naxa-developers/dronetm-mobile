@@ -25,8 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.delay
 import np.com.naxa.drone_tasking_manager.R
-import np.com.naxa.drone_tasking_manager.events.DroneTMAppNavigationEvent
-import np.com.naxa.drone_tasking_manager.ui.local_providers.LocalNavigationEventsViewModel
+import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
+import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.core.theme.PrimaryColor
 
 @Composable
@@ -43,7 +43,7 @@ fun SplashScreen(
             animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
         )
         delay(2000)
-        navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToHome)
+        navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.onNavigateToLogin)
     }
 
     Box(

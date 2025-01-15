@@ -32,10 +32,11 @@ retrofit = "2.9.0"
 okhttp = "5.0.0-alpha.11"
 
 #Coroutines
-coroutines = "1.7.3"
+coroutines = "1.8.1"
 
 #KSP
-ksp = "1.9.20-1.0.14"
+#ksp = "1.9.20-1.0.14"
+ksp = "2.1.0-1.0.29"
 
 ##Accompanist
 accompanist-flowlayout = "0.31.0-alpha"
