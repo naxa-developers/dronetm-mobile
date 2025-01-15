@@ -1,4 +1,4 @@
-package np.com.naxa.drone_tasking_manager.ui.theme
+package np.com.naxa.drone_tasking_manager.core.theme
 
 import androidx.compose.ui.graphics.Color
 

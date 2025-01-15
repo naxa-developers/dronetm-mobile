@@ -27,7 +27,7 @@ import kotlinx.coroutines.delay
 import np.com.naxa.drone_tasking_manager.R
 import np.com.naxa.drone_tasking_manager.events.DroneTMAppNavigationEvent
 import np.com.naxa.drone_tasking_manager.ui.local_providers.LocalNavigationEventsViewModel
-import np.com.naxa.drone_tasking_manager.ui.theme.PrimaryColor
+import np.com.naxa.drone_tasking_manager.core.theme.PrimaryColor
 
 @Composable
 fun SplashScreen(

@@ -1,31 +1,42 @@
-package np.com.naxa.drone_tasking_manager.ui.theme
+package np.com.naxa.drone_tasking_manager.core.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
-private val DarkColorScheme = darkColorScheme(
-    primary = PrimaryColor,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
-
-private val LightColorScheme = lightColorScheme(
+val LightColorScheme = lightColorScheme(
     primary = PrimaryColor40,
     secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+    tertiary = Pink40,
+    primaryContainer = Color(0xFF3700B3),
+    background = Color(0xFFFFFFFF),
+    surface = Color(0xFFFFFFFF),
+    error = Color(0xFFB00020),
     onPrimary = Color.White,
-    onSecondary = Color.White,
+    onSecondary = Color.Black,
+    onBackground = Color.Black,
+    onSurface = Color.Black,
+    onError = Color.White,
+    onTertiary = Color.Black,
+)
+
+val DarkColorScheme = darkColorScheme(
+    primary = Purple80,
+    secondary = PurpleGrey80,
+    tertiary = Pink80,
+    primaryContainer = Color(0xFF3700B3),
+    background = Color(0xFF121212),
+    surface = Color(0xFF121212),
+    error = Color(0xFFCF6679),
+    onPrimary = Color.Black,
+    onSecondary = Color.Black,
+    onBackground = Color.White,
+    onSurface = Color.White,
+    onError = Color.Black,
     onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
 )
 
 @Composable
@@ -45,9 +56,11 @@ fun DroneTMAppTheme(
         else -> LightColorScheme
     }
 
+    val typography = if (darkTheme) DarkTypography else LightTypography
+
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = typography,
         content = content
     )
 }

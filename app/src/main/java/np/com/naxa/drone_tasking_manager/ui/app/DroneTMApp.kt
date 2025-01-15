@@ -34,7 +34,7 @@ import np.com.naxa.drone_tasking_manager.ui.local_providers.LocalNavigationEvent
 import np.com.naxa.drone_tasking_manager.ui.local_providers.LocalUsbDeviceViewModel
 import np.com.naxa.drone_tasking_manager.ui.navigation.Routes
 import np.com.naxa.drone_tasking_manager.ui.navigation.DroneTMAppNavHost
-import np.com.naxa.drone_tasking_manager.ui.theme.DroneTMAppTheme
+import np.com.naxa.drone_tasking_manager.core.theme.DroneTMAppTheme
 import np.com.naxa.drone_tasking_manager.utils.route
 import np.com.naxa.drone_tasking_manager.viewmodel.DownloadAndTransferFileViewModel
 import np.com.naxa.drone_tasking_manager.viewmodel.EventsViewModel
