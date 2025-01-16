@@ -16,7 +16,7 @@ interface ApiService {
      * @param password The password of the user.
      * @return A [LoginResponseDto] containing the user's access token and refresh token.
      */
-    @POST("api/users/login")
+    @POST("api/users/login/")
     @FormUrlEncoded
     suspend fun login(@Field("role") role: String,
                       @Field("username") username: String,

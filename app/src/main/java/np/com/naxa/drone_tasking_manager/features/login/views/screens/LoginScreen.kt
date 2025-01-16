@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -30,12 +32,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
+import np.com.naxa.drone_tasking_manager.events.DroneTMAppEvent
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.events.LoginEvents
 import np.com.naxa.drone_tasking_manager.local_providers.LocalLoginViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
@@ -50,6 +55,7 @@ fun LoginScreen(modifier: Modifier){
     val navigationEventsViewModel = LocalNavigationEventsViewModel.current
 
     val keyboardManager = LocalSoftwareKeyboardController.current
+    val configuration = LocalConfiguration.current
 
     val role by remember { mutableStateOf("DRONE_PILOT") }
     var username by remember { mutableStateOf("testnaxa@gmail.com") }
@@ -67,7 +73,8 @@ fun LoginScreen(modifier: Modifier){
 
     Column(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -133,21 +140,30 @@ fun LoginScreen(modifier: Modifier){
 
 
         Button(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(42.dp),
+            shape = RoundedCornerShape(15),
+
             onClick = {
                 viewModel.onEvent(LoginEvents.NormalLogin(role, username, password))
             },
-            modifier = Modifier.width(200.dp)
+
         ) {
-            Row {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
                 if (state.isLoginIdle) {
                     Text(
                         text = "Login",
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
                     )
                 } else if (state.isLoggingIn) {
-                    Text(
-                        text = "Logging In",
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp
                     )
                 } else if (state.isLoginSuccess != null) {
                     Text(
@@ -166,18 +182,6 @@ fun LoginScreen(modifier: Modifier){
                     )
                 }
 
-                Spacer(
-                    modifier = Modifier.width(16.dp)
-                )
-
-                if (state.isLoggingIn) {
-                    CircularProgressIndicator(
-                        color = Color.White,
-                        modifier = Modifier.size(24.dp),
-                        strokeWidth = 2.dp
-                    )
-
-                }
 
             }
         }
