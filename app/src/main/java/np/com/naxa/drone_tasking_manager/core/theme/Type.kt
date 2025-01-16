@@ -11,15 +11,15 @@ import androidx.compose.ui.unit.sp
 import np.com.naxa.drone_tasking_manager.R
 
 val AppFontFamily = FontFamily(
-    Font(R.font.avenir_next_lt_pro_regular, FontWeight.Normal),
-    Font(R.font.avenir_next_lt_pro_regular, FontWeight.Medium),
-    Font(R.font.avenir_next_lt_pro_regular, FontWeight.SemiBold),
-    Font(R.font.avenir_next_lt_pro_bold, FontWeight.Bold),
-    Font(R.font.avenir_next_lt_pro_bold, FontWeight.ExtraBold),
-    Font(R.font.avenir_next_lt_pro_italic, FontWeight.Normal, FontStyle.Italic),
-    Font(R.font.avenir_next_lt_pro_italic, FontWeight.Medium, FontStyle.Italic),
-    Font(R.font.avenir_next_lt_pro_italic, FontWeight.SemiBold, FontStyle.Italic),
-    Font(R.font.avenir_next_lt_pro_italic, FontWeight.Bold, FontStyle.Italic),
+    Font(R.font.barlowcondensed_black, FontWeight.Normal),
+    Font(R.font.barlowcondensed_medium, FontWeight.Medium),
+    Font(R.font.barlowcondensed_semibold, FontWeight.SemiBold),
+    Font(R.font.barlowcondensed_bold, FontWeight.Bold),
+    Font(R.font.barlowcondensed_extrabold, FontWeight.ExtraBold),
+    Font(R.font.barlowcondensed_italic, FontWeight.Normal, FontStyle.Italic),
+    Font(R.font.barlowcondensed_mediumitalic, FontWeight.Medium, FontStyle.Italic),
+    Font(R.font.barlowcondensed_semibolditalic, FontWeight.SemiBold, FontStyle.Italic),
+    Font(R.font.barlowcondensed_bolditalic, FontWeight.Bold, FontStyle.Italic),
 )
 
 val LightTypography = Typography(
