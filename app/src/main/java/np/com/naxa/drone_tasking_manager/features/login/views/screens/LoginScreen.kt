@@ -46,16 +46,14 @@ import np.com.naxa.drone_tasking_manager.local_providers.LocalLoginViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(modifier: Modifier){
+fun LoginScreen(){
     val viewModel = LocalLoginViewModel.current
     val state by viewModel.state.collectAsState()
 
     val navigationEventsViewModel = LocalNavigationEventsViewModel.current
 
     val keyboardManager = LocalSoftwareKeyboardController.current
-    val configuration = LocalConfiguration.current
 
     val role by remember { mutableStateOf("DRONE_PILOT") }
     var username by remember { mutableStateOf("testnaxa@gmail.com") }
@@ -137,6 +135,8 @@ fun LoginScreen(modifier: Modifier){
             }
         )
 
+
+        Spacer(modifier = Modifier.height(16.dp))
 
 
         Button(

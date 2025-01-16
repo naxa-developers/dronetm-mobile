@@ -56,9 +56,7 @@ fun DroneTMAppNavHost(
 
         // Route for the Home screen
         composable(Routes.Login.path) {
-            LoginScreen(
-                modifier
-            )
+            LoginScreen()
         }
     }
 }

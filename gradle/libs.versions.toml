@@ -31,6 +31,9 @@ lifecycle-extensions = "2.2.0"
 retrofit = "2.9.0"
 okhttp = "5.0.0-alpha.11"
 
+#Storage
+mmkv = "2.0.2"
+
 #Coroutines
 coroutines = "1.8.1"
 
@@ -98,6 +101,8 @@ converter-moshi = { group = "com.squareup.retrofit2", name = "converter-moshi", 
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 
+#Storage
+storage-mmkv = { group = "com.tencent", name = "mmkv-static", version.ref = "mmkv" }
 
 
 [plugins]

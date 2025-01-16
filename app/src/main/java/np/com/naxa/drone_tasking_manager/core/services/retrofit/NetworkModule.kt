@@ -1,5 +1,6 @@
 package np.com.naxa.drone_tasking_manager.core.services.retrofit
 
+import com.tencent.mmkv.BuildConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

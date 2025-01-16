@@ -1,3 +1,5 @@
+import java.util.Properties
+
 @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
 plugins {
     alias(libs.plugins.android.application)
@@ -6,6 +8,14 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.parcelize)
+}
+
+val localProperties =  Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { stream ->
+        localProperties.load(stream)
+    }
 }
 
 android {
@@ -19,6 +29,10 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+
+        buildConfigField("String", "SECRET_DATA_KEY", "\"${localProperties["SECRET_DATA_KEY"] ?: ""}\"")
+        buildConfigField("String", "BASE_URL", "\"${localProperties["BASE_URL"] ?: ""}\"")
+
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -41,6 +55,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -103,6 +118,16 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
     implementation(libs.converter.moshi)
+
+    /* *****************************************************
+    **** Storage
+    ****************************************************** */
+    implementation(libs.storage.mmkv)
+
+
+    /* *****************************************************
+    **** Testing
+    ****************************************************** */
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
