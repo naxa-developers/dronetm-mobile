@@ -1,4 +1,4 @@
-package np.com.naxa.drone_tasking_manager.viewmodel
+package np.com.naxa.drone_tasking_manager.navigation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import np.com.naxa.drone_tasking_manager.events.DroneTMAppNavigationEvent
+import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 
 
 class NavigationEventsViewModel : ViewModel() {

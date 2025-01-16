@@ -54,12 +54,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.events.DroneTMAppEvent
-import np.com.naxa.drone_tasking_manager.events.DroneTMAppNavigationEvent
+import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 import np.com.naxa.drone_tasking_manager.states.DownloadAndTransferState
-import np.com.naxa.drone_tasking_manager.ui.local_providers.LocalDownloadAndTransferFileViewModel
-import np.com.naxa.drone_tasking_manager.ui.local_providers.LocalEventsViewModel
-import np.com.naxa.drone_tasking_manager.ui.local_providers.LocalNavigationEventsViewModel
-import np.com.naxa.drone_tasking_manager.ui.local_providers.LocalUsbDeviceViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalDownloadAndTransferFileViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalEventsViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalUsbDeviceViewModel
 import np.com.naxa.drone_tasking_manager.utils.FileTransferHandler
 import java.io.File
 

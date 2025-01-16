@@ -28,6 +28,7 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -36,16 +37,18 @@ import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.events.DroneTMAppEvent
 import np.com.naxa.drone_tasking_manager.states.DownloadAndTransferState
 import np.com.naxa.drone_tasking_manager.states.UsbDeviceState
-import np.com.naxa.drone_tasking_manager.ui.app.DroneTMApp
+import np.com.naxa.drone_tasking_manager.app.DroneTMApp
 import np.com.naxa.drone_tasking_manager.utils.FileTransferHandler
 import np.com.naxa.drone_tasking_manager.utils.PermissionUtils
 import np.com.naxa.drone_tasking_manager.utils.toFile
 import np.com.naxa.drone_tasking_manager.viewmodel.DownloadAndTransferFileViewModel
 import np.com.naxa.drone_tasking_manager.viewmodel.EventsViewModel
-import np.com.naxa.drone_tasking_manager.viewmodel.NavigationEventsViewModel
+import np.com.naxa.drone_tasking_manager.navigation.viewmodels.NavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.viewmodel.UsbDeviceViewModel
 import java.io.File
 
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val deviceViewModel by viewModels<UsbDeviceViewModel>()
