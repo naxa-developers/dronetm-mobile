@@ -1,9 +1,10 @@
-package np.com.naxa.drone_tasking_manager
+package np.com.naxa.drone_tasking_manager.core.services.retrofit
 
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import np.com.naxa.drone_tasking_manager.ApiService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

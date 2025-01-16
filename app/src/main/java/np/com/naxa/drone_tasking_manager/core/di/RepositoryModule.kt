@@ -1,4 +1,4 @@
-package np.com.naxa.drone_tasking_manager
+package np.com.naxa.drone_tasking_manager.core.di
 
 
 import dagger.Binds

@@ -43,7 +43,7 @@ import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMApp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(){
+fun LoginScreen(modifier: Modifier){
     val viewModel = LocalLoginViewModel.current
     val state by viewModel.state.collectAsState()
 

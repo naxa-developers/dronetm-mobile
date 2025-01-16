@@ -1,5 +1,6 @@
 package np.com.naxa.drone_tasking_manager.app
 
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -24,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.Routes
@@ -35,6 +37,8 @@ import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsVi
 import np.com.naxa.drone_tasking_manager.local_providers.LocalUsbDeviceViewModel
 import np.com.naxa.drone_tasking_manager.navigation.DroneTMAppNavHost
 import np.com.naxa.drone_tasking_manager.core.theme.DroneTMAppTheme
+import np.com.naxa.drone_tasking_manager.features.login.viewmodels.LoginViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalLoginViewModel
 import np.com.naxa.drone_tasking_manager.utils.route
 import np.com.naxa.drone_tasking_manager.viewmodel.DownloadAndTransferFileViewModel
 import np.com.naxa.drone_tasking_manager.viewmodel.EventsViewModel
@@ -64,6 +68,9 @@ fun DroneTMApp(
             backStackEntry?.destination?.route?.route()
         }
     }
+
+    val loginViewModel = hiltViewModel<LoginViewModel>()
+
 
     val topBarTitle by remember {
         derivedStateOf {
@@ -129,6 +136,12 @@ fun DroneTMApp(
                 DroneTMAppNavigationEvent.OnPopBackStack -> {
                     navController.popBackStack()
                 }
+
+                DroneTMAppNavigationEvent.onNavigateToLogin -> {
+                    navController.navigate(Routes.Login.path) {
+
+                    }
+                }
             }
         }
     }
@@ -137,7 +150,8 @@ fun DroneTMApp(
         LocalUsbDeviceViewModel provides deviceViewModel,
         LocalEventsViewModel provides eventsViewModel,
         LocalDownloadAndTransferFileViewModel provides downloadAndTransferViewModel,
-        LocalNavigationEventsViewModel provides navigationEventsViewModel
+        LocalNavigationEventsViewModel provides navigationEventsViewModel,
+        LocalLoginViewModel provides loginViewModel
     ) {
         DroneTMAppTheme {
             Scaffold(

@@ -16,7 +16,7 @@ iconExtendedVersion = "1.7.6"
 
 #Dagger-Hilt
 hilt = "2.49"
-hilt-work = "1.2.0"
+#hilt-work = "1.2.0"
 hilt-compose = "1.2.0"
 
 #Activity KTX for viewModels()
@@ -36,7 +36,7 @@ coroutines = "1.8.1"
 
 #KSP
 #ksp = "1.9.20-1.0.14"
-ksp = "2.1.0-1.0.29"
+ksp = "2.0.0-1.0.24"
 
 ##Accompanist
 accompanist-flowlayout = "0.31.0-alpha"
@@ -73,7 +73,7 @@ accompanist-flowlayout = { group = "com.google.accompanist", name = "accompanist
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hilt-compose" }
-hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hilt-work" }
+#hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hilt-work" }
 
 ##Activity KTX for viewModels()
 activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activity-ktx" }

@@ -28,6 +28,7 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -46,6 +47,8 @@ import np.com.naxa.drone_tasking_manager.navigation.viewmodels.NavigationEventsV
 import np.com.naxa.drone_tasking_manager.viewmodel.UsbDeviceViewModel
 import java.io.File
 
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val deviceViewModel by viewModels<UsbDeviceViewModel>()
