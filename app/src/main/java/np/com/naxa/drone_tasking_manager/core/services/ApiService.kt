@@ -18,15 +18,15 @@ interface ApiService {
      */
     @POST("api/users/login/")
     @FormUrlEncoded
-    suspend fun login(@Field("role") role: String,
+    suspend fun login(@Field("role") role: String = "DRONE_PILOT",
                       @Field("username") username: String,
                       @Field("password") password: String): LoginResponseDto
 
-    @POST("api/users/login")
+    @GET("api/users/callback/")
     @FormUrlEncoded
-    suspend fun googleLogin(@Query("role") role: String,
-                      @Query("code") username: String,
-                      @Query("state") password: String): LoginResponseDto
+    suspend fun googleLogin(@Query("role") role: String = "DRONE_PILOT",
+                      @Query("code") code: String,
+                      @Query("state") state: String): LoginResponseDto
 
 
 }
