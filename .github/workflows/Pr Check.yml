@@ -101,11 +101,11 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Check dependencies
-        run: ./gradlew dependencyUpdates -Drevision=release
+#      - name: Check dependencies
+#        run: ./gradlew dependencyUpdates -Drevision=release
 
-      - name: Upload dependency report
-        uses: actions/upload-artifact@v3
-        with:
-          name: dependency-report
-          path: build/reports/dependencyUpdates/report.txt
+#      - name: Upload dependency report
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: dependency-report
+#          path: build/reports/dependencyUpdates/report.txt
