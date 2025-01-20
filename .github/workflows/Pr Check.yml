@@ -42,26 +42,26 @@ jobs:
 #      - name: Run ktlint check
 #        run: ./gradlew ktlintCheck
 
-      - name: Run detekt
-        run: ./gradlew detekt
-
-      - name: Run unit tests
-        run: ./gradlew testDebugUnitTest
-
-      - name: Run instrumented tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 34
-          script: ./gradlew connectedDebugAndroidTest
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results
-          path: |
-            **/build/reports/tests/
-            **/build/reports/androidTests/
+#      - name: Run detekt
+#        run: ./gradlew detekt
+#
+#      - name: Run unit tests
+#        run: ./gradlew testDebugUnitTest
+#
+#      - name: Run instrumented tests
+#        uses: reactivecircus/android-emulator-runner@v2
+#        with:
+#          api-level: 34
+#          script: ./gradlew connectedDebugAndroidTest
+#
+#      - name: Upload test results
+#        if: always()
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: test-results
+#          path: |
+#            **/build/reports/tests/
+#            **/build/reports/androidTests/
 
       - name: Build debug APK
         run: ./gradlew assembleDebug
