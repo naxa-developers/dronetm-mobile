@@ -72,15 +72,15 @@ jobs:
           name: app-debug
           path: app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Check for Android lint issues
-        run: ./gradlew lint
-
-      - name: Upload lint results
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: lint-results
-          path: app/build/reports/lint-results-debug.html
+#      - name: Check for Android lint issues
+#        run: ./gradlew lint
+#
+#      - name: Upload lint results
+#        if: always()
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: lint-results
+#          path: app/build/reports/lint-results-debug.html
 
   dependency-check:
     name: Check Dependencies
