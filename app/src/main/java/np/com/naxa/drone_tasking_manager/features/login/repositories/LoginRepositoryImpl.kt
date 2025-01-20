@@ -1,5 +1,6 @@
 package np.com.naxa.drone_tasking_manager.features.login.repositories
 
+import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import np.com.naxa.drone_tasking_manager.ApiService
@@ -104,6 +105,8 @@ class LoginRepositoryImpl @Inject constructor(private val apiService: ApiService
 
 
     private fun saveUserData(loginDetails: LoginResponse){
+
+        Log.d("TAG", "saveUserData: ${loginDetails.detail}")
 
         storageService.save(StorageKeys.User.ACCESS_TOKEN, loginDetails.access_token)
         storageService.save(StorageKeys.User.REFRESH_TOKEN, loginDetails.refresh_token)

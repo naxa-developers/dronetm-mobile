@@ -49,11 +49,12 @@ fun LoginScreen(){
             if (account != null) {
 
                 val code = account.serverAuthCode
+                Log.d("TAG", "googleLoginActivityResult: $code")
 
                 viewModel.onEvent(LoginEvents.GoogleLogin(role, code!!, account.idToken!!))
             }
         }catch (exception: ApiException){
-
+            Log.d("TAG", "googleLoginActivityResult: ${exception.message}")
         }
 
 
@@ -68,7 +69,7 @@ fun LoginScreen(){
         },
         onGoogleSignInClick = {
             // Handle Google sign-in
-            googleLoginActivityResult.launch(1)
+            googleLoginActivityResult.launch(0)
         },
         onForgetPasswordClick = { email ->
             // Handle forget password

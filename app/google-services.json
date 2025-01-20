@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "284837732251",
+    "project_id": "drone-tm-274eb",
+    "storage_bucket": "drone-tm-274eb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:284837732251:android:0c707f6030729ecd4f0b3e",
+        "android_client_info": {
+          "package_name": "np.com.naxa.drone_tasking_manager"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB5DNWgQDizB_Uy4e_YoWgB9X5lRKZ8Fz4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

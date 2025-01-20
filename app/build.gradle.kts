@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.parcelize)
+    alias(libs.plugins.google.services)
 }
 
 val localProperties =  Properties()
@@ -133,6 +134,8 @@ dependencies {
 //    implementation(libs.google.auth)
 //    implementation(libs.google.id)
     implementation(libs.google.gms.auth)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
 
 
 
