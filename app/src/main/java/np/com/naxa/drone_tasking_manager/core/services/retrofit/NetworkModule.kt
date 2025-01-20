@@ -1,11 +1,11 @@
 package np.com.naxa.drone_tasking_manager.core.services.retrofit
 
-import com.tencent.mmkv.BuildConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import np.com.naxa.drone_tasking_manager.ApiService
+import np.com.naxa.drone_tasking_manager.BuildConfig
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -41,7 +41,7 @@ class NetworkModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://dev.dronetm.org/")
+            .baseUrl(BuildConfig.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

@@ -1,6 +1,5 @@
 package np.com.naxa.drone_tasking_manager.core.services.storage
 
-import np.com.naxa.drone_tasking_manager.core.utils.DataEncryptionUtils
 
 object StorageKeys {
 

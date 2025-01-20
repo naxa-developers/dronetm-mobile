@@ -8,12 +8,16 @@ import javax.crypto.spec.SecretKeySpec
 object DataUtils {
 
     private fun stringToSecretKey(keyString: String): SecretKey {
-        val decodedKey = Base64.decode(keyString, Base64.DEFAULT)
-        return SecretKeySpec(decodedKey, 0, decodedKey.size, "AES")
+
+        val keyBytes = keyString.toByteArray() // Ensure the key length is 16, 24, or 32 bytes
+         val keyBytesPadded = ByteArray(32) // Use 32 for 256 bits, 16 for 128 bits, 24 for 192 bits
+         System.arraycopy(keyBytes, 0, keyBytesPadded, 0, keyBytes.size.coerceAtMost(keyBytesPadded.size))
+
+        return  SecretKeySpec(keyBytesPadded, "AES")
     }
 
     object Encrypt {
-        fun encryptData(data: String, secretKey: String): {
+        fun encryptData(data: String, secretKey: String): String {
             val cipher = Cipher.getInstance("AES")
             cipher.init(Cipher.ENCRYPT_MODE, stringToSecretKey(secretKey))
             val encryptedBytes = cipher.doFinal(data.toByteArray())

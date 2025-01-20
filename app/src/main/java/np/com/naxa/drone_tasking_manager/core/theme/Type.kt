@@ -121,7 +121,7 @@ val LightTypography = Typography(
     ),
     labelSmall = TextStyle(
         fontFamily = AppFontFamily,
-        color = Color.White,
+        color = Color.Gray,
         fontSize = 10.sp,
         fontWeight = FontWeight.Medium,
         letterSpacing = 1.5.sp,
@@ -129,7 +129,7 @@ val LightTypography = Typography(
     ),
     labelMedium = TextStyle(
         fontFamily = AppFontFamily,
-        color = Color.White,
+        color = Color.Gray,
         fontSize = 12.sp,
         fontWeight = FontWeight.SemiBold,
         letterSpacing = 1.25.sp,
@@ -137,7 +137,7 @@ val LightTypography = Typography(
     ),
     labelLarge = TextStyle(
         fontFamily = AppFontFamily,
-        color = Color.White,
+        color = Color.Gray,
         fontSize = 14.sp,
         fontWeight = FontWeight.Bold,
         letterSpacing = 1.1.sp,
@@ -249,7 +249,7 @@ val DarkTypography = Typography(
 
     labelSmall = TextStyle(
         fontFamily = AppFontFamily,
-        color = Color.White,
+        color = Color.LightGray,
         fontSize = 10.sp,
         fontWeight = FontWeight.Medium,
         letterSpacing = 1.5.sp,
@@ -257,7 +257,7 @@ val DarkTypography = Typography(
     ),
     labelMedium = TextStyle(
         fontFamily = AppFontFamily,
-        color = Color.White,
+        color = Color.LightGray,
         fontSize = 12.sp,
         fontWeight = FontWeight.SemiBold,
         letterSpacing = 1.25.sp,
@@ -265,7 +265,7 @@ val DarkTypography = Typography(
     ),
     labelLarge = TextStyle(
         fontFamily = AppFontFamily,
-        color = Color.White,
+        color = Color.LightGray,
         fontSize = 14.sp,
         fontWeight = FontWeight.Bold,
         letterSpacing = 1.1.sp,

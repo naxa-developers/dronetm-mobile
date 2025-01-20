@@ -28,7 +28,7 @@ class MMKVStorageService private constructor() {
 
         if(key.equals(StorageKeys.User.ACCESS_TOKEN) || key.equals(StorageKeys.User.REFRESH_TOKEN)){
             rawValue as String
-            value = DataUtils.Encrypt.encryptData(rawValue, BuildConfig.SECRET_DATA_KEY)
+            value = DataUtils.Encrypt.encryptData(rawValue, BuildConfig.SECRET_DATA_KEY) as T
         }
 
         when (value) {
@@ -60,7 +60,7 @@ class MMKVStorageService private constructor() {
     private fun<T> decryptData(key: String, defaultValue: String): T {
         var value = mmkv.decodeString(key, defaultValue)!!
         if(key.equals(StorageKeys.User.ACCESS_TOKEN) || key.equals(StorageKeys.User.REFRESH_TOKEN)){
-            value = DataUtils.Encrypt.encryptData(value, BuildConfig.SECRET_DATA_KEY)
+            value = DataUtils.Decrypt.decryptData(value, BuildConfig.SECRET_DATA_KEY)
         }
         return value as T
     }

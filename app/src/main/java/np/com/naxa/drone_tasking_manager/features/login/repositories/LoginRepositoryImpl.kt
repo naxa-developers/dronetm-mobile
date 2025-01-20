@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.flow
 import np.com.naxa.drone_tasking_manager.ApiService
 import np.com.naxa.drone_tasking_manager.Resources
 import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
+import np.com.naxa.drone_tasking_manager.core.services.storage.StorageKeys
 import np.com.naxa.drone_tasking_manager.features.login.mapper.toLoginResponse
 import np.com.naxa.drone_tasking_manager.features.login.models.LoginResponse
 import retrofit2.HttpException
@@ -65,6 +66,7 @@ class LoginRepositoryImpl @Inject constructor(private val apiService: ApiService
 
             val loginDetails = response.toLoginResponse()
 
+            storageService.save(StorageKeys.User.ACCESS_TOKEN, loginDetails.access_token)
             emit(Resources.Success(data = loginDetails))
 
         }
