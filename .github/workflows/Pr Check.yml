@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - develop
+      - drone-tasking-manager
     types: [opened, synchronize, reopened]
 
 jobs:
