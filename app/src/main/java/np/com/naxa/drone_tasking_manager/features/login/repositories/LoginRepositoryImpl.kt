@@ -1,9 +1,12 @@
 package np.com.naxa.drone_tasking_manager.features.login.repositories
 
+import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import np.com.naxa.drone_tasking_manager.ApiService
 import np.com.naxa.drone_tasking_manager.Resources
+import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
+import np.com.naxa.drone_tasking_manager.core.services.storage.StorageKeys
 import np.com.naxa.drone_tasking_manager.features.login.mapper.toLoginResponse
 import np.com.naxa.drone_tasking_manager.features.login.models.LoginResponse
 import retrofit2.HttpException
@@ -20,6 +23,10 @@ import javax.inject.Singleton
  */
 @Singleton
 class LoginRepositoryImpl @Inject constructor(private val apiService: ApiService) : LoginRepository {
+
+    // Singleton instance of MMKVStorageService
+    // This service is used for storing and retrieving data from persistent storage
+    val storageService = MMKVStorageService.getInstance()
 
     /**
      * Attempts to log in a user with the provided credentials.
@@ -43,7 +50,7 @@ class LoginRepositoryImpl @Inject constructor(private val apiService: ApiService
         return flow {
             emit(Resources.Loading())
 
-            val loginDetails =
+            val response =
                 try {
                     apiService.login(role, username, password)
                 } catch (e: HttpException) {
@@ -58,14 +65,52 @@ class LoginRepositoryImpl @Inject constructor(private val apiService: ApiService
                     return@flow emit(Resources.Error(e.message ?: "Unknown Error"))
                 }
 
-            emit(Resources.Success(data = loginDetails.toLoginResponse()))
+            val loginDetails = response.toLoginResponse()
+
+            saveUserData(loginDetails)
+
+            emit(Resources.Success(data = loginDetails))
 
         }
     }
 
 
 
-    override suspend fun googleLogin(): Flow<Resources<LoginResponse>> {
-        TODO("Not yet implemented")
+    override suspend fun googleLogin(role: String, code: String, state: String): Flow<Resources<LoginResponse>> {
+        return flow{
+            emit(Resources.Loading())
+
+        val response =
+            try {
+                apiService.googleLogin(role, code, state)
+            } catch (e: HttpException) {
+                // Handle HTTP-specific exceptions
+                return@flow emit(Resources.Error(e.message()))
+            } catch (e: IOException) {
+                // Handle network/IO-related exceptions
+                e.printStackTrace()
+                return@flow emit(Resources.Error(e.message ?: "Could not load data"))
+            } catch (e: Exception) {
+                // Handle any other unexpected exceptions
+                return@flow emit(Resources.Error(e.message ?: "Unknown Error"))
+            }
+
+        val loginDetails = response.toLoginResponse()
+
+            saveUserData(loginDetails)
+
+        emit(Resources.Success(data = loginDetails))
+    }
+    }
+
+
+    private fun saveUserData(loginDetails: LoginResponse){
+
+        Log.d("TAG", "saveUserData: ${loginDetails.detail}")
+
+        storageService.save(StorageKeys.User.ACCESS_TOKEN, loginDetails.access_token)
+        storageService.save(StorageKeys.User.REFRESH_TOKEN, loginDetails.refresh_token)
+        storageService.save(StorageKeys.User.ROLE, loginDetails.role)
+        storageService.save(StorageKeys.User.TOKEN_TYPE, loginDetails.token_type)
     }
 }

@@ -4,5 +4,5 @@ sealed class LoginEvents {
 
     data class NormalLogin(val role: String, val username: String, val password: String) : LoginEvents()
 
-    data object GoogleLogin : LoginEvents()
+    data class GoogleLogin(val role: String, val code: String, val state: String) : LoginEvents()
 }

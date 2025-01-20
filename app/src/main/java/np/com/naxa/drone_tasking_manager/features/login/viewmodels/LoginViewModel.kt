@@ -28,8 +28,8 @@ class LoginViewModel @Inject constructor(
                 normalLogin(event.role, event.username, event.password)
             }
 
-            LoginEvents.GoogleLogin -> {
-                googleLogin()
+            is LoginEvents.GoogleLogin -> {
+                googleLogin(event.role, event.code, event.state)
             }
         }
     }
@@ -62,9 +62,10 @@ class LoginViewModel @Inject constructor(
     }
 
 
-    private fun googleLogin() {
+    private fun googleLogin(role: String, code: String, state: String) {
         viewModelScope.launch {
-            googleLoginUseCase.invoke().collect { result ->
+            googleLoginUseCase.invoke(role, code, state)
+                .collect { result ->
                 when (result) {
                     is Resources.Loading -> {
                         _state.value = _state.value.copy(isLoggingIn = true, isLoginIdle = false)
