@@ -44,6 +44,12 @@ ksp = "2.0.0-1.0.24"
 ##Accompanist
 accompanist-flowlayout = "0.31.0-alpha"
 
+##Google Signin
+credential = "1.6.0"
+play-service-auth = "21.1.0"
+googleid = "1.8.1"
+gms-play-services-auth = "20.0.0"
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -103,6 +109,12 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 
 #Storage
 storage-mmkv = { group = "com.tencent", name = "mmkv-static", version.ref = "mmkv" }
+
+#Google Sign in
+google-credential = { group = "androidx.credentials", name = "credentials", version.ref = "credential" }
+google-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "play-service-auth" }
+google-id = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
+google-gms-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "gms-play-services-auth" }
 
 
 [plugins]

@@ -66,7 +66,8 @@ class LoginRepositoryImpl @Inject constructor(private val apiService: ApiService
 
             val loginDetails = response.toLoginResponse()
 
-            storageService.save(StorageKeys.User.ACCESS_TOKEN, loginDetails.access_token)
+            saveUserData(loginDetails)
+
             emit(Resources.Success(data = loginDetails))
 
         }
@@ -74,7 +75,39 @@ class LoginRepositoryImpl @Inject constructor(private val apiService: ApiService
 
 
 
-    override suspend fun googleLogin(): Flow<Resources<LoginResponse>> {
-        TODO("Not yet implemented")
+    override suspend fun googleLogin(role: String, code: String, state: String): Flow<Resources<LoginResponse>> {
+        return flow{
+            emit(Resources.Loading())
+
+        val response =
+            try {
+                apiService.googleLogin(role, code, state)
+            } catch (e: HttpException) {
+                // Handle HTTP-specific exceptions
+                return@flow emit(Resources.Error(e.message()))
+            } catch (e: IOException) {
+                // Handle network/IO-related exceptions
+                e.printStackTrace()
+                return@flow emit(Resources.Error(e.message ?: "Could not load data"))
+            } catch (e: Exception) {
+                // Handle any other unexpected exceptions
+                return@flow emit(Resources.Error(e.message ?: "Unknown Error"))
+            }
+
+        val loginDetails = response.toLoginResponse()
+
+            saveUserData(loginDetails)
+
+        emit(Resources.Success(data = loginDetails))
+    }
+    }
+
+
+    private fun saveUserData(loginDetails: LoginResponse){
+
+        storageService.save(StorageKeys.User.ACCESS_TOKEN, loginDetails.access_token)
+        storageService.save(StorageKeys.User.REFRESH_TOKEN, loginDetails.refresh_token)
+        storageService.save(StorageKeys.User.ROLE, loginDetails.role)
+        storageService.save(StorageKeys.User.TOKEN_TYPE, loginDetails.token_type)
     }
 }

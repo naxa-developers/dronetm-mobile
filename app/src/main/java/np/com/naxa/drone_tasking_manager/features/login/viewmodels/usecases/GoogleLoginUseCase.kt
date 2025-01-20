@@ -9,5 +9,5 @@ import javax.inject.Inject
 @Module
 @InstallIn(SingletonComponent::class)
 class GoogleLoginUseCase @Inject constructor(private val loginRepository: LoginRepository) {
-    suspend operator fun invoke() = loginRepository.googleLogin()
+    suspend operator fun invoke(role: String, code: String, state: String) = loginRepository.googleLogin(role, code, state)
 }

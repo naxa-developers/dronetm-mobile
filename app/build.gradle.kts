@@ -32,6 +32,7 @@ android {
 
         buildConfigField("String", "SECRET_DATA_KEY", "\"${localProperties["SECRET_DATA_KEY"] ?: ""}\"")
         buildConfigField("String", "BASE_URL", "\"${localProperties["BASE_URL"] ?: ""}\"")
+        buildConfigField("String", "GOOGLE_CLIENT_ID", "\"${localProperties["GOOGLE_CLIENT_ID"] ?: ""}\"")
 
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -123,6 +124,16 @@ dependencies {
     **** Storage
     ****************************************************** */
     implementation(libs.storage.mmkv)
+
+
+    /* *****************************************************
+    **** Google Sign in
+    ****************************************************** */
+//    implementation(libs.google.credential)
+//    implementation(libs.google.auth)
+//    implementation(libs.google.id)
+    implementation(libs.google.gms.auth)
+
 
 
     /* *****************************************************

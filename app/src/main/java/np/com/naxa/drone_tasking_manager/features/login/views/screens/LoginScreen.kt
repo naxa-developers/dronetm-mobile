@@ -1,5 +1,7 @@
 package np.com.naxa.drone_tasking_manager.features.login.views.screens
 
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -7,6 +9,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import com.google.android.gms.common.api.ApiException
+import np.com.naxa.drone_tasking_manager.features.login.utils.AuthResultContract
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.events.LoginEvents
 import np.com.naxa.drone_tasking_manager.features.login.views.widgets.LoginScreenWidget
 import np.com.naxa.drone_tasking_manager.local_providers.LocalLoginViewModel
@@ -38,6 +42,24 @@ fun LoginScreen(){
     }
 
 
+    val googleLoginActivityResult = rememberLauncherForActivityResult(AuthResultContract()) {
+        task ->
+        try {
+            val account = task?.getResult(Exception::class.java)
+            if (account != null) {
+
+                val code = account.serverAuthCode
+
+                viewModel.onEvent(LoginEvents.GoogleLogin(role, code!!, account.idToken!!))
+            }
+        }catch (exception: ApiException){
+
+        }
+
+
+    }
+
+
 
     LoginScreenWidget(
         onLoginClick = { email, password, rememberMe ->
@@ -46,7 +68,7 @@ fun LoginScreen(){
         },
         onGoogleSignInClick = {
             // Handle Google sign-in
-//            launchGmailListPopup()
+            googleLoginActivityResult.launch(1)
         },
         onForgetPasswordClick = { email ->
             // Handle forget password
