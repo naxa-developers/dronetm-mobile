@@ -9,6 +9,9 @@ class MMKVStorageService private constructor() {
 
     private val mmkv: MMKV = MMKV.defaultMMKV()
 
+    // interceptor cache age in days
+    val interceptorCacheAge = 30L
+
     companion object {
         // Singleton instance
         @Volatile
@@ -63,6 +66,16 @@ class MMKVStorageService private constructor() {
             value = DataUtils.Decrypt.decryptData(value, BuildConfig.SECRET_DATA_KEY)
         }
         return value as T
+    }
+
+
+    /**
+     * Returns all keys stored in the MMKV instance as a mutable set.
+     *
+     * @return A mutable set of all keys, or null if no keys are stored.
+     */
+    fun getAllKeys (): MutableSet<String>?{
+        return mmkv.all?.keys
     }
 
     // Check if a key exists

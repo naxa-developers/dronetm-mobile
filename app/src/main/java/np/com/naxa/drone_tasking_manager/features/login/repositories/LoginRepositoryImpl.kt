@@ -45,14 +45,15 @@ class LoginRepositoryImpl @Inject constructor(private val apiService: ApiService
     override suspend fun normalLogin(
         role: String,
         username: String,
-        password: String
+        password: String,
+        forceRefresh: Boolean
     ): Flow<Resources<LoginResponse>> {
         return flow {
             emit(Resources.Loading())
 
             val response =
                 try {
-                    apiService.login(role, username, password)
+                    apiService.login(role, username, password, forceRefresh)
                 } catch (e: HttpException) {
                     // Handle HTTP-specific exceptions
                     return@flow emit(Resources.Error(e.message()))
@@ -76,13 +77,13 @@ class LoginRepositoryImpl @Inject constructor(private val apiService: ApiService
 
 
 
-    override suspend fun googleLogin(role: String, code: String, state: String): Flow<Resources<LoginResponse>> {
+    override suspend fun googleLogin(role: String, code: String, state: String, forceRefresh: Boolean ): Flow<Resources<LoginResponse>> {
         return flow{
             emit(Resources.Loading())
 
         val response =
             try {
-                apiService.googleLogin(role, code, state)
+                apiService.googleLogin(role, code, state, forceRefresh)
             } catch (e: HttpException) {
                 // Handle HTTP-specific exceptions
                 return@flow emit(Resources.Error(e.message()))
@@ -95,8 +96,7 @@ class LoginRepositoryImpl @Inject constructor(private val apiService: ApiService
                 return@flow emit(Resources.Error(e.message ?: "Unknown Error"))
             }
 
-        val loginDetails = response.toLoginResponse()
-
+            val loginDetails = response.toLoginResponse()
             saveUserData(loginDetails)
 
         emit(Resources.Success(data = loginDetails))
