@@ -28,6 +28,7 @@ class NetworkModule {
     @Singleton
     fun provideOkHttpClient(): OkHttpClient{
         return OkHttpClient.Builder()
+            .addInterceptor(CacheInterceptor())
             .build()
     }
 

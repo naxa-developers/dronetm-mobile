@@ -10,9 +10,9 @@ object StorageKeys {
 
     object User{
         const val IS_LOGGED_IN = "is_logged_in"
-        const val ACCESS_TOKEN = "token_type"
-        const val REFRESH_TOKEN = "token_type"
-        const val ROLE = "token_type"
+        const val ACCESS_TOKEN = "access_token"
+        const val REFRESH_TOKEN = "refresh_token"
+        const val ROLE = "user_role"
         const val TOKEN_TYPE = "token_type"
 
     }
