@@ -8,8 +8,11 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import com.google.android.gms.common.api.ApiException
+import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
+import np.com.naxa.drone_tasking_manager.core.services.storage.StorageKeys
 import np.com.naxa.drone_tasking_manager.features.login.utils.AuthResultContract
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.events.LoginEvents
 import np.com.naxa.drone_tasking_manager.features.login.views.widgets.LoginScreenWidget
@@ -26,7 +29,10 @@ fun LoginScreen(){
 
     val keyboardManager = LocalSoftwareKeyboardController.current
 
+    val storageService = MMKVStorageService.getInstance()
+
     val role by remember { mutableStateOf("DRONE_PILOT") }
+    var rememberMeChecked by remember { mutableStateOf(false) }
 
     val enableView by remember { derivedStateOf {
         !state.isLoggingIn
@@ -38,6 +44,10 @@ fun LoginScreen(){
 
         //trigger to fetch project list
         //and navigate to the project screen
+
+            storageService.save(StorageKeys.User.IS_LOGGED_IN, rememberMeChecked)
+
+        Log.d("TAG", "LoginScreen Access Token: ${storageService.get(StorageKeys.User.ACCESS_TOKEN, "")}")
         navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToHome)
     }
 
@@ -65,10 +75,12 @@ fun LoginScreen(){
     LoginScreenWidget(
         onLoginClick = { email, password, rememberMe ->
             // Handle login
+            rememberMeChecked = rememberMe
             viewModel.onEvent(LoginEvents.NormalLogin(role, email, password))
         },
-        onGoogleSignInClick = {
+        onGoogleSignInClick = {rememberMe ->
             // Handle Google sign-in
+            rememberMeChecked = rememberMe
             googleLoginActivityResult.launch(0)
         },
         onForgetPasswordClick = { email ->

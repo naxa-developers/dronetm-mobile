@@ -54,7 +54,7 @@ import np.com.naxa.drone_tasking_manager.local_providers.LocalLoginViewModel
 @Composable
 fun LoginScreenWidget(
     onLoginClick: (String, String, Boolean) -> Unit,
-    onGoogleSignInClick: () -> Unit,
+    onGoogleSignInClick: (Boolean) -> Unit,
     onForgetPasswordClick: (String) -> Unit,
 ) {
 
@@ -105,7 +105,7 @@ fun LoginScreenWidget(
         Button(
             onClick = {
                 if (!state.isLoggingIn) {
-                    onGoogleSignInClick()
+                    onGoogleSignInClick(rememberMe)
                 }
             },
             modifier = Modifier

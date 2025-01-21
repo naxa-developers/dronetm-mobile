@@ -2,6 +2,8 @@ package np.com.naxa.drone_tasking_manager.core.services.retrofit
 
 import android.net.Uri
 import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
+import np.com.naxa.drone_tasking_manager.core.services.storage.StorageKeys
+import np.com.naxa.drone_tasking_manager.core.utils.DataUtils.EncryptionException
 import okhttp3.Interceptor
 import okhttp3.Protocol
 import okhttp3.Response
@@ -66,9 +68,25 @@ class CacheInterceptor(
         val forceRefresh = isForceRefreshTrue(requestOriginal.url.toString())
         val requestUrl = removeForceRefreshFromUrl(requestOriginal.url.toString())
 
-        val request = requestOriginal.newBuilder()
+        val token: String = try{
+            storageService.get(StorageKeys.User.ACCESS_TOKEN, "")
+        }catch (ex: EncryptionException){
+            ""
+        }catch (ex:Exception){
+            ""
+        }
+
+        val request = if(token.isNotEmpty()) {
+            requestOriginal.newBuilder()
             .url(requestUrl)
+            .header("Access-Token", storageService.get(StorageKeys.User.ACCESS_TOKEN, ""))
             .build()
+        }
+        else {
+            requestOriginal.newBuilder()
+                .url(requestUrl)
+                .build()
+        }
 
         // Skip caching for non-GET requests
         if (request.method != "GET") {

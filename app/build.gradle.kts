@@ -34,6 +34,8 @@ android {
         buildConfigField("String", "SECRET_DATA_KEY", "\"${localProperties["SECRET_DATA_KEY"] ?: ""}\"")
         buildConfigField("String", "BASE_URL", "\"${localProperties["BASE_URL"] ?: ""}\"")
         buildConfigField("String", "GOOGLE_CLIENT_ID", "\"${localProperties["GOOGLE_CLIENT_ID"] ?: ""}\"")
+        buildConfigField("String", "ENCRYPTION_ALGORITHM", "\"${localProperties["ENCRYPTION_ALGORITHM"] ?: ""}\"")
+        buildConfigField("String", "ENCRYPTION_ALGORITHM_KEY", "\"${localProperties["ENCRYPTION_ALGORITHM_KEY"] ?: ""}\"")
 
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
