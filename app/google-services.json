@@ -12,7 +12,20 @@
           "package_name": "np.com.naxa.drone_tasking_manager"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "284837732251-tg3lodvr6aoqhrb6v7je5svt69k57dot.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "np.com.naxa.drone_tasking_manager",
+            "certificate_hash": "50c5777c5327d98719631cf851c1a0f094749c5e"
+          }
+        },
+        {
+          "client_id": "284837732251-e5cfncpoiriu4qdg68qjvtduoq7tmf8a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB5DNWgQDizB_Uy4e_YoWgB9X5lRKZ8Fz4"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "284837732251-e5cfncpoiriu4qdg68qjvtduoq7tmf8a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

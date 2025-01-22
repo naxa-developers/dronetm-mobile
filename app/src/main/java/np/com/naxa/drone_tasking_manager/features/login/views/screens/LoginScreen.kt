@@ -56,6 +56,9 @@ fun LoginScreen(){
         task ->
         try {
             val account = task?.getResult(Exception::class.java)
+
+
+
             if (account != null) {
 
                 val code = account.serverAuthCode
