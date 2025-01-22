@@ -55,14 +55,22 @@ fun LoginScreen(){
     val googleLoginActivityResult = rememberLauncherForActivityResult(AuthResultContract()) {
         task ->
         try {
-            val account = task?.getResult(Exception::class.java)
+            val account = task?.result
 
-
-
+            Log.d("TAG", "googleLoginActivityResult: ${account.toString()}")
             if (account != null) {
 
                 val code = account.serverAuthCode
+                val token = account.idToken
+                val gmailState = account.grantedScopes
+                val gmailStateRequested = account.requestedScopes
+
                 Log.d("TAG", "googleLoginActivityResult: $code")
+                Log.d("TAG", "googleLoginActivityResult: $token")
+                Log.d("TAG", "googleLoginActivityResult: ${account.zac()}")
+                Log.d("TAG", "googleLoginActivityResult: ${account.zad()}")
+
+
 
                 viewModel.onEvent(LoginEvents.GoogleLogin(role, code!!, account.idToken!!))
             }

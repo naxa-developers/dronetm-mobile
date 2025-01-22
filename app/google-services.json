@@ -14,6 +14,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "284837732251-185frrh9l5fvcvthdq4pbvcjv3liavke.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "np.com.naxa.drone_tasking_manager",
+            "certificate_hash": "cd35cb3728202e461806e6fb777dafd949b64b57"
+          }
+        },
+        {
+          "client_id": "284837732251-8geinflo9gtk7t7nuqpqguqh346bnbgb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "np.com.naxa.drone_tasking_manager",
+            "certificate_hash": "a98807339ee563c203189fb6b7c2bb553001c480"
+          }
+        },
+        {
           "client_id": "284837732251-tg3lodvr6aoqhrb6v7je5svt69k57dot.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
