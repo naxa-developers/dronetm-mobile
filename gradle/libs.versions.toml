@@ -6,8 +6,8 @@ junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.7"
-activityCompose = "1.9.3"
-composeBom = "2024.12.01"
+activityCompose = "1.10.0"
+composeBom = "2025.01.00"
 navigationCompose = "2.8.5"
 #okhttp = "4.12.0"
 #runtimeLivedata = "1.7.6"
@@ -15,12 +15,12 @@ documentfile = "1.0.1"
 iconExtendedVersion = "1.7.6"
 
 #Dagger-Hilt
-hilt = "2.49"
+hilt = "2.55"
 #hilt-work = "1.2.0"
 hilt-compose = "1.2.0"
 
 #Activity KTX for viewModels()
-activity-ktx = "1.9.3"
+activity-ktx = "1.10.0"
 
 #Lifecycle
 lifecycle-version = "2.8.7"
@@ -28,21 +28,21 @@ runtime-livedata = "1.7.6"
 lifecycle-extensions = "2.2.0"
 
 #Retrofit2
-retrofit = "2.9.0"
-okhttp = "5.0.0-alpha.11"
+retrofit = "2.11.0"
+okhttp = "5.0.0-alpha.14"
 
 #Storage
 mmkv = "2.0.2"
 
 #Coroutines
-coroutines = "1.8.1"
+coroutines = "1.10.1"
 
 #KSP
 #ksp = "1.9.20-1.0.14"
 ksp = "2.0.0-1.0.24"
 
 ##Accompanist
-accompanist-flowlayout = "0.31.0-alpha"
+accompanist-flowlayout = "0.36.0"
 
 ##Google Signin
 credential = "1.6.0"
@@ -122,6 +122,8 @@ google-gms-auth = { group = "com.google.android.gms", name = "play-services-auth
 #Firebase
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-auth = { module = "com.google.firebase:firebase-auth" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

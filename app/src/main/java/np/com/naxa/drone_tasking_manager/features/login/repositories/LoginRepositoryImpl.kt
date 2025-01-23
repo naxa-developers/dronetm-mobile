@@ -78,25 +78,35 @@ class LoginRepositoryImpl @Inject constructor(private val apiService: ApiService
 
 
     override suspend fun googleLogin(role: String, code: String, state: String, forceRefresh: Boolean ): Flow<Resources<LoginResponse>> {
+        Log.d("TAG", "googleLogin: Called")
+
+
         return flow{
             emit(Resources.Loading())
 
         val response =
             try {
-                apiService.googleLogin(role, code, state, forceRefresh)
+                apiService.googleLogin( code, "ysFFkmJRMJtxVejpCaq3M1Qdp8J3O7", role, forceRefresh)
             } catch (e: HttpException) {
                 // Handle HTTP-specific exceptions
+                Log.d("TAG", "googleLogin i am here: ${e.message()}")
                 return@flow emit(Resources.Error(e.message()))
             } catch (e: IOException) {
                 // Handle network/IO-related exceptions
                 e.printStackTrace()
+                Log.d("TAG", "googleLogin i am here1: ${e.message}")
+
                 return@flow emit(Resources.Error(e.message ?: "Could not load data"))
             } catch (e: Exception) {
                 // Handle any other unexpected exceptions
+                Log.d("TAG", "googleLogin i am here2: ${e.message}")
                 return@flow emit(Resources.Error(e.message ?: "Unknown Error"))
             }
 
             val loginDetails = response.toLoginResponse()
+
+            Log.d("TAG", "googleLogin i am here3: ${loginDetails.detail}")
+
             saveUserData(loginDetails)
 
         emit(Resources.Success(data = loginDetails))

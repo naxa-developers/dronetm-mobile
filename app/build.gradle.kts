@@ -136,6 +136,7 @@ dependencies {
 //    implementation(libs.google.auth)
 //    implementation(libs.google.id)
     implementation(libs.google.gms.auth)
+    implementation(libs.firebase.auth)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
 
