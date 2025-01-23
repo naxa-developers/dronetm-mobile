@@ -45,9 +45,9 @@ ksp = "2.0.0-1.0.24"
 accompanist-flowlayout = "0.36.0"
 
 ##Google Signin
-credential = "1.6.0"
-play-service-auth = "21.1.0"
-googleid = "1.8.1"
+credential = "1.3.0"
+credentials-play-service-auth = "1.3.0"
+googleid = "1.1.1"
 gms-play-services-auth = "21.3.0"
 google-services = "4.4.2"
 
@@ -115,7 +115,7 @@ storage-mmkv = { group = "com.tencent", name = "mmkv-static", version.ref = "mmk
 
 #Google Sign in
 google-credential = { group = "androidx.credentials", name = "credentials", version.ref = "credential" }
-google-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "play-service-auth" }
+google-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials-play-service-auth" }
 google-id = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
 google-gms-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "gms-play-services-auth" }
 
