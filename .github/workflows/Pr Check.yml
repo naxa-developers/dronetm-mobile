@@ -70,7 +70,8 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: app-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+#          path: app/build/outputs/apk/debug/app-debug.apk
+          path: app/release/debug/app-debug.apk
 
 #      - name: Check for Android lint issues
 #        run: ./gradlew lint
@@ -109,3 +110,4 @@ jobs:
 #        with:
 #          name: dependency-report
 #          path: build/reports/dependencyUpdates/report.txt
+

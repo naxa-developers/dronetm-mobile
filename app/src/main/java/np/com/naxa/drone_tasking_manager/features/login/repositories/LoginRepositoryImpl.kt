@@ -97,6 +97,9 @@ class LoginRepositoryImpl @Inject constructor(private val apiService: ApiService
             }
 
             val loginDetails = response.toLoginResponse()
+
+            Log.d("TAG", "googleLogin: ${loginDetails.detail}")
+
             saveUserData(loginDetails)
 
         emit(Resources.Success(data = loginDetails))

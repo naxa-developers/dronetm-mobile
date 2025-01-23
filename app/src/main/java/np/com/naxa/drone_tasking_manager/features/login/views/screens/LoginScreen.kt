@@ -62,17 +62,14 @@ fun LoginScreen(){
 
                 val code = account.serverAuthCode
                 val token = account.idToken
-                val gmailState = account.grantedScopes
-                val gmailStateRequested = account.requestedScopes
+                val gmailState = account.zac()
 
                 Log.d("TAG", "googleLoginActivityResult: $code")
                 Log.d("TAG", "googleLoginActivityResult: $token")
                 Log.d("TAG", "googleLoginActivityResult: ${account.zac()}")
-                Log.d("TAG", "googleLoginActivityResult: ${account.zad()}")
 
 
-
-                viewModel.onEvent(LoginEvents.GoogleLogin(role, code!!, account.idToken!!))
+                viewModel.onEvent(LoginEvents.GoogleLogin(role, code!!, gmailState))
             }
         }catch (exception: ApiException){
             Log.d("TAG", "googleLoginActivityResult: ${exception.message}")
