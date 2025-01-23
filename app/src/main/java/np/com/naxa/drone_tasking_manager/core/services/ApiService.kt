@@ -27,10 +27,10 @@ interface ApiService {
 
 
     @GET("api/users/callback/")
-    @FormUrlEncoded
-    suspend fun googleLogin(@Query("role") role: String = "DRONE_PILOT",
+    suspend fun googleLogin(
                       @Query("code") code: String,
                       @Query("state") state: String,
+                      @Query("role") role: String = "DRONE_PILOT",
                             @Query("force_refresh") forceRefresh: Boolean = false): LoginResponseDto
 
 
