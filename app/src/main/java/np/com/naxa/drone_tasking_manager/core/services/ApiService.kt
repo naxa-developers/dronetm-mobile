@@ -1,4 +1,6 @@
-package np.com.naxa.drone_tasking_manager
+package np.com.naxa.drone_tasking_manager.core.services
+
+import np.com.naxa.drone_tasking_manager.features.login.dto.GoogleLoginLinkResponseDto
 import np.com.naxa.drone_tasking_manager.features.login.dto.LoginResponseDto
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -20,18 +22,24 @@ interface ApiService {
      */
     @POST("api/users/login/")
     @FormUrlEncoded
-    suspend fun login(@Field("role") role: String = "DRONE_PILOT",
-                      @Field("username") username: String,
-                      @Field("password") password: String,
-                      @Query("force_refresh") forceRefresh: Boolean = false): LoginResponseDto
+    suspend fun login(
+        @Field("role") role: String = "DRONE_PILOT",
+        @Field("username") username: String,
+        @Field("password") password: String,
+        @Query("force_refresh") forceRefresh: Boolean = false
+    ): LoginResponseDto
+
+    @GET("api/users/google-login/")
+    suspend fun getGoogleLogin(@Query("force_refresh") forceRefresh: Boolean = true): GoogleLoginLinkResponseDto
 
 
     @GET("api/users/callback/")
     suspend fun googleLogin(
-                      @Query("code") code: String,
-                      @Query("state") state: String,
-                      @Query("role") role: String = "DRONE_PILOT",
-                            @Query("force_refresh") forceRefresh: Boolean = false): LoginResponseDto
+        @Query("code") code: String,
+        @Query("state") state: String,
+        @Query("role") role: String = "DRONE_PILOT",
+        @Query("force_refresh") forceRefresh: Boolean = false
+    ): LoginResponseDto
 
 
 }

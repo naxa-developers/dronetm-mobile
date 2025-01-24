@@ -1,4 +1,4 @@
-package np.com.naxa.drone_tasking_manager
+package np.com.naxa.drone_tasking_manager.core.utils
 
 /**
  * A sealed class representing different states of a resource operation.

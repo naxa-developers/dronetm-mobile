@@ -3,11 +3,13 @@ package np.com.naxa.drone_tasking_manager.features.login.repositories
 import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import np.com.naxa.drone_tasking_manager.ApiService
-import np.com.naxa.drone_tasking_manager.Resources
+import np.com.naxa.drone_tasking_manager.core.services.ApiService
+import np.com.naxa.drone_tasking_manager.core.utils.Resources
 import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
 import np.com.naxa.drone_tasking_manager.core.services.storage.StorageKeys
+import np.com.naxa.drone_tasking_manager.features.login.mapper.toGoogleLoginLinkResponse
 import np.com.naxa.drone_tasking_manager.features.login.mapper.toLoginResponse
+import np.com.naxa.drone_tasking_manager.features.login.models.GoogleLoginLinkResponse
 import np.com.naxa.drone_tasking_manager.features.login.models.LoginResponse
 import retrofit2.HttpException
 import java.io.IOException
@@ -22,11 +24,12 @@ import javax.inject.Singleton
  * @property apiService The service responsible for making API calls related to authentication
  */
 @Singleton
-class LoginRepositoryImpl @Inject constructor(private val apiService: ApiService) : LoginRepository {
+class LoginRepositoryImpl @Inject constructor(private val apiService: ApiService) :
+    LoginRepository {
 
     // Singleton instance of MMKVStorageService
     // This service is used for storing and retrieving data from persistent storage
-    val storageService = MMKVStorageService.getInstance()
+    private val storageService = MMKVStorageService.getInstance()
 
     /**
      * Attempts to log in a user with the provided credentials.
@@ -75,46 +78,70 @@ class LoginRepositoryImpl @Inject constructor(private val apiService: ApiService
         }
     }
 
+    override suspend fun getGoogleLogin(): Flow<Resources<GoogleLoginLinkResponse>> {
+        return flow {
+            try {
+                emit(Resources.Loading())
+
+                val response = apiService.getGoogleLogin()
+
+                emit(Resources.Success(data = response.toGoogleLoginLinkResponse()))
+
+            } catch (e: Exception) {
+                return@flow emit(Resources.Error(e.message ?: "Error logging with google"))
+            }
+        }
+    }
 
 
-    override suspend fun googleLogin(role: String, code: String, state: String, forceRefresh: Boolean ): Flow<Resources<LoginResponse>> {
+    override suspend fun googleLogin(
+        role: String,
+        code: String,
+        state: String,
+        forceRefresh: Boolean
+    ): Flow<Resources<LoginResponse>> {
         Log.d("TAG", "googleLogin: Called")
 
 
-        return flow{
+        return flow {
             emit(Resources.Loading())
 
-        val response =
+//        val response =
+//            try {
+//                apiService.googleLogin( code, "ysFFkmJRMJtxVejpCaq3M1Qdp8J3O7", role, forceRefresh)
+//            } catch (e: HttpException) {
+//                // Handle HTTP-specific exceptions
+//                Log.d("TAG", "googleLogin i am here: ${e.message()}")
+//                return@flow emit(Resources.Error(e.message()))
+//            } catch (e: IOException) {
+//                // Handle network/IO-related exceptions
+//                e.printStackTrace()
+//                Log.d("TAG", "googleLogin i am here1: ${e.message}")
+//
+//                return@flow emit(Resources.Error(e.message ?: "Could not load data"))
+//            } catch (e: Exception) {
+//                // Handle any other unexpected exceptions
+//                Log.d("TAG", "googleLogin i am here2: ${e.message}")
+//                return@flow emit(Resources.Error(e.message ?: "Unknown Error"))
+//            }
+//
+//            val loginDetails = response.toLoginResponse()
+//
+//            Log.d("TAG", "googleLogin i am here3: ${loginDetails.detail}")
+
+//            saveUserData(loginDetails)
+
             try {
-                apiService.googleLogin( code, "ysFFkmJRMJtxVejpCaq3M1Qdp8J3O7", role, forceRefresh)
-            } catch (e: HttpException) {
-                // Handle HTTP-specific exceptions
-                Log.d("TAG", "googleLogin i am here: ${e.message()}")
-                return@flow emit(Resources.Error(e.message()))
-            } catch (e: IOException) {
-                // Handle network/IO-related exceptions
-                e.printStackTrace()
-                Log.d("TAG", "googleLogin i am here1: ${e.message}")
 
-                return@flow emit(Resources.Error(e.message ?: "Could not load data"))
+
             } catch (e: Exception) {
-                // Handle any other unexpected exceptions
-                Log.d("TAG", "googleLogin i am here2: ${e.message}")
-                return@flow emit(Resources.Error(e.message ?: "Unknown Error"))
+                return@flow emit(Resources.Error(e.message ?: "Error logging with google"))
             }
-
-            val loginDetails = response.toLoginResponse()
-
-            Log.d("TAG", "googleLogin i am here3: ${loginDetails.detail}")
-
-            saveUserData(loginDetails)
-
-        emit(Resources.Success(data = loginDetails))
-    }
+        }
     }
 
 
-    private fun saveUserData(loginDetails: LoginResponse){
+    private fun saveUserData(loginDetails: LoginResponse) {
 
         Log.d("TAG", "saveUserData: ${loginDetails.detail}")
 

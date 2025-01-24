@@ -1,7 +1,10 @@
 package np.com.naxa.drone_tasking_manager.features.login.views.screens
 
+import android.app.Activity
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -9,11 +12,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.common.api.ApiException
 import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
 import np.com.naxa.drone_tasking_manager.core.services.storage.StorageKeys
 import np.com.naxa.drone_tasking_manager.features.login.utils.AuthResultContract
+import np.com.naxa.drone_tasking_manager.features.login.utils.GoogleSignInHandler
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.events.LoginEvents
 import np.com.naxa.drone_tasking_manager.features.login.views.widgets.LoginScreenWidget
 import np.com.naxa.drone_tasking_manager.local_providers.LocalLoginViewModel
@@ -21,7 +27,7 @@ import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsVi
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 
 @Composable
-fun LoginScreen(){
+fun LoginScreen() {
     val viewModel = LocalLoginViewModel.current
     val state by viewModel.state.collectAsState()
 
@@ -34,9 +40,11 @@ fun LoginScreen(){
     val role by remember { mutableStateOf("DRONE_PILOT") }
     var rememberMeChecked by remember { mutableStateOf(false) }
 
-    val enableView by remember { derivedStateOf {
-        !state.isLoggingIn
-    } }
+    val enableView by remember {
+        derivedStateOf {
+            !state.isLoggingIn
+        }
+    }
 
 
     if (state.isLoginSuccess != null) {
@@ -45,37 +53,57 @@ fun LoginScreen(){
         //trigger to fetch project list
         //and navigate to the project screen
 
-            storageService.save(StorageKeys.User.IS_LOGGED_IN, rememberMeChecked)
+        storageService.save(StorageKeys.User.IS_LOGGED_IN, rememberMeChecked)
 
-        Log.d("TAG", "LoginScreen Access Token: ${storageService.get(StorageKeys.User.ACCESS_TOKEN, "")}")
+        Log.d(
+            "TAG",
+            "LoginScreen Access Token: ${storageService.get(StorageKeys.User.ACCESS_TOKEN, "")}"
+        )
         navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToHome)
     }
 
 
-    val googleLoginActivityResult = rememberLauncherForActivityResult(AuthResultContract()) {
-        task ->
-        try {
-            val account = task?.result
+    val googleLoginActivityResult =
+        rememberLauncherForActivityResult(AuthResultContract()) { task ->
+            try {
+                val account = task?.result
 
-            Log.d("TAG", "googleLoginActivityResult: ${account.toString()}")
-            if (account != null) {
+                Log.d("TAG", "googleLoginActivityResult: ${account.toString()}")
+                if (account != null) {
 
-                val code = account.serverAuthCode
-                val token = account.idToken
-                val gmailState = account.zac()
+                    val code = account.serverAuthCode
+                    val token = account.idToken
+                    val gmailState = account.zac()
 
-                Log.d("TAG", "googleLoginActivityResult: $code")
-                Log.d("TAG", "googleLoginActivityResult: $token")
-                Log.d("TAG", "googleLoginActivityResult: ${account.zac()}")
+                    Log.d("TAG", "googleLoginActivityResult: $code")
+                    Log.d("TAG", "googleLoginActivityResult: $token")
+                    Log.d("TAG", "googleLoginActivityResult: ${account.zac()}")
 
 
-                viewModel.onEvent(LoginEvents.GoogleLogin(role, code!!, gmailState))
+                    viewModel.onEvent(LoginEvents.GoogleLogin(role, code!!, gmailState))
+                }
+            } catch (exception: ApiException) {
+                Log.d("TAG", "googleLoginActivityResult: ${exception.message}")
             }
-        }catch (exception: ApiException){
-            Log.d("TAG", "googleLoginActivityResult: ${exception.message}")
+
+
         }
 
+    val context = LocalContext.current
 
+    val authorizationRequestLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult()
+    ) { activityResult ->
+        if (activityResult.resultCode == Activity.RESULT_OK) {
+            val result = Identity.getAuthorizationClient(context)
+                .getAuthorizationResultFromIntent(activityResult.data)
+
+            val code = result.serverAuthCode
+            viewModel.onEvent(LoginEvents.GoogleLogin(role, code ?: "", ""))
+
+        } else {
+            Log.e("GoogleSignInHandler", "Authorization cancelled")
+        }
     }
 
 
@@ -86,10 +114,32 @@ fun LoginScreen(){
             rememberMeChecked = rememberMe
             viewModel.onEvent(LoginEvents.NormalLogin(role, email, password))
         },
-        onGoogleSignInClick = {rememberMe ->
+        onGoogleSignInClick = { rememberMe ->
             // Handle Google sign-in
             rememberMeChecked = rememberMe
-            googleLoginActivityResult.launch(0)
+            // googleLoginActivityResult.launch(0)
+            viewModel.onEvent(LoginEvents.GoogleLoginLinkUrl() { clientId, scopes ->
+                GoogleSignInHandler.initiate(
+                    context = context,
+                    onSignInSuccess = { result ->
+                        val code = result.serverAuthCode
+                        Log.d(
+                            "GoogleSignInHandler", """
+                                        LoginScreen: [authorizationLauncher]:
+                                        code: $code,
+                                        clientId: $clientId
+                                        scopes: $scopes
+                                    """.trimIndent()
+                        )
+                        viewModel.onEvent(LoginEvents.GoogleLogin(role, code ?: "", ""))
+
+                    },
+                    onSignInFailure = {},
+                    launchSignIn = {
+                        authorizationRequestLauncher.launch(IntentSenderRequest.Builder(it).build())
+                    }
+                )
+            })
         },
         onForgetPasswordClick = { email ->
             // Handle forget password

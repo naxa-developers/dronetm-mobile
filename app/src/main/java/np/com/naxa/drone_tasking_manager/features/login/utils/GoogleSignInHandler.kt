@@ -32,12 +32,14 @@ object GoogleSignInHandler {
 
     fun initiate(
         context: Context,
+        scopes: List<String>? = null,
+        clientId: String? = null,
         launchSignIn: (IntentSender) -> Unit,
         onSignInSuccess: (AuthorizationResult) -> Unit,
         onSignInFailure: (Exception) -> Unit
     ) {
 
-        val requestedScopes = listOf(
+        val requestedScopes = scopes?.map { Scope(it) } ?: listOf(
             Scope(Scopes.PROFILE),
             Scope(Scopes.EMAIL),
             Scope(Scopes.APP_STATE),
@@ -46,7 +48,7 @@ object GoogleSignInHandler {
         val authorizationRequest = AuthorizationRequest
             .builder()
             .setRequestedScopes(requestedScopes)
-            .requestOfflineAccess("284837732251-e5cfncpoiriu4qdg68qjvtduoq7tmf8a.apps.googleusercontent.com")
+            .requestOfflineAccess(clientId ?: "284837732251-e5cfncpoiriu4qdg68qjvtduoq7tmf8a.apps.googleusercontent.com")
             .build()
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -104,7 +106,7 @@ object GoogleSignInHandler {
     //    }
 
     // Call on button click
-    //    GoogleSignInHandler.initiate1(
+    //    GoogleSignInHandler.initiate(
     //    context = context,
     //    onSignInSuccess = { result ->
     //        val code = result.serverAuthCode
