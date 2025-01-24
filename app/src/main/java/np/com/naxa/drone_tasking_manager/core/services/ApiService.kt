@@ -1,4 +1,4 @@
-package np.com.naxa.drone_tasking_manager
+package np.com.naxa.drone_tasking_manager.core.services
 import np.com.naxa.drone_tasking_manager.features.login.dto.LoginResponseDto
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
