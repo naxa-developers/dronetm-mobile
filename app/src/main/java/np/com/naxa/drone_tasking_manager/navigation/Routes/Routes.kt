@@ -46,4 +46,40 @@ enum class Routes(
         label = "Login",
         path = "login"
     ),
+
+    /**
+     * Route for displaying the Projects screen.
+     * Path: /projects
+     */
+    Projects(
+        label = "Projects",
+        path = "projects"
+    ),
+
+    /**
+     * Route for displaying the Projects List screen.
+     * Path: /projects-list
+     */
+    ProjectsList(
+        label = "Projects",
+        path = "projects-list"
+    ),
+
+    /**
+     * Route for displaying the Projects Map screen.
+     * Path: /projects-map
+     */
+    ProjectsMap(
+        label = "Map",
+        path = "projects-map"
+    ),
+
+    /**
+     * Route for displaying the Project Details screen.
+     * Path: /projects
+     */
+    ProjectDetails(
+        label = "Details",
+        path = "projects-details/{id}"
+    ),
 }

@@ -4,7 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import np.com.naxa.drone_tasking_manager.ApiService
+import np.com.naxa.drone_tasking_manager.core.services.ApiService
 import np.com.naxa.drone_tasking_manager.BuildConfig
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit

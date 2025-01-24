@@ -43,7 +43,7 @@ fun SplashScreen(
             animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
         )
         delay(2000)
-        navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.onNavigateToLogin)
+        navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToLogin)
     }
 
     Box(

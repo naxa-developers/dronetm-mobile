@@ -1,15 +1,18 @@
 package np.com.naxa.drone_tasking_manager.app
 
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.LineStyle
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -29,20 +32,24 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.Routes
-import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
-import np.com.naxa.drone_tasking_manager.states.DownloadAndTransferState
-import np.com.naxa.drone_tasking_manager.local_providers.LocalDownloadAndTransferFileViewModel
-import np.com.naxa.drone_tasking_manager.local_providers.LocalEventsViewModel
-import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
-import np.com.naxa.drone_tasking_manager.local_providers.LocalUsbDeviceViewModel
-import np.com.naxa.drone_tasking_manager.navigation.DroneTMAppNavHost
 import np.com.naxa.drone_tasking_manager.core.theme.DroneTMAppTheme
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.LoginViewModel
+import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.ProjectDetailViewModel
+import np.com.naxa.drone_tasking_manager.features.projects.viewmodels.ProjectsViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalDownloadAndTransferFileViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalLoginViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalProjectDetailViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalProjectsViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalUsbDeviceViewModel
+import np.com.naxa.drone_tasking_manager.navigation.DroneTMAppNavHost
+import np.com.naxa.drone_tasking_manager.navigation.viewmodels.NavigationEventsViewModel
+import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
+import np.com.naxa.drone_tasking_manager.states.DownloadAndTransferState
 import np.com.naxa.drone_tasking_manager.utils.route
 import np.com.naxa.drone_tasking_manager.viewmodel.DownloadAndTransferFileViewModel
 import np.com.naxa.drone_tasking_manager.viewmodel.EventsViewModel
-import np.com.naxa.drone_tasking_manager.navigation.viewmodels.NavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.viewmodel.UsbDeviceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,6 +77,8 @@ fun DroneTMApp(
     }
 
     val loginViewModel = hiltViewModel<LoginViewModel>()
+    val projectsViewModel = hiltViewModel<ProjectsViewModel>()
+    val projectDetailViewModel = hiltViewModel<ProjectDetailViewModel>()
 
 
     val topBarTitle by remember {
@@ -137,9 +146,33 @@ fun DroneTMApp(
                     navController.popBackStack()
                 }
 
-                DroneTMAppNavigationEvent.onNavigateToLogin -> {
+                DroneTMAppNavigationEvent.OnNavigateToLogin -> {
                     navController.navigate(Routes.Login.path) {
+                        popUpTo(Routes.Splash.path) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                }
 
+                DroneTMAppNavigationEvent.OnNavigateToProjects -> {
+                    navController.navigate(Routes.Projects.path) {
+                        popUpTo(Routes.Login.path) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                }
+
+                is DroneTMAppNavigationEvent.OnNavigateToProjectDetail -> {
+
+                    if (currentRoute?.path != Routes.ProjectDetails.path) {
+                        navController.navigate(
+                            Routes.ProjectDetails.path.replace(
+                                "{id}",
+                                event.id
+                            )
+                        )
                     }
                 }
             }
@@ -151,20 +184,22 @@ fun DroneTMApp(
         LocalEventsViewModel provides eventsViewModel,
         LocalDownloadAndTransferFileViewModel provides downloadAndTransferViewModel,
         LocalNavigationEventsViewModel provides navigationEventsViewModel,
-        LocalLoginViewModel provides loginViewModel
+        LocalLoginViewModel provides loginViewModel,
+        LocalProjectsViewModel provides projectsViewModel,
+        LocalProjectDetailViewModel provides projectDetailViewModel,
     ) {
         DroneTMAppTheme {
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
                 snackbarHost = { SnackbarHost(snackBarHostState) },
                 topBar = {
-                    if (currentRoute != Routes.Splash && currentRoute != Routes.Home) {
+                    if (currentRoute != Routes.Splash && currentRoute != Routes.Home && currentRoute != Routes.ProjectsMap) {
                         CenterAlignedTopAppBar(
                             title = {
                                 Text(topBarTitle)
                             },
                             navigationIcon = {
-                                if (currentRoute != null) {
+                                if (currentRoute != null && currentRoute != Routes.ProjectsList) {
                                     IconButton(
                                         onClick = {
                                             if (currentRoute == Routes.DownloadAndTransfer) {
@@ -214,11 +249,40 @@ fun DroneTMApp(
                             }
                         )
                     }
+                },
+                bottomBar = {
+                    if (currentRoute == Routes.Projects || currentRoute == Routes.ProjectsList || currentRoute == Routes.ProjectsMap) {
+                        NavigationBar {
+                            listOf(Routes.ProjectsList, Routes.ProjectsMap).forEach { route ->
+                                NavigationBarItem(
+                                    selected = currentRoute == route,
+                                    onClick = {
+                                        navController.navigate(route.path) {
+                                            // Pop up to the parent navigation (Projects)
+                                            popUpTo(Routes.Projects.path) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    },
+                                    icon = {
+                                        Icon(
+                                            if (route == Routes.ProjectsMap) Icons.Filled.Map else Icons.Filled.LineStyle,
+                                            contentDescription = null
+                                        )
+                                    },
+                                    label = { Text(route.label) },
+                                    alwaysShowLabel = true,
+                                )
+                            }
+                        }
+                    }
                 }
             ) { innerPadding ->
                 DroneTMAppNavHost(
                     modifier = Modifier.padding(
-                        if (currentRoute != Routes.Splash) innerPadding else PaddingValues(
+                        if (currentRoute != Routes.Splash && currentRoute != Routes.ProjectsMap) innerPadding else PaddingValues(
                             0.dp
                         )
                     ),
