@@ -15,7 +15,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import np.com.naxa.drone_tasking_manager.Routes
 import np.com.naxa.drone_tasking_manager.features.login.views.screens.LoginScreen
-import np.com.naxa.drone_tasking_manager.features.project_details.views.screens.ProjectDetails
+import np.com.naxa.drone_tasking_manager.features.project_details.views.screens.ProjectDetailsScreen
 import np.com.naxa.drone_tasking_manager.features.projects.views.screens.ProjectsListScreen
 import np.com.naxa.drone_tasking_manager.features.projects.views.screens.ProjectsMapScreen
 import np.com.naxa.drone_tasking_manager.ui.screens.download_and_transfer.DownloadAndTransferFileScreen
@@ -116,7 +116,7 @@ fun DroneTMAppNavHost(
             },
         ) { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")
-            ProjectDetails(
+            ProjectDetailsScreen(
                 modifier = modifier,
                 projectId = id,
             )

@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProjectDetailViewModel @Inject constructor(
-    private val fetchSingleProjectUseCase: FetchProjectDetailUseCase
+    private val projectUseCase: FetchProjectDetailUseCase
 ) : ViewModel() {
 
     /**
@@ -43,12 +43,33 @@ class ProjectDetailViewModel @Inject constructor(
     }
 
 
+    /**
+     * Fetches a project by its ID.
+     *
+     * This function retrieves project details from the data source using the provided ID.
+     * It supports both fetching from cache and forcing a refresh from the network.
+     * The result of the operation is emitted through the `_projectState` flow.
+     *
+     * @param id The unique identifier of the project to fetch.
+     * @param forceRefresh `true` to bypass the cache and fetch the project from the network,
+     *                     `false` to attempt to retrieve it from the cache first. Defaults to `false`.
+     *
+     * @throws IllegalStateException If the use case returns a successful response with null data
+     *                              and an appropriate error message isn't provided.
+     *
+     * Emits the following [ProjectDetailState] values to `_projectState`:
+     * - [ProjectDetailState.Loading]: When the operation is in progress.
+     * - [ProjectDetailState.Success]: When the project is successfully retrieved.
+     *   Contains the fetched Project object.
+     * - [ProjectDetailState.Error]: When an error occurs during the operation.
+     *   Contains an error message.
+     */
     private fun fetchProjectById(
         id: String,
         forceRefresh: Boolean = false
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            fetchSingleProjectUseCase.invoke(
+            projectUseCase.invoke(
                 id = id,
                 forceRefresh = forceRefresh,
             ).collect { result ->

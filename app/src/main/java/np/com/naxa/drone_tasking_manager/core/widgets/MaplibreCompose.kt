@@ -47,6 +47,9 @@ fun MaplibreCompose(
     enableScrollGestures: Boolean = true,
     enableZoomGestures: Boolean = true,
     enableRotateGestures: Boolean = true,
+    enableDoubleTapGestures: Boolean = true,
+    enableTiltGestures: Boolean = true,
+    enableHorizontalScrollGestures: Boolean = true,
     enableCompass: Boolean = false,
     enableAttribution: Boolean = false,
     enableLogo: Boolean = false,
@@ -103,6 +106,9 @@ fun MaplibreCompose(
                                 isScrollGesturesEnabled = enableScrollGestures
                                 isZoomGesturesEnabled = enableZoomGestures
                                 isRotateGesturesEnabled = enableRotateGestures
+                                isTiltGesturesEnabled = enableTiltGestures
+                                isDoubleTapGesturesEnabled = enableDoubleTapGestures
+                                isHorizontalScrollGesturesEnabled = enableHorizontalScrollGestures
                                 isLogoEnabled = enableLogo
                                 isAttributionEnabled = enableAttribution
                                 isCompassEnabled = enableCompass

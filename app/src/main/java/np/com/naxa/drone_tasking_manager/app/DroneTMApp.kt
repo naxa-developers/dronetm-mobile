@@ -193,7 +193,11 @@ fun DroneTMApp(
                 modifier = Modifier.fillMaxSize(),
                 snackbarHost = { SnackbarHost(snackBarHostState) },
                 topBar = {
-                    if (currentRoute != Routes.Splash && currentRoute != Routes.Home && currentRoute != Routes.ProjectsMap) {
+                    if (currentRoute != Routes.Splash
+                        && currentRoute != Routes.Home
+                        && currentRoute != Routes.ProjectsMap
+                        && currentRoute != Routes.ProjectDetails
+                    ) {
                         CenterAlignedTopAppBar(
                             title = {
                                 Text(topBarTitle)
@@ -282,7 +286,7 @@ fun DroneTMApp(
             ) { innerPadding ->
                 DroneTMAppNavHost(
                     modifier = Modifier.padding(
-                        if (currentRoute != Routes.Splash && currentRoute != Routes.ProjectsMap) innerPadding else PaddingValues(
+                        if (currentRoute != Routes.Splash && currentRoute != Routes.ProjectsMap && currentRoute != Routes.ProjectDetails) innerPadding else PaddingValues(
                             0.dp
                         )
                     ),

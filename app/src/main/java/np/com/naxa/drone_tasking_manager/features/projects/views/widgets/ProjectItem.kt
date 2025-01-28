@@ -68,17 +68,25 @@ fun ProjectItem(
             enableScrollGestures = false,
             enableZoomGestures = false,
             enableRotateGestures = false,
+            enableDoubleTapGestures = false,
+            enableTiltGestures = false,
+            enableHorizontalScrollGestures = false,
             onMapReady = { libreMap, _ ->
 
-                if (project.outline?.geometry != null) {
+                libreMap.addOnMapClickListener { _ ->
+                    onItemClick(project)
+                    true
+                }
+
+                if (project.geometry?.geometry != null) {
                     val bounds =
-                        ProjectGeometryUtils.calculateLatLngBounds(project.outline.geometry!!.coordinates)
+                        ProjectGeometryUtils.calculateLatLngBounds(project.geometry.geometry.coordinates)
 
                     bounds?.let {
-                        libreMap.animateCamera(CameraUpdateFactory.newLatLngBounds(it, 0), 375)
+                        libreMap.animateCamera(CameraUpdateFactory.newLatLngBounds(it, 20), 375)
                     }
 
-                    val feature = project.outline.geometry!!.toFeatureJson()
+                    val feature = project.geometry.geometry.toFeatureJson()
 
                     val sourceId = "project-geometry-${project.id}"
                     val fillLayerId = "project-geometry-fill-layer-${project.id}"
@@ -144,7 +152,6 @@ fun ProjectItem(
                     }
 
                 }
-
             }
         )
         Column(

@@ -1,4 +1,4 @@
-package np.com.naxa.drone_tasking_manager.features.projects.views.widgets
+package np.com.naxa.drone_tasking_manager.features.project_details.views.widgets
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,7 +22,7 @@ import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMApp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProjectInfoBottomSheet(
+fun ProjectTaskInfoBottomSheet(
     modifier: Modifier = Modifier,
     infoJsonObject: JsonObject?,
     infoSheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false),
@@ -50,21 +50,21 @@ fun ProjectInfoBottomSheet(
                     Text(
                         modifier = Modifier.padding(bottom = 8.dp),
                         text = try {
-                            it.get("name").asString
+                            "#${it.get("id").asString}"
                         } catch (e: Exception) {
                             ""
                         },
                         style = MaterialTheme.typography.headlineSmall
                     )
                     Text(
+                        modifier = Modifier.padding(bottom = 8.dp),
                         text = try {
-                            "#${it.get("slug").asString}"
+                            it.get("name").asString
                         } catch (e: Exception) {
                             ""
                         },
                         style = MaterialTheme.typography.labelMedium
                     )
-
                     ElevatedButton(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -80,16 +80,17 @@ fun ProjectInfoBottomSheet(
                                 null
                             }
 
-                            if (id != null) {
-                                navigationEventsViewModel.sendEvent(
-                                    DroneTMAppNavigationEvent.OnNavigateToProjectDetail(
-                                        id
-                                    )
-                                )
-                            }
+                            // if (id != null) {
+                            // Navigate to Task Details Screen
+                            // navigationEventsViewModel.sendEvent(
+                            //     DroneTMAppNavigationEvent.OnNavigateToProjectDetail(
+                            //         id
+                            //     )
+                            // )
+                            // }
                         }
                     ) {
-                        Text("Go to Project", color = Color.White)
+                        Text("Go to Task", color = Color.White)
                     }
                 }
             }

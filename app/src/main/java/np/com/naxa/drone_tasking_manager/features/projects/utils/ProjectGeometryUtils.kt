@@ -85,4 +85,33 @@ object ProjectGeometryUtils {
             null
         }
     }
+
+
+    /**
+     * Calculates the centroid (center point) of a bounding box.
+     *
+     * The bounding box is defined by two coordinate pairs: the bottom-left (lng1, lat1)
+     * and the top-right (lng2, lat2).
+     *
+     * @param box A list of four Double values representing the bounding box coordinates:
+     *            [lng1, lat1, lng2, lat2].
+     *            - lng1: Longitude of the bottom-left corner.
+     *            - lat1: Latitude of the bottom-left corner.
+     *            - lng2: Longitude of the top-right corner.
+     *            - lat2: Latitude of the top-right corner.
+     * @return A list containing two Double values representing the centroid coordinates:
+     *         [centerX, centerY].
+     *         - centerX: Longitude of the centroid.
+     *         - centerY: Latitude of the centroid.
+     * @throws IllegalArgumentException if the input list `box` does not contain exactly 4 elements.
+     */
+    fun calculateCentroidOfBBox(box: List<Double>): List<Double> {
+        require(box.size == 4) {
+            "Box must contain exactly 4 elements: [lng1, lat1, lng2, lat2]"
+        }
+        val (x1, y1, x2, y2) = box
+        val centerX = (x1 + x2) / 2
+        val centerY = (y1 + y2) / 2
+        return listOf(centerX, centerY)
+    }
 }

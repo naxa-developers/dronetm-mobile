@@ -2,10 +2,13 @@ package np.com.naxa.drone_tasking_manager.features.projects.mapper
 
 import np.com.naxa.drone_tasking_manager.features.projects.dto.project.Outline
 import np.com.naxa.drone_tasking_manager.features.project_details.dto.project.ProjectResponseDto
+import np.com.naxa.drone_tasking_manager.features.projects.dto.project.Tasks
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects.ProjectsResponseDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects.Result
 import np.com.naxa.drone_tasking_manager.features.projects.models.Project
 import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectGeometry
+import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectTask
+import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectTaskState
 import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectsResponse
 
 fun ProjectResponseDto.toProject() = Project(
@@ -15,7 +18,7 @@ fun ProjectResponseDto.toProject() = Project(
     description = description,
     perTaskInstructions = perTaskInstructions,
     requiresApprovalFromManagerForLocking = requiresApprovalFromManagerForLocking,
-    outline = outline?.toProjectGeometry(),
+    geometry = outline?.toProjectGeometry(),
     noFlyZones = noFlyZones,
     requiresApprovalFromRegulator = requiresApprovalFromRegulator,
     regulatorEmails = regulatorEmails,
@@ -26,7 +29,7 @@ fun ProjectResponseDto.toProject() = Project(
     authorName = authorName,
     projectArea = projectArea,
     totalTaskCount = totalTaskCount,
-    tasks = tasks,
+    tasks = tasks.map { it.toProjectTask() },
     imageUrl = imageUrl,
     ongoingTaskCount = ongoingTaskCount,
     completedTaskCount = completedTaskCount,
@@ -42,7 +45,7 @@ fun Result.toProject() = Project(
     description = description,
     perTaskInstructions = perTaskInstructions,
     requiresApprovalFromManagerForLocking = requiresApprovalFromManagerForLocking,
-    outline = ProjectGeometry(
+    geometry = ProjectGeometry(
         geometry = outline,
     ),
     noFlyZones = null,
@@ -76,4 +79,21 @@ fun Outline.toProjectGeometry() = ProjectGeometry(
     geometry = geometry,
     properties = properties,
     id = id,
+)
+
+
+fun Tasks.toProjectTask() = ProjectTask(
+    id = id,
+    projectId = projectId,
+    projectTaskIndex = projectTaskIndex,
+    geometry = outline?.toProjectGeometry(),
+    state = ProjectTaskState.fromString(state),
+    userId = userId,
+    name = name,
+    imageCount = imageCount,
+    assetsUrl = assetsUrl,
+    totalAreaSqkm = totalAreaSqkm,
+    flightTimeMinutes = flightTimeMinutes,
+    flightDistanceKm = flightDistanceKm,
+    totalImageUploaded = totalImageUploaded,
 )
