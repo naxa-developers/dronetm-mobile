@@ -1,9 +1,16 @@
 package np.com.naxa.drone_tasking_manager
 import np.com.naxa.drone_tasking_manager.features.login.dto.LoginResponseDto
+import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileDto
+import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileUpdateDto
+import okhttp3.RequestBody
+import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.Multipart
+import retrofit2.http.PATCH
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
@@ -32,6 +39,16 @@ interface ApiService {
                       @Query("state") state: String,
                       @Query("role") role: String = "DRONE_PILOT",
                             @Query("force_refresh") forceRefresh: Boolean = false): LoginResponseDto
+
+
+    @GET("api/users/my-info/")
+    suspend fun fetchMyInfo(): UserProfileDto
+
+
+    @PATCH("api/users/{id}/profile")
+    suspend fun updateUser(@Path("id") userId: String, @Body body: RequestBody): UserProfileUpdateDto
+
+
 
 
 }
