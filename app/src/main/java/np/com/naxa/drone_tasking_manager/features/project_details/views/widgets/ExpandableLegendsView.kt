@@ -42,13 +42,15 @@ fun ExpandableLegendsView(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(8.dp))
                     .clickable(interactionSource = null, indication = null) { onToggle.invoke() }
-                    .padding(8.dp),
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     modifier = Modifier.weight(1f),
                     text = "Legend",
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -94,7 +96,7 @@ fun ExpandableLegendsView(
                             text = state.label,
                             style = MaterialTheme.typography.bodySmall.copy(
                                 fontSize = 10.sp,
-                                fontWeight = FontWeight.W300
+                                fontWeight = FontWeight.Normal
                             )
                         )
                     }

@@ -50,11 +50,12 @@ fun ProjectTaskInfoBottomSheet(
                     Text(
                         modifier = Modifier.padding(bottom = 8.dp),
                         text = try {
-                            "#${it.get("id").asString}"
+                            "Task #${it.get("id").asString}"
                         } catch (e: Exception) {
                             ""
                         },
-                        style = MaterialTheme.typography.headlineSmall
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary,
                     )
                     Text(
                         modifier = Modifier.padding(bottom = 8.dp),

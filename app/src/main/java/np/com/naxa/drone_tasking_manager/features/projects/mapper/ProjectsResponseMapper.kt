@@ -7,6 +7,7 @@ import np.com.naxa.drone_tasking_manager.features.projects.dto.projects.Projects
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects.Result
 import np.com.naxa.drone_tasking_manager.features.projects.models.Project
 import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectGeometry
+import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectStatus
 import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectTaskState
 import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectsResponse
@@ -33,7 +34,7 @@ fun ProjectResponseDto.toProject() = Project(
     imageUrl = imageUrl,
     ongoingTaskCount = ongoingTaskCount,
     completedTaskCount = completedTaskCount,
-    status = status,
+    status = ProjectStatus.fromString(status),
     createdAt = createdAt,
     authorId = authorId,
 )
@@ -61,7 +62,7 @@ fun Result.toProject() = Project(
     imageUrl = imageUrl,
     ongoingTaskCount = ongoingTaskCount,
     completedTaskCount = completedTaskCount,
-    status = status,
+    status = ProjectStatus.fromString(status),
     createdAt = createdAt,
     authorId = authorId,
 )

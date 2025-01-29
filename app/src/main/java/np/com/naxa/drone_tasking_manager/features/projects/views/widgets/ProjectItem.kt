@@ -24,6 +24,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import np.com.naxa.drone_tasking_manager.core.widgets.MaplibreCompose
 import np.com.naxa.drone_tasking_manager.features.projects.dto.project.toFeatureJson
 import np.com.naxa.drone_tasking_manager.features.projects.models.Project
@@ -177,7 +178,7 @@ fun ProjectItem(
                     modifier = Modifier
                         .border(
                             width = 1.dp,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = project.status?.color ?: MaterialTheme.colorScheme.primary,
                             shape = RoundedCornerShape(100)
                         )
                         .padding(
@@ -186,19 +187,14 @@ fun ProjectItem(
                             top = 4.dp,
                             bottom = 6.dp
                         ),
-                    text = project.status?.replaceFirstChar {
-                        if (it.isLowerCase()) it.titlecase(
-                            Locale.ENGLISH
-                        ) else it.toString()
-                    }
-                        ?: "",
-                    style = MaterialTheme.typography.labelMedium
+                    text = project.status?.label ?: "",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = project.status?.color ?: Color.Unspecified,
                 )
             }
             Text(
                 text = project.name ?: "Unknown",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Normal
+                style = MaterialTheme.typography.titleLarge,
             )
             Row(
                 modifier = Modifier
@@ -209,22 +205,22 @@ fun ProjectItem(
                 Text(
                     text = buildAnnotatedString {
                         withStyle(
-                            style = SpanStyle(
+                            style = MaterialTheme.typography.titleLarge.copy(
                                 color = Color.Red,
-                                fontWeight = FontWeight.Bold
-                            )
+                                fontSize = 18.sp
+                            ).toSpanStyle()
                         ) {
                             append("${project.completedTaskCount ?: 0}")
                         }
                         append("/")
                         append("${project.totalTaskCount ?: 0}")
                     },
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
                     modifier = Modifier.padding(start = 8.dp),
                     text = "Task Completed",
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.bodyLarge,
                 )
             }
             LinearProgressIndicator(

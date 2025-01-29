@@ -161,6 +161,7 @@ fun DroneTMApp(
                             inclusive = true
                         }
                         launchSingleTop = true
+                        restoreState = true
                     }
                 }
 

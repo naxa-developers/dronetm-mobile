@@ -1,7 +1,10 @@
 package np.com.naxa.drone_tasking_manager.core.widgets
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
@@ -26,8 +29,8 @@ fun CustomExpandable(
         if (!below) {
             AnimatedVisibility(
                 visible = isExpanded,
-                enter = expandVertically(),
-                exit = shrinkVertically()
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
             ) {
                 expandable()
             }
@@ -38,8 +41,8 @@ fun CustomExpandable(
         if (below) {
             AnimatedVisibility(
                 visible = isExpanded,
-                enter = expandVertically(),
-                exit = shrinkVertically()
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
             ) {
                 expandable()
             }

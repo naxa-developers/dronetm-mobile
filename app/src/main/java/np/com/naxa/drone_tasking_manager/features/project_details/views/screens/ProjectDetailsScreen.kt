@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -29,6 +30,7 @@ import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.eve
 import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.states.ProjectDetailState
 import np.com.naxa.drone_tasking_manager.features.project_details.views.widgets.ExpandableLegendsView
 import np.com.naxa.drone_tasking_manager.features.project_details.views.widgets.ProjectDetailMapView
+import np.com.naxa.drone_tasking_manager.features.project_details.views.widgets.ProjectDetailTabView
 import np.com.naxa.drone_tasking_manager.features.projects.models.Project
 import np.com.naxa.drone_tasking_manager.features.projects.viewmodels.events.ProjectsEvent
 import np.com.naxa.drone_tasking_manager.features.projects.viewmodels.states.ProjectsListState
@@ -78,6 +80,14 @@ fun ProjectDetailsScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height((configuration.screenHeightDp * 0.6f).dp),
+                            project = project
+                        )
+                    }
+                    item {
+                        ProjectDetailTabView(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight(),
                             project = project
                         )
                     }

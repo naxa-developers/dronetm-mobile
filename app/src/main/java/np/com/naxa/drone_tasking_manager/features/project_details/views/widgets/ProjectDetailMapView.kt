@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -18,11 +17,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import com.google.gson.JsonObject
 import np.com.naxa.drone_tasking_manager.R
 import np.com.naxa.drone_tasking_manager.core.widgets.MaplibreCompose
@@ -31,7 +28,6 @@ import np.com.naxa.drone_tasking_manager.features.projects.models.Project
 import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectTaskState
 import np.com.naxa.drone_tasking_manager.features.projects.models.toFeatureJsonStr
 import np.com.naxa.drone_tasking_manager.features.projects.models.toLockedFeatureJsonStr
-import np.com.naxa.drone_tasking_manager.features.projects.views.widgets.ProjectInfoBottomSheet
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds

@@ -54,7 +54,7 @@ fun ProjectInfoBottomSheet(
                         } catch (e: Exception) {
                             ""
                         },
-                        style = MaterialTheme.typography.headlineSmall
+                        style = MaterialTheme.typography.titleLarge
                     )
                     Text(
                         text = try {
