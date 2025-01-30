@@ -48,8 +48,9 @@ fun LoginScreen(){
             storageService.save(StorageKeys.User.IS_LOGGED_IN, rememberMeChecked)
 
         Log.d("TAG", "LoginScreen Access Token: ${storageService.get(StorageKeys.User.ACCESS_TOKEN, "")}")
-//        navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToHome)
+
         navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToProfileScreen)
+//        navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToProjects)
     }
 
 
