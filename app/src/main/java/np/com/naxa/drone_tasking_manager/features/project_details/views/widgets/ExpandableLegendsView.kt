@@ -27,7 +27,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import np.com.naxa.drone_tasking_manager.core.widgets.CustomExpandable
-import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectTaskState
+import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTaskState
 
 @Composable
 fun ExpandableLegendsView(

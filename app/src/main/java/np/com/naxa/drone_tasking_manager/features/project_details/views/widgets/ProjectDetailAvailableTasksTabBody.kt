@@ -17,8 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import np.com.naxa.drone_tasking_manager.core.widgets.SuperscriptText
 import np.com.naxa.drone_tasking_manager.features.projects.models.Project
-import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectTask
-import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectTaskState
+import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
+import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTaskState
 import java.util.Locale
 
 @Composable

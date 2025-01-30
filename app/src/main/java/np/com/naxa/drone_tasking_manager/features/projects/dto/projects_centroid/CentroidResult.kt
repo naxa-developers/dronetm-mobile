@@ -13,30 +13,29 @@ data class CentroidResult(
     @SerializedName("ongoing_task_count") var ongoingTaskCount: Int? = null,
     @SerializedName("completed_task_count") var completedTaskCount: Int? = null,
     @SerializedName("status") var status: String? = null
+) {
+    fun toFeatureJsonStr(): String {
+        val feature = mapOf(
+            "type" to "Feature",
+            "properties" to mapOf(
+                "id" to id,
+                "slug" to slug,
+                "name" to name,
+                "total_task_count" to totalTaskCount,
+                "ongoing_task_count" to ongoingTaskCount,
+                "completed_task_count" to completedTaskCount,
+                "status" to status,
+                "color" to if (status?.trim()
+                        ?.lowercase() == "ongoing"
+                ) "#417EC9" else if (status?.trim()
+                        ?.lowercase() == "not-started"
+                ) "#808080" else if (status?.trim()
+                        ?.lowercase() == "completed"
+                ) "#028A0F" else "#808080"
+            ),
+            "geometry" to centroid?.toJson()
+        )
 
-)
-
-fun CentroidResult.toFeatureJsonStr(): String {
-    val feature = mapOf(
-        "type" to "Feature",
-        "properties" to mapOf(
-            "id" to id,
-            "slug" to slug,
-            "name" to name,
-            "total_task_count" to totalTaskCount,
-            "ongoing_task_count" to ongoingTaskCount,
-            "completed_task_count" to completedTaskCount,
-            "status" to status,
-            "color" to if (status?.trim()
-                    ?.lowercase() == "ongoing"
-            ) "#417EC9" else if (status?.trim()
-                    ?.lowercase() == "not-started"
-            ) "#808080" else if (status?.trim()
-                    ?.lowercase() == "completed"
-            ) "#028A0F" else "#808080"
-        ),
-        "geometry" to centroid?.toJson()
-    )
-
-    return GsonBuilder().setPrettyPrinting().create().toJson(feature)
+        return GsonBuilder().setPrettyPrinting().create().toJson(feature)
+    }
 }

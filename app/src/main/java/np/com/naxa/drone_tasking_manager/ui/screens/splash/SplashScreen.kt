@@ -1,5 +1,6 @@
 package np.com.naxa.drone_tasking_manager.ui.screens.splash
 
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -25,6 +26,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.delay
 import np.com.naxa.drone_tasking_manager.R
+import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
+import np.com.naxa.drone_tasking_manager.core.services.storage.StorageKeys
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.core.theme.PrimaryColor
@@ -43,7 +46,16 @@ fun SplashScreen(
             animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
         )
         delay(2000)
-        navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToLogin)
+
+        val storageService = MMKVStorageService.getInstance()
+
+        if (storageService.get<String>(StorageKeys.User.ACCESS_TOKEN, "").trim().isNotBlank()) {
+            navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToProjects)
+            return@LaunchedEffect
+        } else {
+            navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToLogin)
+            return@LaunchedEffect
+        }
     }
 
     Box(

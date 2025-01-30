@@ -16,9 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import np.com.naxa.drone_tasking_manager.features.projects.models.Project
-import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectTask
-import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectTaskState
-import java.util.Locale
+import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
+import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTaskState
 
 @Composable
 fun ProjectDetailContributionsTabBody(
@@ -97,7 +96,7 @@ fun ProjectDetailContributionsTabBody(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        task.name ?: "",
+                        task.userName ?: "",
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.bodySmall
                     )
@@ -112,7 +111,7 @@ fun ProjectDetailContributionsTabBody(
                         style = MaterialTheme.typography.bodySmall
                     )
                     Text(
-                        task.totalImageUploaded ?: "-",
+                        task.totalImageUploaded?.toString() ?: "-",
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.bodySmall
                     )

@@ -2,7 +2,6 @@ package np.com.naxa.drone_tasking_manager.features.projects.dto.projects
 
 import com.google.gson.annotations.SerializedName
 
-
 data class Pagination(
     @SerializedName("has_next") var hasNext: Boolean? = null,
     @SerializedName("has_prev") var hasPrev: Boolean? = null,

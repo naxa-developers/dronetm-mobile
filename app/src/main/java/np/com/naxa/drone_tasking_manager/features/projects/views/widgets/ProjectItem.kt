@@ -19,15 +19,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import np.com.naxa.drone_tasking_manager.core.widgets.MaplibreCompose
-import np.com.naxa.drone_tasking_manager.features.projects.dto.project.toFeatureJson
 import np.com.naxa.drone_tasking_manager.features.projects.models.Project
+import np.com.naxa.drone_tasking_manager.features.projects.models.toFeatureJson
 import np.com.naxa.drone_tasking_manager.features.projects.utils.ProjectGeometryUtils
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.style.layers.FillLayer
@@ -37,7 +36,6 @@ import org.maplibre.android.style.layers.PropertyValue
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
-import java.util.Locale
 
 @Composable
 fun ProjectItem(

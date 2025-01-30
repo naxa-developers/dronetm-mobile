@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import np.com.naxa.drone_tasking_manager.core.utils.Response
 import np.com.naxa.drone_tasking_manager.core.services.ApiService
-import np.com.naxa.drone_tasking_manager.features.projects.dto.projects_centroid.toFeatureJsonStr
 import np.com.naxa.drone_tasking_manager.features.projects.mapper.toProject
 import np.com.naxa.drone_tasking_manager.features.projects.mapper.toProjectResponse
 import np.com.naxa.drone_tasking_manager.features.projects.models.Project

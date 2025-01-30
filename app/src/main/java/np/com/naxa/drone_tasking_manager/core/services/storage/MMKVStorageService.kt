@@ -29,7 +29,7 @@ class MMKVStorageService private constructor() {
 
         var value = rawValue
 
-        if(key.equals(StorageKeys.User.ACCESS_TOKEN) || key.equals(StorageKeys.User.REFRESH_TOKEN)){
+        if (key == StorageKeys.User.ACCESS_TOKEN || key == StorageKeys.User.REFRESH_TOKEN) {
             rawValue as String
             value = DataUtils.Encrypt.encryptData(rawValue, BuildConfig.SECRET_DATA_KEY) as T
         }
@@ -60,9 +60,9 @@ class MMKVStorageService private constructor() {
         }
     }
 
-    private fun<T> decryptData(key: String, defaultValue: String): T {
+    private fun <T> decryptData(key: String, defaultValue: String): T {
         var value = mmkv.decodeString(key, defaultValue)!!
-        if(key.equals(StorageKeys.User.ACCESS_TOKEN) || key.equals(StorageKeys.User.REFRESH_TOKEN)){
+        if (key == StorageKeys.User.ACCESS_TOKEN || key == StorageKeys.User.REFRESH_TOKEN) {
             value = DataUtils.Decrypt.decryptData(value, BuildConfig.SECRET_DATA_KEY)
         }
         return value as T
@@ -74,7 +74,7 @@ class MMKVStorageService private constructor() {
      *
      * @return A mutable set of all keys, or null if no keys are stored.
      */
-    fun getAllKeys (): MutableSet<String>?{
+    fun getAllKeys(): MutableSet<String>? {
         return mmkv.all?.keys
     }
 

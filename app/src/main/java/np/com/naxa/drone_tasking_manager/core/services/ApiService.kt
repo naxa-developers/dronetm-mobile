@@ -1,7 +1,7 @@
 package np.com.naxa.drone_tasking_manager.core.services
 
 import np.com.naxa.drone_tasking_manager.features.login.dto.LoginResponseDto
-import np.com.naxa.drone_tasking_manager.features.project_details.dto.project.ProjectResponseDto
+import np.com.naxa.drone_tasking_manager.features.projects.dto.project.ProjectDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects.ProjectsResponseDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects_centroid.CentroidResult
 import retrofit2.http.Field
@@ -63,7 +63,7 @@ interface ApiService {
     suspend fun fetchProjectById(
         @Path("project_id") id: String,
         @Query("force_refresh") forceRefresh: Boolean = false
-    ): ProjectResponseDto
+    ): ProjectDto
 
     /**
      * Interface defining API calls related to projects.

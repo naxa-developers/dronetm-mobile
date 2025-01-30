@@ -1,11 +1,10 @@
-package np.com.naxa.drone_tasking_manager.features.project_details.dto.project
+package np.com.naxa.drone_tasking_manager.features.projects.dto.project
 
 import com.google.gson.annotations.SerializedName
-import np.com.naxa.drone_tasking_manager.features.projects.dto.project.NoFlyZones
-import np.com.naxa.drone_tasking_manager.features.projects.dto.project.Outline
-import np.com.naxa.drone_tasking_manager.features.projects.dto.project.Tasks
+import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskDto
 
-data class ProjectResponseDto(
+
+data class ProjectDto(
     @SerializedName("id") var id: String? = null,
     @SerializedName("slug") var slug: String? = null,
     @SerializedName("name") var name: String? = null,
@@ -15,7 +14,7 @@ data class ProjectResponseDto(
     @SerializedName("outline") var outline: Outline? = null,
     @SerializedName("no_fly_zones") var noFlyZones: NoFlyZones? = null,
     @SerializedName("requires_approval_from_regulator") var requiresApprovalFromRegulator: Boolean? = null,
-    @SerializedName("regulator_emails") var regulatorEmails: String? = null,
+    @SerializedName("regulator_emails") var regulatorEmails: List<String>? = null,
     @SerializedName("regulator_approval_status") var regulatorApprovalStatus: String? = null,
     @SerializedName("image_processing_status") var imageProcessingStatus: String? = null,
     @SerializedName("regulator_comment") var regulatorComment: String? = null,
@@ -23,7 +22,7 @@ data class ProjectResponseDto(
     @SerializedName("author_name") var authorName: String? = null,
     @SerializedName("project_area") var projectArea: Double? = null,
     @SerializedName("total_task_count") var totalTaskCount: Int? = null,
-    @SerializedName("tasks") var tasks: ArrayList<Tasks> = arrayListOf(),
+    @SerializedName("tasks") var tasks: ArrayList<TaskDto> = arrayListOf(),
     @SerializedName("image_url") var imageUrl: String? = null,
     @SerializedName("ongoing_task_count") var ongoingTaskCount: Int? = null,
     @SerializedName("completed_task_count") var completedTaskCount: Int? = null,

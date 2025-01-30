@@ -25,9 +25,8 @@ import np.com.naxa.drone_tasking_manager.R
 import np.com.naxa.drone_tasking_manager.core.widgets.MaplibreCompose
 import np.com.naxa.drone_tasking_manager.core.widgets.rememberCameraPosition
 import np.com.naxa.drone_tasking_manager.features.projects.models.Project
-import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectTaskState
 import np.com.naxa.drone_tasking_manager.features.projects.models.toFeatureJsonStr
-import np.com.naxa.drone_tasking_manager.features.projects.models.toLockedFeatureJsonStr
+import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTaskState
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds

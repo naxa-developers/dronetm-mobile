@@ -1,18 +1,15 @@
 package np.com.naxa.drone_tasking_manager.features.projects.mapper
 
 import np.com.naxa.drone_tasking_manager.features.projects.dto.project.Outline
-import np.com.naxa.drone_tasking_manager.features.project_details.dto.project.ProjectResponseDto
-import np.com.naxa.drone_tasking_manager.features.projects.dto.project.Tasks
+import np.com.naxa.drone_tasking_manager.features.projects.dto.project.ProjectDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects.ProjectsResponseDto
-import np.com.naxa.drone_tasking_manager.features.projects.dto.projects.Result
 import np.com.naxa.drone_tasking_manager.features.projects.models.Project
 import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectGeometry
 import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectStatus
-import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectTask
-import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectTaskState
 import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectsResponse
+import np.com.naxa.drone_tasking_manager.features.tasks.mapper.toProjectTask
 
-fun ProjectResponseDto.toProject() = Project(
+fun ProjectDto.toProject() = Project(
     id = id,
     slug = slug,
     name = name,
@@ -22,7 +19,7 @@ fun ProjectResponseDto.toProject() = Project(
     geometry = outline?.toProjectGeometry(),
     noFlyZones = noFlyZones,
     requiresApprovalFromRegulator = requiresApprovalFromRegulator,
-    regulatorEmails = regulatorEmails,
+    regulatorEmails = regulatorEmails ?: emptyList(),
     regulatorApprovalStatus = regulatorApprovalStatus,
     imageProcessingStatus = imageProcessingStatus,
     regulatorComment = regulatorComment,
@@ -30,35 +27,11 @@ fun ProjectResponseDto.toProject() = Project(
     authorName = authorName,
     projectArea = projectArea,
     totalTaskCount = totalTaskCount,
-    tasks = tasks.map { it.toProjectTask() },
-    imageUrl = imageUrl,
-    ongoingTaskCount = ongoingTaskCount,
-    completedTaskCount = completedTaskCount,
-    status = ProjectStatus.fromString(status),
-    createdAt = createdAt,
-    authorId = authorId,
-)
-
-fun Result.toProject() = Project(
-    id = id,
-    slug = slug,
-    name = name,
-    description = description,
-    perTaskInstructions = perTaskInstructions,
-    requiresApprovalFromManagerForLocking = requiresApprovalFromManagerForLocking,
-    geometry = ProjectGeometry(
-        geometry = outline,
-    ),
-    noFlyZones = null,
-    requiresApprovalFromRegulator = requiresApprovalFromRegulator,
-    regulatorEmails = regulatorEmails,
-    regulatorApprovalStatus = regulatorApprovalStatus,
-    imageProcessingStatus = imageProcessingStatus,
-    regulatorComment = regulatorComment,
-    commentingRegulatorId = commentingRegulatorId,
-    authorName = authorName,
-    projectArea = projectArea,
-    totalTaskCount = totalTaskCount,
+    tasks = tasks.map {
+        it.toProjectTask().copy(
+            projectName = name,
+        )
+    },
     imageUrl = imageUrl,
     ongoingTaskCount = ongoingTaskCount,
     completedTaskCount = completedTaskCount,
@@ -77,24 +50,19 @@ fun ProjectsResponseDto.toProjectResponse() = ProjectsResponse(
 
 fun Outline.toProjectGeometry() = ProjectGeometry(
     type = type,
-    geometry = geometry,
-    properties = properties,
+    geometry = geometry?.coordinates?.let {
+        ProjectGeometry.Geometry(
+            type = geometry?.type,
+            coordinates = it
+        )
+    },
+    properties = properties?.let {
+        properties?.bbox?.let { it1 ->
+            ProjectGeometry.Properties(
+                id = properties?.id,
+                bbox = it1
+            )
+        }
+    },
     id = id,
-)
-
-
-fun Tasks.toProjectTask() = ProjectTask(
-    id = id,
-    projectId = projectId,
-    projectTaskIndex = projectTaskIndex,
-    geometry = outline?.toProjectGeometry(),
-    state = ProjectTaskState.fromString(state),
-    userId = userId,
-    name = name,
-    imageCount = imageCount,
-    assetsUrl = assetsUrl,
-    totalAreaSqkm = totalAreaSqkm,
-    flightTimeMinutes = flightTimeMinutes,
-    flightDistanceKm = flightDistanceKm,
-    totalImageUploaded = totalImageUploaded,
 )
