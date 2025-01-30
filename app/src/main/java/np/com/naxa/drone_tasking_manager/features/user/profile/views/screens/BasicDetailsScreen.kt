@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -107,13 +108,15 @@ fun BasicDetailsScreen() {
             onClick = { /* Handle save */ },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(58.dp)
+                .height(48.dp)
                 .padding(0.dp),
 //            enabled = enableView,
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.surface,
+                containerColor = Color.Red,
                 contentColor = MaterialTheme.colorScheme.onSurface
-            )
+            ),
+
+            shape = RoundedCornerShape(16)
         ) {
             Text("Save")
         }
