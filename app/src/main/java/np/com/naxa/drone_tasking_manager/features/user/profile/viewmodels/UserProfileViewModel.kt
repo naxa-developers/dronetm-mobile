@@ -1,5 +1,6 @@
 package np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -46,10 +47,13 @@ class UserProfileViewModel @Inject constructor(
 
 
     private fun fetchUserProfile() {
+        Log.d("TAG", "fetchUserProfile: I am Here at Start")
         viewModelScope.launch {
             fetchUserProfileUseCase.invoke(forceRefresh = true).collect { result ->
                 when (result) {
                     is Resources.Loading -> {
+                        Log.d("TAG", "fetchUserProfile: I am Here at Loading")
+
                         _userProfileState.value = _userProfileState.value.copy(
                             isUserProfileLoading = true,
                             isUserProfileSuccess = false,
@@ -57,6 +61,7 @@ class UserProfileViewModel @Inject constructor(
                     }
 
                     is Resources.Success -> {
+                        Log.d("TAG", "fetchUserProfile: I am Here at Success")
                         _userProfileState.value = _userProfileState.value.copy(
                             isUserProfileLoading = false,
                             isUserProfileSuccess = true,
@@ -66,6 +71,8 @@ class UserProfileViewModel @Inject constructor(
                     }
 
                     is Resources.Error -> {
+                        Log.d("TAG", "fetchUserProfile: I am Here at Error")
+
                         _userProfileState.value = _userProfileState.value.copy(
                             isUserProfileLoading = false,
                             isUserProfileSuccess = false,
@@ -74,6 +81,8 @@ class UserProfileViewModel @Inject constructor(
                     }
 
                     else -> {
+                        Log.d("TAG", "fetchUserProfile: I am Here at Else")
+
                         _userProfileState.value = _userProfileState.value.copy(
                             isUserProfileLoading = false,
                             isUserProfileSuccess = false,

@@ -30,11 +30,13 @@ import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.Routes
 import np.com.naxa.drone_tasking_manager.core.theme.DroneTMAppTheme
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.LoginViewModel
+import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.UserProfileViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalDownloadAndTransferFileViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalLoginViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalUsbDeviceViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalUserProfileViewModel
 import np.com.naxa.drone_tasking_manager.navigation.DroneTMAppNavHost
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.NavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
@@ -69,6 +71,7 @@ fun DroneTMApp(
     }
 
     val loginViewModel = hiltViewModel<LoginViewModel>()
+    val userProfileViewModel = hiltViewModel<UserProfileViewModel>()
 
     val topBarTitle by remember {
         derivedStateOf {
@@ -155,6 +158,7 @@ fun DroneTMApp(
         LocalDownloadAndTransferFileViewModel provides downloadAndTransferViewModel,
         LocalNavigationEventsViewModel provides navigationEventsViewModel,
         LocalLoginViewModel provides loginViewModel,
+        LocalUserProfileViewModel provides userProfileViewModel
     ) {
         DroneTMAppTheme {
             Scaffold(
