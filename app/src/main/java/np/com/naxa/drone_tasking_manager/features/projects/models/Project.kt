@@ -1,6 +1,5 @@
 package np.com.naxa.drone_tasking_manager.features.projects.models
 
-import androidx.compose.ui.graphics.Color
 import np.com.naxa.drone_tasking_manager.features.projects.dto.project.NoFlyZones
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 

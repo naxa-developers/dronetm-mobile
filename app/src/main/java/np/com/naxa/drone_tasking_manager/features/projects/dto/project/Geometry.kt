@@ -1,6 +1,5 @@
 package np.com.naxa.drone_tasking_manager.features.projects.dto.project
 
-import com.google.gson.GsonBuilder
 import com.google.gson.annotations.SerializedName
 
 data class Geometry(
