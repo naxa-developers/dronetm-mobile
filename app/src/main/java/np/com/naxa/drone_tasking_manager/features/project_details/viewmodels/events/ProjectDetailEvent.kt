@@ -12,5 +12,5 @@ sealed class ProjectDetailEvent {
      * @constructor Creates a [FetchProjectById] event with the specified project ID.
      * @see ProjectDetailEvent
      */
-    data class FetchProjectById(val id: String) : ProjectDetailEvent()
+    data class FetchProjectById(val id: String, val forceRefresh: Boolean = false) : ProjectDetailEvent()
 }

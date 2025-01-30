@@ -4,6 +4,7 @@ import np.com.naxa.drone_tasking_manager.features.login.dto.LoginResponseDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.project.ProjectDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects.ProjectsResponseDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects_centroid.CentroidResult
+import np.com.naxa.drone_tasking_manager.features.tasks.dto.LockOrUnlockEventRequestBody
 import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskDto
 import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskLockUnlockResponseDto
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileDto
@@ -92,12 +93,11 @@ interface ApiService {
     /**
      * Interface defining API calls related to lock or unlock task.
      */
-    @GET("api/tasks/event/{project_id}/{task_id}")
+    @POST("api/tasks/event/{project_id}/{task_id}")
     suspend fun lockOrUnlockTask(
         @Path("project_id") projectId: String,
         @Path("task_id") taskId: String,
-        @Field("event") event: String,
-        @Field("updated_at") updatedAt: String,
+        @Body body: LockOrUnlockEventRequestBody
     ): TaskLockUnlockResponseDto
 
     @GET("api/users/my-info/")

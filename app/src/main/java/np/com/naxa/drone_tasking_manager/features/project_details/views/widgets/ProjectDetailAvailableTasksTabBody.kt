@@ -86,7 +86,7 @@ fun ProjectDetailAvailableTasksTabBody(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            if (i % 2 == 0) Color.White else Color.LightGray.copy(
+                            if (i % 2 == 0) MaterialTheme.colorScheme.surface else Color.LightGray.copy(
                                 alpha = 0.35F
                             )
                         )

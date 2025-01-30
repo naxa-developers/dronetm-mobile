@@ -44,8 +44,11 @@ import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.eve
 import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.states.ProjectDetailState
 import np.com.naxa.drone_tasking_manager.features.project_details.views.widgets.ProjectDetailMapView
 import np.com.naxa.drone_tasking_manager.features.project_details.views.widgets.ProjectDetailTabView
+import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
+import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskLockOrUnlockState
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalProjectDetailViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 import kotlin.math.roundToInt
 
@@ -64,6 +67,10 @@ fun ProjectDetailsScreen(
     val viewModel = LocalProjectDetailViewModel.current
     val state by viewModel.projectState.collectAsState()
 
+    val tasksViewModel = LocalTasksViewModel.current
+    val lockTaskState by tasksViewModel.taskLockState.collectAsState()
+    val unlockTaskState by tasksViewModel.taskUnlockState.collectAsState()
+
     val mapViewMaxHeightPx =
         with(LocalDensity.current) { (configuration.screenHeightDp * 0.5).dp.toPx() }
     val mapViewMinHeightPx =
@@ -75,7 +82,7 @@ fun ProjectDetailsScreen(
 
     LaunchedEffect(Unit) {
         if (projectId != null) {
-            viewModel.triggerEvent(ProjectDetailEvent.FetchProjectById(projectId))
+            viewModel.triggerEvent(ProjectDetailEvent.FetchProjectById(projectId, true))
         }
     }
 
@@ -85,7 +92,8 @@ fun ProjectDetailsScreen(
                 val totalHeightPx = layoutInfo.visibleItemsInfo.sumOf { it.size }
                 val contentHeight = with(density) { totalHeightPx.toDp() }
 
-                isScrollable = contentHeight > (configuration.screenHeightDp.dp - with(density) {mapViewMaxHeightPx.toDp()})
+                isScrollable =
+                    contentHeight > (configuration.screenHeightDp.dp - with(density) { mapViewMaxHeightPx.toDp() })
                 if (!isScrollable) mapViewOffset = 0f
             }
     }
@@ -100,6 +108,42 @@ fun ProjectDetailsScreen(
                 return Offset.Zero
             }
         }
+    }
+
+    // React to changes in lockTaskState
+    LaunchedEffect(lockTaskState) {
+        if (lockTaskState is TaskLockOrUnlockState.Success && projectId != null) {
+            viewModel.triggerEvent(ProjectDetailEvent.FetchProjectById(projectId, true))
+        }
+
+        if (lockTaskState is TaskLockOrUnlockState.Error) {
+            val error = (lockTaskState as TaskLockOrUnlockState.Error).message
+            navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnSnackBarShow(
+                message = error
+            ))
+        }
+
+        tasksViewModel.triggerEvent(TasksEvent.ResetState(
+            lockState = true,
+        ))
+    }
+
+    // React to changes in unlockTaskState
+    LaunchedEffect(unlockTaskState) {
+        if (unlockTaskState is TaskLockOrUnlockState.Success && projectId != null) {
+            viewModel.triggerEvent(ProjectDetailEvent.FetchProjectById(projectId, true))
+        }
+
+        if (unlockTaskState is TaskLockOrUnlockState.Error) {
+            val error = (unlockTaskState as TaskLockOrUnlockState.Error).message
+            navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnSnackBarShow(
+                message = error
+            ))
+        }
+
+        tasksViewModel.triggerEvent(TasksEvent.ResetState(
+            unlockState = true,
+        ))
     }
 
     when (state) {

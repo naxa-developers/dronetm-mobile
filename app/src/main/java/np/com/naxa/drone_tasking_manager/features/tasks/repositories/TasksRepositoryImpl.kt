@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import np.com.naxa.drone_tasking_manager.core.services.ApiService
 import np.com.naxa.drone_tasking_manager.core.utils.Response
+import np.com.naxa.drone_tasking_manager.features.tasks.dto.LockOrUnlockEventRequestBody
 import np.com.naxa.drone_tasking_manager.features.tasks.mapper.toProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.mapper.toTaskLockUnlockResponse
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
@@ -48,14 +49,16 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
                 val response = apiService.lockOrUnlockTask(
                     projectId = projectId,
                     taskId = taskId,
-                    event = "request",
-                    updatedAt = DateUtils.currentDateAsStr()
+                    body = LockOrUnlockEventRequestBody(
+                        event = "request",
+                        updatedAt = DateUtils.currentDateAsStr(),
+                    ),
                 )
 
                 emit(Response.Success(response.toTaskLockUnlockResponse()))
 
             } catch (e: Exception) {
-                emit(Response.Error(e.message ?: "Error locking task $taskId"))
+                emit(Response.Error(e.cause?.message ?: "Error locking task $taskId"))
             }
         }
     }
@@ -71,14 +74,16 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
                 val response = apiService.lockOrUnlockTask(
                     projectId = projectId,
                     taskId = taskId,
-                    event = "unlock",
-                    updatedAt = DateUtils.currentDateAsStr()
+                    body = LockOrUnlockEventRequestBody(
+                        event = "unlock",
+                        updatedAt = DateUtils.currentDateAsStr(),
+                    ),
                 )
 
                 emit(Response.Success(response.toTaskLockUnlockResponse()))
 
             } catch (e: Exception) {
-                emit(Response.Error(e.message ?: "Error unlocking task $taskId"))
+                emit(Response.Error(e.cause?.message ?: "Error unlocking task $taskId"))
             }
         }
     }

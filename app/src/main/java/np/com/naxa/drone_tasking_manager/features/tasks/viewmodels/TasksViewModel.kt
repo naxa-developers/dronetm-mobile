@@ -26,23 +26,23 @@ class TasksViewModel @Inject constructor(
     /**
      * Represents the different states of task details.
      */
-    private val _tasksDetailState =
+    private val _taskDetailState =
         MutableStateFlow<TaskDetailState>(TaskDetailState.Idle)
-    val tasksDetailState = _tasksDetailState.asStateFlow()
+    val taskDetailState = _taskDetailState.asStateFlow()
 
     /**
      * Represents the different states of locking task.
      */
-    private val _tasksLockState =
+    private val _taskLockState =
         MutableStateFlow<TaskLockOrUnlockState>(TaskLockOrUnlockState.Idle)
-    val tasksLockState = _tasksLockState.asStateFlow()
+    val taskLockState = _taskLockState.asStateFlow()
 
     /**
      * Represents the different states of unlocking task.
      */
-    private val _tasksUnlockState =
+    private val _taskUnlockState =
         MutableStateFlow<TaskLockOrUnlockState>(TaskLockOrUnlockState.Idle)
-    val tasksUnlockState = _tasksUnlockState.asStateFlow()
+    val taskUnlockState = _taskUnlockState.asStateFlow()
 
 
     /**
@@ -76,6 +76,22 @@ class TasksViewModel @Inject constructor(
                     forceRefresh = event.forceRefresh
                 )
 
+            }
+
+            is TasksEvent.ResetState -> {
+               viewModelScope.launch {
+                   if (event.lockState) {
+                       _taskLockState.emit(TaskLockOrUnlockState.Idle)
+                   }
+
+                   if (event.unlockState) {
+                       _taskUnlockState.emit(TaskLockOrUnlockState.Idle)
+                   }
+
+                   if (event.taskDetailState) {
+                       _taskDetailState.emit(TaskDetailState.Idle)
+                   }
+               }
             }
         }
     }
@@ -112,17 +128,17 @@ class TasksViewModel @Inject constructor(
             lockTaskUseCase.invoke(taskId, projectId).collect { result ->
                 when (result) {
                     is Response.Loading -> {
-                        _tasksLockState.emit(TaskLockOrUnlockState.Requesting)
+                        _taskLockState.emit(TaskLockOrUnlockState.Requesting)
                     }
 
                     is Response.Success -> {
-                        _tasksLockState.emit(
+                        _taskLockState.emit(
                             TaskLockOrUnlockState.Success(result.data!!)
                         )
                     }
 
                     is Response.Error -> {
-                        _tasksLockState.emit(TaskLockOrUnlockState.Error(result.message))
+                        _taskLockState.emit(TaskLockOrUnlockState.Error(result.message))
                     }
                 }
             }
@@ -152,17 +168,17 @@ class TasksViewModel @Inject constructor(
             unlockTaskUseCase.invoke(taskId, projectId).collect { result ->
                 when (result) {
                     is Response.Loading -> {
-                        _tasksUnlockState.emit(TaskLockOrUnlockState.Requesting)
+                        _taskUnlockState.emit(TaskLockOrUnlockState.Requesting)
                     }
 
                     is Response.Success -> {
-                        _tasksUnlockState.emit(
+                        _taskUnlockState.emit(
                             TaskLockOrUnlockState.Success(result.data!!)
                         )
                     }
 
                     is Response.Error -> {
-                        _tasksUnlockState.emit(TaskLockOrUnlockState.Error(result.message))
+                        _taskUnlockState.emit(TaskLockOrUnlockState.Error(result.message))
                     }
                 }
             }
@@ -200,17 +216,17 @@ class TasksViewModel @Inject constructor(
             ).collect { result ->
                 when (result) {
                     is Response.Loading -> {
-                        _tasksDetailState.emit(TaskDetailState.Loading)
+                        _taskDetailState.emit(TaskDetailState.Loading)
                     }
 
                     is Response.Error -> {
-                        _tasksDetailState.emit(TaskDetailState.Error(result.message))
+                        _taskDetailState.emit(TaskDetailState.Error(result.message))
                     }
 
                     is Response.Success -> {
 
                         if (result.data != null) {
-                            _tasksDetailState.emit(
+                            _taskDetailState.emit(
                                 TaskDetailState.Success(
                                     result.data!!,
                                 )
@@ -218,7 +234,7 @@ class TasksViewModel @Inject constructor(
 
                             return@collect
                         }
-                        _tasksDetailState.emit(
+                        _taskDetailState.emit(
                             TaskDetailState.Error("No task found with the given id")
                         )
                     }

@@ -1,6 +1,7 @@
 package np.com.naxa.drone_tasking_manager.utils
 
 import android.os.Build
+import android.util.Log
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.ZoneOffset
@@ -11,7 +12,11 @@ import java.util.TimeZone
 
 object DateUtils {
 
-    fun currentDateAsStr(): String = getCurrentISODate()
+    fun currentDateAsStr(): String {
+        val s = getCurrentISODate()
+        Log.d("AMIT", "currentDateAsStr: $s")
+        return s
+    }
 
     private fun getCurrentISODate(): String {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

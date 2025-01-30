@@ -56,4 +56,29 @@ sealed class TasksEvent {
      * @property projectId The unique identifier of the project to which the locked task belongs.
      */
     data class LockTask(val taskId: String, val projectId: String) : TasksEvent()
+
+    /**
+     * Represents the state of various reset actions within the application.
+     *
+     * This data class encapsulates the state of three distinct reset actions:
+     * - Locking: Indicates whether a lock operation has been triggered and should be reset.
+     * - Unlocking: Indicates whether an unlock operation has been triggered and should be reset.
+     * - Task Detail: Indicates whether the task detail view's state should be reset.
+     *
+     * Each state is represented by a boolean flag, where `true` signifies that the corresponding
+     * action's state should be reset, and `false` indicates that it should not.
+     *
+     * This class inherits from [TasksEvent], suggesting it is used as an event in a larger system
+     * related to tasks.
+     *
+     * @property lockState `true` if the lock state should be reset, `false` otherwise. Defaults to `false`.
+     * @property unlockState `true` if the unlock state should be reset, `false` otherwise. Defaults to `false`.
+     * @property taskDetailState `true` if the task detail view's state should be reset, `false` otherwise. Defaults to `false`.
+     * @constructor Creates a [ResetState] instance with optional initial values for each state.
+     */
+    data class ResetState(
+        val lockState: Boolean = false,
+        val unlockState: Boolean = false,
+        val taskDetailState: Boolean = false
+    ) : TasksEvent()
 }
