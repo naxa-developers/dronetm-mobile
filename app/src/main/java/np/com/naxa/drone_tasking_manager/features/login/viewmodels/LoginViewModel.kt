@@ -11,16 +11,20 @@ import np.com.naxa.drone_tasking_manager.features.login.viewmodels.events.LoginE
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.states.LoginStates
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.usecases.GoogleLoginUseCase
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.usecases.NormalLoginUseCase
+import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.UserProfileViewModel
+import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.events.UserProfileEvents
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val normalLoginUseCase: NormalLoginUseCase,
-    private val googleLoginUseCase: GoogleLoginUseCase
+    private val googleLoginUseCase: GoogleLoginUseCase,
+    private val userProfileViewModel: UserProfileViewModel
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LoginStates())
     var state = _state.asStateFlow()
+
 
     fun onEvent(event: LoginEvents) {
         when (event) {
@@ -45,6 +49,10 @@ class LoginViewModel @Inject constructor(
 
                     is Resources.Success -> {
                         result.data?.let { loginResponse ->
+
+                            // Fetch User profile after successful login
+                            userProfileViewModel.onEvent(UserProfileEvents.FetchUserProfile)
+
                             _state.value = _state.value.copy(isLoginSuccess = loginResponse, isLoggingIn = false)
                         }
                     }

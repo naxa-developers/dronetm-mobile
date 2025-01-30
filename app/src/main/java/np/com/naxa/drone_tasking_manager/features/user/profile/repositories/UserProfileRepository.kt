@@ -2,7 +2,6 @@ package np.com.naxa.drone_tasking_manager.features.user.profile.repositories
 
 import kotlinx.coroutines.flow.Flow
 import np.com.naxa.drone_tasking_manager.Resources
-import np.com.naxa.drone_tasking_manager.features.login.models.LoginResponse
 import np.com.naxa.drone_tasking_manager.features.user.profile.models.UserProfile
 
 interface UserProfileRepository {

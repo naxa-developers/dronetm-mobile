@@ -1,9 +1,11 @@
 package np.com.naxa.drone_tasking_manager.features.user.profile.mapper
 
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileDto
+import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileUpdateDto
 import np.com.naxa.drone_tasking_manager.features.user.profile.models.BasicUserDetails
 import np.com.naxa.drone_tasking_manager.features.user.profile.models.OtherUserDetails
 import np.com.naxa.drone_tasking_manager.features.user.profile.models.UserProfile
+import np.com.naxa.drone_tasking_manager.features.user.profile.models.UserProfileUpdateDetails
 
 fun UserProfileDto.toUserProfile(): UserProfile {
     return UserProfile(
@@ -43,7 +45,7 @@ fun UserProfileDto.toBasicUserDetails(): BasicUserDetails {
     )
 }
 
-fun UserProfileDto.toOtherUserDetails(): OtherUserDetails{
+fun UserProfileDto.toOtherUserDetails(): OtherUserDetails {
     return OtherUserDetails(
         certified_drone_operator = this.certifiedDroneOperator,
         drone_you_own = this.droneYouOwn,
@@ -51,5 +53,33 @@ fun UserProfileDto.toOtherUserDetails(): OtherUserDetails{
         notify_for_projects_within_km = this.notifyForProjectsWithinKm,
         registration_certificate_url = this.registrationCertificateUrl,
         registration_file = this.registrationFile,
+    )
+}
+
+fun UserProfile.toBasicUserDetails(): BasicUserDetails {
+    return BasicUserDetails(
+        name = this.name,
+        phone_number = this.phone_number,
+        profile_img = this.phone_number,
+        city = this.city,
+        country = this.country
+    )
+}
+
+fun UserProfile.toOtherUserDetails(): OtherUserDetails {
+    return OtherUserDetails(
+        certified_drone_operator = this.certified_drone_operator,
+        drone_you_own = this.drone_you_own,
+        experience_years = this.experience_years,
+        notify_for_projects_within_km = this.notify_for_projects_within_km,
+        registration_certificate_url = this.registration_certificate_url,
+        registration_file = this.registration_file,
+    )
+}
+
+fun UserProfileUpdateDto.toBasicUserProfileUpdateDetails(): UserProfileUpdateDetails {
+    return UserProfileUpdateDetails(
+        details = this.message,
+        result = this.results?.toUserProfile()
     )
 }

@@ -7,6 +7,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import np.com.naxa.drone_tasking_manager.features.login.repositories.LoginRepository
 import np.com.naxa.drone_tasking_manager.features.login.repositories.LoginRepositoryImpl
+import np.com.naxa.drone_tasking_manager.features.user.profile.repositories.UserProfileRepository
+import np.com.naxa.drone_tasking_manager.features.user.profile.repositories.UserProfileRepositoryImpl
 import javax.inject.Singleton
 
 @Module
@@ -24,5 +26,12 @@ abstract class RepositoryModule {
     abstract  fun bindLoginRepository(
         loginRepositoryImpl: LoginRepositoryImpl
     ) : LoginRepository
+
+
+    @Binds
+    @Singleton
+    abstract  fun bindUserProfileRepository(
+        userProfileRepositoryImpl: UserProfileRepositoryImpl
+    ) : UserProfileRepository
 
 }
