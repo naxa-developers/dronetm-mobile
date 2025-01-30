@@ -85,7 +85,7 @@ fun ProjectDetailsScreen(
                 val totalHeightPx = layoutInfo.visibleItemsInfo.sumOf { it.size }
                 val contentHeight = with(density) { totalHeightPx.toDp() }
 
-                isScrollable = contentHeight > configuration.screenHeightDp.dp
+                isScrollable = contentHeight > (configuration.screenHeightDp.dp - with(density) {mapViewMaxHeightPx.toDp()})
                 if (!isScrollable) mapViewOffset = 0f
             }
     }
