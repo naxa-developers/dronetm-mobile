@@ -69,7 +69,7 @@ class UserProfileViewModel @Inject constructor(
                         _userProfileState.value = _userProfileState.value.copy(
                             isUserProfileLoading = false,
                             isUserProfileSuccess = false,
-                            userProfileError = result.message ?: "Unable to fetch profile data."
+                            userProfileError = result.message
                         )
                     }
 
