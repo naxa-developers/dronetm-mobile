@@ -5,6 +5,7 @@ import np.com.naxa.drone_tasking_manager.features.login.viewmodels.LoginViewMode
 import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.ProjectDetailViewModel
 import np.com.naxa.drone_tasking_manager.features.projects.viewmodels.ProjectsViewModel
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.TasksViewModel
+import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.UserProfileViewModel
 import np.com.naxa.drone_tasking_manager.viewmodel.DownloadAndTransferFileViewModel
 import np.com.naxa.drone_tasking_manager.viewmodel.EventsViewModel
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.NavigationEventsViewModel
@@ -41,3 +42,7 @@ val LocalProjectDetailViewModel = compositionLocalOf<ProjectDetailViewModel> {
 val LocalTasksViewModel = compositionLocalOf<TasksViewModel> {
     error("No ViewModel provided")
 }
+
+//val LocalUserProfileViewModel = compositionLocalOf<UserProfileViewModel> {
+//    error("No ViewModel provided")
+//}

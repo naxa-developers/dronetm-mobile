@@ -11,12 +11,15 @@ import np.com.naxa.drone_tasking_manager.features.login.viewmodels.events.LoginE
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.states.LoginStates
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.usecases.GoogleLoginUseCase
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.usecases.NormalLoginUseCase
+import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.UserProfileViewModel
+import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.events.UserProfileEvents
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val normalLoginUseCase: NormalLoginUseCase,
-    private val googleLoginUseCase: GoogleLoginUseCase
+    private val googleLoginUseCase: GoogleLoginUseCase,
+    private val userProfileViewModel: UserProfileViewModel
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LoginStates())
@@ -45,10 +48,11 @@ class LoginViewModel @Inject constructor(
 
                     is Response.Success -> {
                         result.data?.let { loginResponse ->
-                            _state.value = _state.value.copy(
-                                isLoginSuccess = loginResponse,
-                                isLoggingIn = false
-                            )
+
+                            // Fetch User profile after successful login
+                            userProfileViewModel.onEvent(UserProfileEvents.FetchUserProfile)
+
+                            _state.value = _state.value.copy(isLoginSuccess = loginResponse, isLoggingIn = false)
                         }
                     }
 
@@ -100,8 +104,11 @@ class LoginViewModel @Inject constructor(
                             )
                         }
 
+                    else -> {
+                        _state.value = _state.value.copy(isLoginError = "Unknown Error", isLoggingIn = false, isLoginSuccess = null)
                     }
                 }
+            }
         }
     }
 

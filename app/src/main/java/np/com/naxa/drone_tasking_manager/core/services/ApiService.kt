@@ -1,13 +1,10 @@
-package np.com.naxa.drone_tasking_manager.core.services
-
+package np.com.naxa.drone_tasking_manager
 import np.com.naxa.drone_tasking_manager.features.login.dto.LoginResponseDto
-import np.com.naxa.drone_tasking_manager.features.projects.dto.project.ProjectDto
-import np.com.naxa.drone_tasking_manager.features.projects.dto.projects.ProjectsResponseDto
-import np.com.naxa.drone_tasking_manager.features.projects.dto.projects_centroid.CentroidResult
-import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskLockUnlockResponseDto
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.Multipart
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -85,4 +82,12 @@ interface ApiService {
         @Field("updated_at") updatedAt: String,
     ): TaskLockUnlockResponseDto
 
+    @GET("api/users/my-info/")
+    suspend fun fetchMyInfo(
+        @Query("force_refresh") forceRefresh: Boolean = true
+    ): UserProfileDto
+
+
+    @PATCH("api/users/{id}/profile")
+    suspend fun updateUser(@Path("id") userId: String, @Body body: RequestBody): UserProfileUpdateDto
 }
