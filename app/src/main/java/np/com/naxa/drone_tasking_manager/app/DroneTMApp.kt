@@ -36,12 +36,14 @@ import np.com.naxa.drone_tasking_manager.core.theme.DroneTMAppTheme
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.LoginViewModel
 import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.ProjectDetailViewModel
 import np.com.naxa.drone_tasking_manager.features.projects.viewmodels.ProjectsViewModel
+import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.TasksViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalDownloadAndTransferFileViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalLoginViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalProjectDetailViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalProjectsViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalUsbDeviceViewModel
 import np.com.naxa.drone_tasking_manager.navigation.DroneTMAppNavHost
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.NavigationEventsViewModel
@@ -79,6 +81,7 @@ fun DroneTMApp(
     val loginViewModel = hiltViewModel<LoginViewModel>()
     val projectsViewModel = hiltViewModel<ProjectsViewModel>()
     val projectDetailViewModel = hiltViewModel<ProjectDetailViewModel>()
+    val tasksViewModel = hiltViewModel<TasksViewModel>()
 
 
     val topBarTitle by remember {
@@ -188,6 +191,7 @@ fun DroneTMApp(
         LocalLoginViewModel provides loginViewModel,
         LocalProjectsViewModel provides projectsViewModel,
         LocalProjectDetailViewModel provides projectDetailViewModel,
+        LocalTasksViewModel provides tasksViewModel
     ) {
         DroneTMAppTheme {
             Scaffold(

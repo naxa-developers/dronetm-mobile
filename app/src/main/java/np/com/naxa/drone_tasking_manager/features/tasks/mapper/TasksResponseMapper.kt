@@ -2,8 +2,10 @@ package np.com.naxa.drone_tasking_manager.features.tasks.mapper
 
 import np.com.naxa.drone_tasking_manager.features.projects.mapper.toProjectGeometry
 import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskDto
+import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskLockUnlockResponseDto
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTaskState
+import np.com.naxa.drone_tasking_manager.features.tasks.models.TaskLockUnlockResponse
 
 fun TaskDto.toProjectTask() = ProjectTask(
     id = id,
@@ -27,4 +29,10 @@ fun TaskDto.toProjectTask() = ProjectTask(
     gimbleAnglesDegrees = gimbleAnglesDegrees,
     createdAt = createdAt,
     updatedAt = updatedAt,
+)
+
+fun TaskLockUnlockResponseDto.toTaskLockUnlockResponse() = TaskLockUnlockResponse(
+    projectId = projectId,
+    taskId = taskId,
+    comment = comment
 )

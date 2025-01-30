@@ -4,6 +4,7 @@ import np.com.naxa.drone_tasking_manager.features.login.dto.LoginResponseDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.project.ProjectDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects.ProjectsResponseDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects_centroid.CentroidResult
+import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskLockUnlockResponseDto
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
@@ -72,5 +73,16 @@ interface ApiService {
     suspend fun fetchProjectsCentroid(
         @Query("force_refresh") forceRefresh: Boolean = false
     ): List<CentroidResult>
+
+    /**
+     * Interface defining API calls related to lock or unlock task.
+     */
+    @GET("api/tasks/event/{project_id}/{task_id}")
+    suspend fun lockOrUnlockTask(
+        @Path("project_id") projectId: String,
+        @Path("task_id") taskId: String,
+        @Field("event") event: String,
+        @Field("updated_at") updatedAt: String,
+    ): TaskLockUnlockResponseDto
 
 }

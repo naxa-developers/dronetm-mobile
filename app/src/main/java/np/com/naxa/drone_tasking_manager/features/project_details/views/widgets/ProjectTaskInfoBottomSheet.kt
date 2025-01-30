@@ -18,7 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.google.gson.JsonObject
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
-import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,14 +80,14 @@ fun ProjectTaskInfoBottomSheet(
                                 null
                             }
 
-                            // if (id != null) {
-                            // Navigate to Task Details Screen
-                            // navigationEventsViewModel.sendEvent(
-                            //     DroneTMAppNavigationEvent.OnNavigateToProjectDetail(
-                            //         id
-                            //     )
-                            // )
-                            // }
+                            if (id != null) {
+
+                                val projectId = try {
+                                    it.get("projectId").asString
+                                } catch (e: Exception) {
+                                    null
+                                }
+                            }
                         }
                     ) {
                         Text("Go to Task", color = Color.White)

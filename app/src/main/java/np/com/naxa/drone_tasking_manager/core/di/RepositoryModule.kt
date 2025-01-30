@@ -9,6 +9,8 @@ import np.com.naxa.drone_tasking_manager.features.login.repositories.LoginReposi
 import np.com.naxa.drone_tasking_manager.features.login.repositories.LoginRepositoryImpl
 import np.com.naxa.drone_tasking_manager.features.projects.repositories.ProjectsRepository
 import np.com.naxa.drone_tasking_manager.features.projects.repositories.ProjectsRepositoryImpl
+import np.com.naxa.drone_tasking_manager.features.tasks.repositories.TasksRepository
+import np.com.naxa.drone_tasking_manager.features.tasks.repositories.TasksRepositoryImpl
 import javax.inject.Singleton
 
 @Module
@@ -38,4 +40,16 @@ abstract class RepositoryModule {
     abstract fun bindProjectsRepository(
         projectsRepositoryImpl: ProjectsRepositoryImpl
     ): ProjectsRepository
+
+    /**
+     * Binds the TasksRepositoryImpl to the TasksRepository interface.
+     *
+     * @param tasksRepositoryImpl The implementation of the TasksRepository interface.
+     * @return The TasksRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindTasksRepository(
+        tasksRepositoryImpl: TasksRepositoryImpl
+    ): TasksRepository
 }
