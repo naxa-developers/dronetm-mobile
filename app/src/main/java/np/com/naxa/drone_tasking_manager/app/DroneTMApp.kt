@@ -8,6 +8,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.LineStyle
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,13 +27,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
+import np.com.naxa.drone_tasking_manager.R
 import np.com.naxa.drone_tasking_manager.Routes
 import np.com.naxa.drone_tasking_manager.core.theme.DroneTMAppTheme
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.LoginViewModel
@@ -68,6 +76,8 @@ fun DroneTMApp(
     val navController = rememberNavController()
 
     val snackBarHostState = remember { SnackbarHostState() }
+
+    var menuExpanded by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
 
@@ -265,7 +275,22 @@ fun DroneTMApp(
                                         )
                                     }
                                 }
-                            }
+                            },
+
+                            actions = {
+                                IconButton(onClick = {
+                                    navigationEventsViewModel.sendEvent(
+                                        DroneTMAppNavigationEvent.OnNavigateToProfileScreen
+                                    )
+                                }) {
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_user_avatar), // Replace with your icon
+                                        contentDescription = "Profile",
+//                                        tint = Color.White
+                                    )
+                                }
+
+                            },
                         )
                     }
                 },
