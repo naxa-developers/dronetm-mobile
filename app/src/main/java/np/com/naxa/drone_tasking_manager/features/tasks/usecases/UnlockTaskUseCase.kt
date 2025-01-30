@@ -19,6 +19,6 @@ import javax.inject.Inject
 @Module
 @InstallIn(SingletonComponent::class)
 class UnlockTaskUseCase @Inject constructor(private val tasksRepository: TasksRepository) {
-    suspend operator fun invoke(taskId: String, projectId: String) = tasksRepository.lockTask(taskId, projectId)
+    suspend operator fun invoke(taskId: String, projectId: String) = tasksRepository.unlockTask(taskId, projectId)
 
 }
