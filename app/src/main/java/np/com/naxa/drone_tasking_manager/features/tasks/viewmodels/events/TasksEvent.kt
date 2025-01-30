@@ -2,6 +2,31 @@ package np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events
 
 
 sealed class TasksEvent {
+
+    /**
+     * Represents an event to fetch a specific task by its ID.
+     *
+     * This event is used to trigger the fetching of a task with the given ID.
+     * It can optionally force a refresh of the data, bypassing any cached values.
+     *
+     * @property id The unique identifier of the task to be fetched.
+     * @property forceRefresh Indicates whether to force a refresh of the task data.
+     *                       If `true`, the data will be fetched from the source, ignoring any cached values.
+     *                       If `false` (default), the system may use cached data if available.
+     *
+     * @constructor Creates a [FetchTaskById] event with the specified task ID and refresh option.
+     *
+     * Example usage:
+     * ```kotlin
+     * // Fetch task with ID "123" and use cached data if available.
+     * val fetchTaskEvent = FetchTaskById(id = "123")
+     *
+     * // Fetch task with ID "456" and force a refresh from the data source.
+     * val fetchTaskEventForceRefresh = FetchTaskById(id = "456", forceRefresh = true)
+     * ```
+     */
+    data class FetchTaskById(val id: String, val forceRefresh: Boolean = false) : TasksEvent()
+
     /**
      * Represents an event indicating that a task should be unlocked.
      *
@@ -18,7 +43,8 @@ sealed class TasksEvent {
      */
 
 
-    data class UnlockTask(val taskId: String, val projectId: String): TasksEvent()
+    data class UnlockTask(val taskId: String, val projectId: String) : TasksEvent()
+
     /**
      * Represents a task locking event.
      *
@@ -29,5 +55,5 @@ sealed class TasksEvent {
      * @property taskId The unique identifier of the task that was locked.
      * @property projectId The unique identifier of the project to which the locked task belongs.
      */
-    data class LockTask(val taskId: String, val projectId: String): TasksEvent()
+    data class LockTask(val taskId: String, val projectId: String) : TasksEvent()
 }

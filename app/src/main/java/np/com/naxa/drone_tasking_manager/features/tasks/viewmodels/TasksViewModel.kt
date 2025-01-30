@@ -8,17 +8,27 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.core.utils.Response
+import np.com.naxa.drone_tasking_manager.features.tasks.usecases.FetchTaskDetailUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.LockTaskUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.UnlockTaskUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
+import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskDetailState
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskLockOrUnlockState
 import javax.inject.Inject
 
 @HiltViewModel
 class TasksViewModel @Inject constructor(
+    private val fetchTaskDetailUseCase: FetchTaskDetailUseCase,
     private val lockTaskUseCase: LockTaskUseCase,
-    private val unlockTaskUseCase: UnlockTaskUseCase
+    private val unlockTaskUseCase: UnlockTaskUseCase,
 ) : ViewModel() {
+
+    /**
+     * Represents the different states of task details.
+     */
+    private val _tasksDetailState =
+        MutableStateFlow<TaskDetailState>(TaskDetailState.Idle)
+    val tasksDetailState = _tasksDetailState.asStateFlow()
 
     /**
      * Represents the different states of locking task.
@@ -58,6 +68,14 @@ class TasksViewModel @Inject constructor(
                     taskId = event.taskId,
                     projectId = event.projectId
                 )
+            }
+
+            is TasksEvent.FetchTaskById -> {
+                fetchTask(
+                    id = event.id,
+                    forceRefresh = event.forceRefresh
+                )
+
             }
         }
     }
@@ -151,4 +169,61 @@ class TasksViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Fetches the details of a task from the data source.
+     *
+     * This function retrieves the details of a task identified by the given `id`.
+     * It uses the `fetchTaskDetailUseCase` to interact with the data layer and collect the results.
+     * The result is then processed and emitted to the `_tasksDetailState` as a `TaskDetailState`.
+     *
+     * @param id The unique identifier of the task to fetch.
+     * @param forceRefresh A boolean indicating whether to force a refresh of the data from the
+     *                     source, ignoring any cached data. Defaults to `false`.
+     *
+     * The function handles different states of the response from the use case:
+     * - `Response.Loading`: Emits `TaskDetailState.Loading`.
+     * - `Response.Error`: Emits `TaskDetailState.Error` with the error message.
+     * - `Response.Success`:
+     *   - If the data is not null, emits `TaskDetailState.Success` with the task details.
+     *   - If the data is null, emits `TaskDetailState.Error` with a "No task found" message.
+     *
+     * The function operates on the `viewModelScope` using the `Dispatchers.IO` for background operations.
+     */
+    private fun fetchTask(
+        id: String,
+        forceRefresh: Boolean = false
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            fetchTaskDetailUseCase.invoke(
+                taskId = id,
+                forceRefresh = forceRefresh,
+            ).collect { result ->
+                when (result) {
+                    is Response.Loading -> {
+                        _tasksDetailState.emit(TaskDetailState.Loading)
+                    }
+
+                    is Response.Error -> {
+                        _tasksDetailState.emit(TaskDetailState.Error(result.message))
+                    }
+
+                    is Response.Success -> {
+
+                        if (result.data != null) {
+                            _tasksDetailState.emit(
+                                TaskDetailState.Success(
+                                    result.data!!,
+                                )
+                            )
+
+                            return@collect
+                        }
+                        _tasksDetailState.emit(
+                            TaskDetailState.Error("No task found with the given id")
+                        )
+                    }
+                }
+            }
+        }
+    }
 }

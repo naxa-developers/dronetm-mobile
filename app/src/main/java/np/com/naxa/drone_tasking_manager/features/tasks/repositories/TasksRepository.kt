@@ -2,30 +2,31 @@ package np.com.naxa.drone_tasking_manager.features.tasks.repositories
 
 import kotlinx.coroutines.flow.Flow
 import np.com.naxa.drone_tasking_manager.core.utils.Response
+import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.models.TaskLockUnlockResponse
 
 interface TasksRepository {
 
-//    /**
-//     * Fetches a task by its ID.
-//     *
-//     * This function retrieves a task from the API service using the provided ID.
-//     * It supports forced refresh to bypass any potential caching mechanisms.
-//     * The result is emitted as a Flow of Resources, which can be in the following states:
-//     *   - Loading: Indicates that the request is in progress.
-//     *   - Success: Indicates that the request was successful and contains the Project data.
-//     *   - Error: Indicates that an error occurred during the request and contains an error message.
-//     *
-//     * @param id The ID of the task to fetch.
-//     * @param forceRefresh If true, forces a refresh of the data, bypassing any caching.
-//     *                     If false, the API service may return cached data if available.
-//     * @return A Flow of Resources<ProjectTask>, emitting the current state of the request.
-//     *         The Flow will emit at least one value (Loading) and then either Success or Error.
-//     */
-//    suspend fun fetchTaskById(
-//        id: String,
-//        forceRefresh: Boolean = true
-//    ): Flow<Response<ProjectTask>>
+    /**
+     * Fetches a task by its ID.
+     *
+     * This function retrieves a task from the API service using the provided ID.
+     * It supports forced refresh to bypass any potential caching mechanisms.
+     * The result is emitted as a Flow of Resources, which can be in the following states:
+     *   - Loading: Indicates that the request is in progress.
+     *   - Success: Indicates that the request was successful and contains the Project data.
+     *   - Error: Indicates that an error occurred during the request and contains an error message.
+     *
+     * @param id The ID of the task to fetch.
+     * @param forceRefresh If true, forces a refresh of the data, bypassing any caching.
+     *                     If false, the API service may return cached data if available.
+     * @return A Flow of Resources<ProjectTask>, emitting the current state of the request.
+     *         The Flow will emit at least one value (Loading) and then either Success or Error.
+     */
+    suspend fun fetchTaskById(
+        id: String,
+        forceRefresh: Boolean = true
+    ): Flow<Response<ProjectTask>>
 
 
     /**
@@ -61,5 +62,8 @@ interface TasksRepository {
      *
      * @return A [Flow] emitting [Response] objects containing a [TaskLockUnlockResponse] on success or error information on failure.
      */
-    suspend fun unlockTask(taskId: String, projectId: String): Flow<Response<TaskLockUnlockResponse>>
+    suspend fun unlockTask(
+        taskId: String,
+        projectId: String
+    ): Flow<Response<TaskLockUnlockResponse>>
 }

@@ -4,6 +4,7 @@ import np.com.naxa.drone_tasking_manager.features.login.dto.LoginResponseDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.project.ProjectDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects.ProjectsResponseDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects_centroid.CentroidResult
+import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskDto
 import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskLockUnlockResponseDto
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileDto
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileUpdateDto
@@ -78,6 +79,15 @@ interface ApiService {
     suspend fun fetchProjectsCentroid(
         @Query("force_refresh") forceRefresh: Boolean = false
     ): List<CentroidResult>
+
+    /**
+     * Interface defining API calls related to fetch task by id.
+     */
+    @GET("api/tasks/{task_id}")
+    suspend fun fetchTaskById(
+        @Path("task_id") id: String,
+        @Query("force_refresh") forceRefresh: Boolean = false
+    ): TaskDto
 
     /**
      * Interface defining API calls related to lock or unlock task.
