@@ -1,18 +1,18 @@
 package np.com.naxa.drone_tasking_manager.features.user.profile.repositories
 
 import kotlinx.coroutines.flow.Flow
-import np.com.naxa.drone_tasking_manager.Resources
+import np.com.naxa.drone_tasking_manager.core.utils.Response
 import np.com.naxa.drone_tasking_manager.features.user.profile.models.UserProfile
 
 interface UserProfileRepository {
-    suspend fun fetchMyInfo(forceRefresh: Boolean = true): Flow<Resources<UserProfile>>
+    suspend fun fetchMyInfo(forceRefresh: Boolean = true): Flow<Response<UserProfile>>
 
     suspend fun updateBasicDetails(
         name: String,
         country: String,
         city: String,
         phone: String
-    ): Flow<Resources<UserProfile>>
+    ): Flow<Response<UserProfile>>
 
 
     suspend fun updateOtherDetails(
@@ -22,5 +22,5 @@ interface UserProfileRepository {
         notifyForProjectsWithinKm: Int,
         registrationCertificateUrl: String,
         registrationFile: String
-    ): Flow<Resources<UserProfile>>
+    ): Flow<Response<UserProfile>>
 }

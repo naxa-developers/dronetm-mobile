@@ -1,15 +1,19 @@
 package np.com.naxa.drone_tasking_manager.core.services.retrofit
 
+import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import np.com.naxa.drone_tasking_manager.ApiService
 import np.com.naxa.drone_tasking_manager.BuildConfig
+import np.com.naxa.drone_tasking_manager.core.services.ApiService
+import np.com.naxa.drone_tasking_manager.features.projects.dto.project.Outline
+import np.com.naxa.drone_tasking_manager.features.projects.dto.project.OutlineDeserializer
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
+
 
 /**
  * Dagger Hilt module for providing network-related dependencies.
@@ -26,7 +30,7 @@ class NetworkModule {
      */
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient{
+    fun provideOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(CacheInterceptor())
             .build()
@@ -41,10 +45,12 @@ class NetworkModule {
     @Provides
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        val gson =
+            GsonBuilder().registerTypeAdapter(Outline::class.java, OutlineDeserializer()).create()
         return Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
             .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }
 

@@ -26,6 +26,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -43,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -66,9 +68,11 @@ fun LoginScreenWidget(
     var isPasswordVisible by remember { mutableStateOf(false) }
     var rememberMe by remember { mutableStateOf(false) }
 
-    val enableView by remember { derivedStateOf {
-        !state.isLoggingIn
-    } }
+    val enableView by remember {
+        derivedStateOf {
+            !state.isLoggingIn
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -98,44 +102,32 @@ fun LoginScreenWidget(
         Text(
             text = "Drone Operator",
             style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 24.dp, top = 16.dp)
         )
 
         // Google Sign In Button
-        Button(
+        OutlinedButton(
             onClick = {
                 if (!state.isLoggingIn) {
                     onGoogleSignInClick(rememberMe)
                 }
             },
             modifier = Modifier
-                .fillMaxWidth()
-                .height(58.dp)
-                .padding(0.dp),
+                .fillMaxWidth(),
             enabled = enableView,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.surface,
                 contentColor = MaterialTheme.colorScheme.onSurface
-            )
+            ),
+            shape = RoundedCornerShape(16)
         ) {
-            if(state.isLoggingIn) CircularProgressIndicator(
+            if (state.isLoggingIn) CircularProgressIndicator(
                 color = Color.White,
-                modifier = Modifier.size(24.dp),
-                strokeWidth = 2.dp
-            ) else Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(68.dp)
-                    .padding(0.dp)
-                    .clip(shape = RoundedCornerShape(16))
-                    .border(
-                        BorderStroke(1.dp, SolidColor(Color.LightGray)),
-                        shape = RoundedCornerShape(16)
-                    )
-
-            ) {
+                    .size(32.dp),
+                strokeWidth = 2.dp
+            ) else {
                 Image(
                     painter = painterResource(id = R.drawable.ic_google_logo),
                     contentDescription = "Google Icon",
@@ -209,12 +201,14 @@ fun LoginScreenWidget(
                 )
                 Text("Remember Me")
             }
-            TextButton(onClick = {
-                if (email.isNotEmpty()) {
-                    onForgetPasswordClick(email)
-                }
-            },
-                enabled = enableView,) {
+            TextButton(
+                onClick = {
+                    if (email.isNotEmpty()) {
+                        onForgetPasswordClick(email)
+                    }
+                },
+                enabled = enableView,
+            ) {
                 Text(
                     "Forgot Your Password?",
                     color = Color.Red
@@ -234,15 +228,19 @@ fun LoginScreenWidget(
                 .height(48.dp),
             enabled = enableView,
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Red
+                containerColor = Color.Red,
+                contentColor = Color.White
             ),
             shape = RoundedCornerShape(16)
         ) {
-            if(state.isLoggingIn) CircularProgressIndicator(
-                        color = Color.White,
-                        modifier = Modifier.size(24.dp),
-                        strokeWidth = 2.dp
-                    ) else if(state.isLoggingIn) Text("Retry Log In") else Text("Log In")
+            if (state.isLoggingIn) CircularProgressIndicator(
+                color = Color.White,
+                modifier = Modifier.size(32.dp),
+                strokeWidth = 2.dp
+            ) else if (state.isLoggingIn) Text(
+                "Retry Log In",
+                color = Color.White
+            ) else Text("Log In", color = Color.White)
         }
     }
 }

@@ -6,7 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import np.com.naxa.drone_tasking_manager.Resources
+import np.com.naxa.drone_tasking_manager.core.utils.Response
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.events.UserProfileEvents
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.states.UserProfileStates
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.usecases.FetchUserProfileUseCase
@@ -49,14 +49,14 @@ class UserProfileViewModel @Inject constructor(
         viewModelScope.launch {
             fetchUserProfileUseCase.invoke(forceRefresh = true).collect { result ->
                 when (result) {
-                    is Resources.Loading -> {
+                    is Response.Loading -> {
                         _userProfileState.value = _userProfileState.value.copy(
                             isUserProfileLoading = true,
                             isUserProfileSuccess = false,
                         )
                     }
 
-                    is Resources.Success -> {
+                    is Response.Success -> {
                         _userProfileState.value = _userProfileState.value.copy(
                             isUserProfileLoading = false,
                             isUserProfileSuccess = true,
@@ -65,11 +65,11 @@ class UserProfileViewModel @Inject constructor(
                         )
                     }
 
-                    is Resources.Error -> {
+                    is Response.Error -> {
                         _userProfileState.value = _userProfileState.value.copy(
                             isUserProfileLoading = false,
                             isUserProfileSuccess = false,
-                            userProfileError = result.message ?: "Unable to fetch profile data."
+                            userProfileError = result.message
                         )
                     }
 

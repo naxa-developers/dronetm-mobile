@@ -2,39 +2,39 @@ package np.com.naxa.drone_tasking_manager.features.user.profile.repositories
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import np.com.naxa.drone_tasking_manager.ApiService
-import np.com.naxa.drone_tasking_manager.Resources
-import np.com.naxa.drone_tasking_manager.features.login.mapper.toLoginResponse
+import np.com.naxa.drone_tasking_manager.core.services.ApiService
+import np.com.naxa.drone_tasking_manager.core.utils.Response
 import np.com.naxa.drone_tasking_manager.features.user.profile.mapper.toUserProfile
 import np.com.naxa.drone_tasking_manager.features.user.profile.models.UserProfile
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
-class UserProfileRepositoryImpl @Inject constructor(private val apiService: ApiService) : UserProfileRepository {
-    override suspend fun fetchMyInfo(forceRefresh: Boolean): Flow<Resources<UserProfile>> {
+class UserProfileRepositoryImpl @Inject constructor(private val apiService: ApiService) :
+    UserProfileRepository {
+    override suspend fun fetchMyInfo(forceRefresh: Boolean): Flow<Response<UserProfile>> {
         return flow {
-            emit(Resources.Loading())
+            emit(Response.Loading())
 
             val response =
                 try {
                     apiService.fetchMyInfo(forceRefresh)
                 } catch (e: HttpException) {
                     // Handle HTTP-specific exceptions
-                    return@flow emit(Resources.Error(e.message()))
+                    return@flow emit(Response.Error(e.message()))
                 } catch (e: IOException) {
                     // Handle network/IO-related exceptions
                     e.printStackTrace()
-                    return@flow emit(Resources.Error(e.message ?: "Could not load data"))
+                    return@flow emit(Response.Error(e.message ?: "Could not load data"))
                 } catch (e: Exception) {
                     // Handle any other unexpected exceptions
-                    return@flow emit(Resources.Error(e.message ?: "Unknown Error"))
+                    return@flow emit(Response.Error(e.message ?: "Unknown Error"))
                 }
 
             val myInfoDetails = response.toUserProfile()
 
 
-            emit(Resources.Success(data = myInfoDetails))
+            emit(Response.Success(data = myInfoDetails))
 
         }
     }
@@ -44,7 +44,7 @@ class UserProfileRepositoryImpl @Inject constructor(private val apiService: ApiS
         country: String,
         city: String,
         phone: String
-    ): Flow<Resources<UserProfile>> {
+    ): Flow<Response<UserProfile>> {
         TODO("Not yet implemented")
     }
 
@@ -55,7 +55,7 @@ class UserProfileRepositoryImpl @Inject constructor(private val apiService: ApiS
         notifyForProjectsWithinKm: Int,
         registrationCertificateUrl: String,
         registrationFile: String
-    ): Flow<Resources<UserProfile>> {
+    ): Flow<Response<UserProfile>> {
         TODO("Not yet implemented")
     }
 

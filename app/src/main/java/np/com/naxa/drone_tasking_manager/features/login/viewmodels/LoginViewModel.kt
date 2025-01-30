@@ -6,7 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import np.com.naxa.drone_tasking_manager.Resources
+import np.com.naxa.drone_tasking_manager.core.utils.Response
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.events.LoginEvents
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.states.LoginStates
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.usecases.GoogleLoginUseCase
@@ -25,7 +25,6 @@ class LoginViewModel @Inject constructor(
     private val _state = MutableStateFlow(LoginStates())
     var state = _state.asStateFlow()
 
-
     fun onEvent(event: LoginEvents) {
         when (event) {
             is LoginEvents.NormalLogin -> {
@@ -43,11 +42,11 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             normalLoginUseCase.invoke(role, username, password).collect { result ->
                 when (result) {
-                    is Resources.Loading -> {
+                    is Response.Loading -> {
                         _state.value = _state.value.copy(isLoggingIn = true, isLoginIdle = false)
                     }
 
-                    is Resources.Success -> {
+                    is Response.Success -> {
                         result.data?.let { loginResponse ->
 
                             // Fetch User profile after successful login
@@ -57,12 +56,20 @@ class LoginViewModel @Inject constructor(
                         }
                     }
 
-                    is Resources.Error -> {
-                        _state.value = _state.value.copy(isLoginError = result.message!!, isLoggingIn = false, isLoginSuccess = null)
+                    is Response.Error -> {
+                        _state.value = _state.value.copy(
+                            isLoginError = result.message!!,
+                            isLoggingIn = false,
+                            isLoginSuccess = null
+                        )
                     }
 
                     else -> {
-                        _state.value = _state.value.copy(isLoginError = "Unknown Error", isLoggingIn = false, isLoginSuccess = null)
+                        _state.value = _state.value.copy(
+                            isLoginError = "Unknown Error",
+                            isLoggingIn = false,
+                            isLoginSuccess = null
+                        )
                     }
                 }
             }
@@ -74,20 +81,28 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             googleLoginUseCase.invoke(role, code, state)
                 .collect { result ->
-                when (result) {
-                    is Resources.Loading -> {
-                        _state.value = _state.value.copy(isLoggingIn = true, isLoginIdle = false)
-                    }
-
-                    is Resources.Success -> {
-                        result.data?.let { loginResponse ->
-                            _state.value = _state.value.copy(isLoginSuccess = loginResponse, isLoggingIn = false)
+                    when (result) {
+                        is Response.Loading -> {
+                            _state.value =
+                                _state.value.copy(isLoggingIn = true, isLoginIdle = false)
                         }
-                    }
 
-                    is Resources.Error -> {
-                        _state.value = _state.value.copy(isLoginError = result.message!!, isLoggingIn = false, isLoginSuccess = null)
-                    }
+                        is Response.Success -> {
+                            result.data?.let { loginResponse ->
+                                _state.value = _state.value.copy(
+                                    isLoginSuccess = loginResponse,
+                                    isLoggingIn = false
+                                )
+                            }
+                        }
+
+                        is Response.Error -> {
+                            _state.value = _state.value.copy(
+                                isLoginError = result.message!!,
+                                isLoggingIn = false,
+                                isLoginSuccess = null
+                            )
+                        }
 
                     else -> {
                         _state.value = _state.value.copy(isLoginError = "Unknown Error", isLoggingIn = false, isLoginSuccess = null)
