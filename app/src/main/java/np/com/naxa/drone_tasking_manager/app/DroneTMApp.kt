@@ -140,6 +140,11 @@ fun DroneTMApp(
 
                     }
                 }
+
+                DroneTMAppNavigationEvent.OnNavigateToProfileScreen -> {
+
+                    navController.navigate(Routes.ProfileScreen.path)
+                }
             }
         }
     }

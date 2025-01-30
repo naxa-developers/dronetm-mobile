@@ -34,4 +34,6 @@ sealed class DroneTMAppNavigationEvent {
 
     data object onNavigateToLogin : DroneTMAppNavigationEvent()
 
+    data object OnNavigateToProfileScreen : DroneTMAppNavigationEvent()
+
 }

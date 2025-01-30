@@ -46,4 +46,13 @@ enum class Routes(
         label = "Login",
         path = "login"
     ),
+
+    /**
+     * Route for displaying the Login screen.
+     * Path: /login
+     */
+    ProfileScreen(
+        label = "Profile",
+        path = "profile"
+    ),
 }
