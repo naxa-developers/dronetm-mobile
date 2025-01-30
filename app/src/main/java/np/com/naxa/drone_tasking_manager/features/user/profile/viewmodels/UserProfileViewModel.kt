@@ -47,7 +47,7 @@ class UserProfileViewModel @Inject constructor(
 
     private fun fetchUserProfile() {
         viewModelScope.launch {
-            fetchUserProfileUseCase.invoke().collect { result ->
+            fetchUserProfileUseCase.invoke(forceRefresh = true).collect { result ->
                 when (result) {
                     is Resources.Loading -> {
                         _userProfileState.value = _userProfileState.value.copy(

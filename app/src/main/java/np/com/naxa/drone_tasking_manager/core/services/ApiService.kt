@@ -42,7 +42,9 @@ interface ApiService {
 
 
     @GET("api/users/my-info/")
-    suspend fun fetchMyInfo(): UserProfileDto
+    suspend fun fetchMyInfo(
+        @Query("force_refresh") forceRefresh: Boolean = true
+    ): UserProfileDto
 
 
     @PATCH("api/users/{id}/profile")

@@ -9,6 +9,6 @@ import javax.inject.Inject
 @Module
 @InstallIn(SingletonComponent::class)
 class FetchUserProfileUseCase @Inject constructor(private val profileRepository: UserProfileRepository) {
-    suspend operator fun invoke() = profileRepository.fetchMyInfo()
+    suspend operator fun invoke(forceRefresh: Boolean = true) = profileRepository.fetchMyInfo(forceRefresh)
 
 }

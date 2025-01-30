@@ -5,7 +5,7 @@ import np.com.naxa.drone_tasking_manager.Resources
 import np.com.naxa.drone_tasking_manager.features.user.profile.models.UserProfile
 
 interface UserProfileRepository {
-    suspend fun fetchMyInfo(): Flow<Resources<UserProfile>>
+    suspend fun fetchMyInfo(forceRefresh: Boolean = true): Flow<Resources<UserProfile>>
 
     suspend fun updateBasicDetails(
         name: String,

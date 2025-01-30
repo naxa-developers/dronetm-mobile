@@ -12,13 +12,13 @@ import java.io.IOException
 import javax.inject.Inject
 
 class UserProfileRepositoryImpl @Inject constructor(private val apiService: ApiService) : UserProfileRepository {
-    override suspend fun fetchMyInfo(): Flow<Resources<UserProfile>> {
+    override suspend fun fetchMyInfo(forceRefresh: Boolean): Flow<Resources<UserProfile>> {
         return flow {
             emit(Resources.Loading())
 
             val response =
                 try {
-                    apiService.fetchMyInfo()
+                    apiService.fetchMyInfo(forceRefresh)
                 } catch (e: HttpException) {
                     // Handle HTTP-specific exceptions
                     return@flow emit(Resources.Error(e.message()))
