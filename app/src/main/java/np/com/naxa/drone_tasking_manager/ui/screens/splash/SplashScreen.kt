@@ -28,6 +28,8 @@ import np.com.naxa.drone_tasking_manager.R
 import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
 import np.com.naxa.drone_tasking_manager.core.services.storage.StorageKeys
 import np.com.naxa.drone_tasking_manager.core.theme.PrimaryColor
+import np.com.naxa.drone_tasking_manager.features.login.viewmodels.events.LoginEvents
+import np.com.naxa.drone_tasking_manager.local_providers.LocalLoginViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 
@@ -38,19 +40,24 @@ fun SplashScreen(
     val context = LocalContext.current
     val alphaAnimation = remember { Animatable(0f) }
     val navigationEventsViewModel = LocalNavigationEventsViewModel.current
+    val loginViewModel = LocalLoginViewModel.current
 
     LaunchedEffect(Unit) {
         alphaAnimation.animateTo(
             targetValue = 1f,
             animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
         )
-        delay(2000)
 
         val storageService = MMKVStorageService.getInstance()
 
         if (storageService.get<String>(StorageKeys.User.ACCESS_TOKEN, "").trim().isNotBlank()) {
-            navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToProjects)
-            return@LaunchedEffect
+            loginViewModel.onEvent(LoginEvents.RefreshToken(onRefreshed = {
+                if (it) {
+                    navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToProjects)
+                } else {
+                    navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToLogin)
+                }
+            }))
         } else {
             navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToLogin)
             return@LaunchedEffect

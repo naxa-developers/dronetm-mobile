@@ -123,6 +123,34 @@ class LoginRepositoryImpl @Inject constructor(private val apiService: ApiService
         }
     }
 
+    override suspend fun refreshToken(): Flow<Response<LoginResponse>> {
+        return flow {
+            emit(Response.Loading())
+
+            val response =
+                try {
+                    apiService.refreshToken()
+                } catch (e: HttpException) {
+                    // Handle HTTP-specific exceptions
+                    return@flow emit(Response.Error(e.message()))
+                } catch (e: IOException) {
+                    // Handle network/IO-related exceptions
+                    e.printStackTrace()
+                    return@flow emit(Response.Error(e.message ?: "Could not refresh token"))
+                } catch (e: Exception) {
+                    // Handle any other unexpected exceptions
+                    return@flow emit(Response.Error(e.message ?: "Unknown Error"))
+                }
+
+            val tokenDetails = response.toLoginResponse()
+
+            saveUserData(tokenDetails)
+
+            emit(Response.Success(data = tokenDetails))
+
+        }
+    }
+
 
     private fun saveUserData(loginDetails: LoginResponse) {
 

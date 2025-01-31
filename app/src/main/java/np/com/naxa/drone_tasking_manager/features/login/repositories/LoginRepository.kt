@@ -8,4 +8,5 @@ interface LoginRepository {
 
     suspend fun normalLogin(role: String, username: String, password: String, forceRefresh: Boolean = true): Flow<Response<LoginResponse>>
     suspend fun googleLogin(role: String, code: String, state: String, forceRefresh: Boolean = true): Flow<Response<LoginResponse>>
+    suspend fun refreshToken(): Flow<Response<LoginResponse>>
 }
