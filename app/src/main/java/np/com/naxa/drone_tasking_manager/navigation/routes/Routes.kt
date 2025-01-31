@@ -1,4 +1,4 @@
-package np.com.naxa.drone_tasking_manager
+package np.com.naxa.drone_tasking_manager.navigation.routes
 
 /**
  * Represents the available navigation routes in the application.
@@ -81,5 +81,14 @@ enum class Routes(
     ProjectDetails(
         label = "Details",
         path = "projects-details/{id}"
+    ),
+
+    /**
+     * Route for displaying the Task Details screen.
+     * Path: /task-details/{id}
+     */
+    TaskDetails(
+        label = "Task Details",
+        path = "task-details/{id}"
     ),
 }

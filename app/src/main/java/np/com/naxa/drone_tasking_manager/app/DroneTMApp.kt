@@ -1,6 +1,5 @@
 package np.com.naxa.drone_tasking_manager.app
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -34,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
-import np.com.naxa.drone_tasking_manager.Routes
+import np.com.naxa.drone_tasking_manager.navigation.routes.Routes
 import np.com.naxa.drone_tasking_manager.core.theme.DroneTMAppTheme
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.LoginViewModel
 import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.ProjectDetailViewModel
@@ -175,10 +174,20 @@ fun DroneTMApp(
                 }
 
                 is DroneTMAppNavigationEvent.OnNavigateToProjectDetail -> {
-
                     if (currentRoute?.path != Routes.ProjectDetails.path) {
                         navController.navigate(
                             Routes.ProjectDetails.path.replace(
+                                "{id}",
+                                event.id
+                            )
+                        )
+                    }
+                }
+
+                is DroneTMAppNavigationEvent.OnNavigateToTaskDetail -> {
+                    if (currentRoute?.path != Routes.TaskDetails.path) {
+                        navController.navigate(
+                            Routes.TaskDetails.path.replace(
                                 "{id}",
                                 event.id
                             )
@@ -217,6 +226,7 @@ fun DroneTMApp(
                         && currentRoute != Routes.Home
                         && currentRoute != Routes.ProjectsMap
                         && currentRoute != Routes.ProjectDetails
+                        && currentRoute != Routes.TaskDetails
                     ) {
                         CenterAlignedTopAppBar(
                             title = {
@@ -306,7 +316,11 @@ fun DroneTMApp(
             ) { innerPadding ->
                 DroneTMAppNavHost(
                     modifier = Modifier.padding(
-                        if (currentRoute != Routes.Splash && currentRoute != Routes.ProjectsMap && currentRoute != Routes.ProjectDetails) innerPadding else PaddingValues(
+                        if (currentRoute != Routes.Splash &&
+                            currentRoute != Routes.ProjectsMap &&
+                            currentRoute != Routes.ProjectDetails &&
+                            currentRoute != Routes.TaskDetails
+                        ) innerPadding else PaddingValues(
                             0.dp
                         )
                     ),

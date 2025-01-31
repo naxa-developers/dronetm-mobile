@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.documentfile.provider.DocumentFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import np.com.naxa.drone_tasking_manager.Routes
+import np.com.naxa.drone_tasking_manager.navigation.routes.Routes
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream

@@ -1,4 +1,4 @@
-package np.com.naxa.drone_tasking_manager.features.project_details.views.widgets
+package np.com.naxa.drone_tasking_manager.features.tasks.views.widgets
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
@@ -32,13 +32,11 @@ import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageServic
 import np.com.naxa.drone_tasking_manager.core.services.storage.StorageKeys
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTaskState
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
-import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
-import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProjectTaskInfoBottomSheet(
+fun TaskWaypointInfoBottomSheet(
     modifier: Modifier = Modifier,
     infoJsonObject: JsonObject?,
     infoSheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false),
@@ -47,7 +45,6 @@ fun ProjectTaskInfoBottomSheet(
 ) {
 
     val scope = rememberCoroutineScope()
-    val navigationEventsViewModel = LocalNavigationEventsViewModel.current
 
     val showUnlockAlertDialog = remember { mutableStateOf(false) }
 
@@ -242,13 +239,7 @@ fun ProjectTaskInfoBottomSheet(
                                     contentColor = Color.White
                                 ),
                                 onClick = {
-                                    if (taskId != null) {
-                                        navigationEventsViewModel.sendEvent(
-                                            DroneTMAppNavigationEvent.OnNavigateToTaskDetail(
-                                                taskId!!
-                                            )
-                                        )
-                                    }
+
                                 }
                             ) {
                                 Text("Go to Task", color = Color.White)
@@ -258,25 +249,5 @@ fun ProjectTaskInfoBottomSheet(
                 }
             }
         }
-    }
-
-    if (showUnlockAlertDialog.value) {
-        UnlockTaskAlertDialog(
-            onDismissRequest = { showUnlockAlertDialog.value = false },
-            onConfirm = {
-                showUnlockAlertDialog.value = false
-                scope.launch {
-                    if (taskId == null || projectId == null) return@launch
-
-                    tasksViewModel.triggerEvent(
-                        TasksEvent.UnlockTask(
-                            taskId!!,
-                            projectId!!,
-                        )
-                    )
-                    infoSheetState.hide()
-                }
-            }
-        )
     }
 }
