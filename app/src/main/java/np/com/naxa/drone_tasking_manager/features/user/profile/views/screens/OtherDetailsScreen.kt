@@ -15,7 +15,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
@@ -33,9 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.UserProfileViewModel
-import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.events.UserProfileEvents
 import np.com.naxa.drone_tasking_manager.local_providers.LocalUserProfileViewModel
 
 @Composable
@@ -50,12 +46,7 @@ fun OtherDetailsScreen() {
     var isCertified by remember { mutableStateOf(false) }
     var certificateFile by remember { mutableStateOf<String?>(null) }
 
-//    LaunchedEffect(Unit) {
-//        viewModel.onEvent(UserProfileEvents.FetchUserProfile(forceRefresh = false))
-//    }
-
     LaunchedEffect(state.userProfile) {
-        Log.d("TAG", "fetchUserProfile BasicDetailsScreen I am Here: ${state.userProfile}")
         state.userProfile?.let {
             notifyDistance = "${it.notify_for_projects_within_km ?: 0}"
             experience = it.country ?: ""

@@ -290,7 +290,7 @@ fun DroneTMApp(
                                     Surface(
                                         shape = CircleShape,
                                         modifier = Modifier
-                                            .size(48.dp)
+                                            .size(24.dp)
                                             .padding(bottom = 0.dp),
                                         color = Color.Red
                                     ) {
@@ -298,7 +298,7 @@ fun DroneTMApp(
                                             painter = painterResource(id = R.drawable.ic_drone_operator_icon_24),
                                             contentDescription = "Profile",
                                             tint = Color.White,
-                                            modifier = Modifier.padding(16.dp),
+                                            modifier = Modifier.padding(4.dp),
                                         )
                                     }
                                 }

@@ -49,10 +49,6 @@ fun BasicDetailsScreen() {
     var phone by rememberSaveable { mutableStateOf("") }
 
 
-//    LaunchedEffect(Unit) {
-//        viewModel.onEvent(UserProfileEvents.FetchUserProfile(forceRefresh = false))
-//    }
-
     LaunchedEffect(state.userProfile) {
         Log.d("TAG", "fetchUserProfile BasicDetailsScreen I am Here: ${state.userProfile}")
         state.userProfile?.let {
