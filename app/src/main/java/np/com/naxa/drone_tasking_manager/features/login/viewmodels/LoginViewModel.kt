@@ -50,9 +50,16 @@ class LoginViewModel @Inject constructor(
                         result.data?.let { loginResponse ->
 
                             // Fetch User profile after successful login
-                            userProfileViewModel.onEvent(UserProfileEvents.FetchUserProfile)
+                            userProfileViewModel.onEvent(
+                                UserProfileEvents.FetchUserProfile(
+                                    forceRefresh = true
+                                )
+                            )
 
-                            _state.value = _state.value.copy(isLoginSuccess = loginResponse, isLoggingIn = false)
+                            _state.value = _state.value.copy(
+                                isLoginSuccess = loginResponse,
+                                isLoggingIn = false
+                            )
                         }
                     }
 
@@ -104,11 +111,15 @@ class LoginViewModel @Inject constructor(
                             )
                         }
 
-                    else -> {
-                        _state.value = _state.value.copy(isLoginError = "Unknown Error", isLoggingIn = false, isLoginSuccess = null)
+                        else -> {
+                            _state.value = _state.value.copy(
+                                isLoginError = "Unknown Error",
+                                isLoggingIn = false,
+                                isLoginSuccess = null
+                            )
+                        }
                     }
                 }
-            }
         }
     }
 

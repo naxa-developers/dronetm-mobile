@@ -48,6 +48,13 @@ enum class Routes(
     ),
 
     /**
+     * Route for displaying the User Profile screen.
+     * Path: /profile
+     */
+    ProfileScreen(
+        label = "Profile",
+        path = "profile"),
+    /**
      * Route for displaying the Projects screen.
      * Path: /projects
      */

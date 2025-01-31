@@ -2,6 +2,7 @@ package np.com.naxa.drone_tasking_manager.features.user.profile.dto
 
 
 import com.google.gson.annotations.SerializedName
+import java.math.BigInteger
 
 data class UserProfileDto(
     @SerializedName("certificate_file") val certificateFile: String?,
@@ -26,5 +27,5 @@ data class UserProfileDto(
     @SerializedName("registration_certificate_url") val registrationCertificateUrl: String?,
     @SerializedName("registration_file") val registrationFile: String?,
     @SerializedName("role") val role: List<String?>?,
-    @SerializedName("user_id") val userId: Long?
+    @SerializedName("user_id") val userId: BigInteger?
 )

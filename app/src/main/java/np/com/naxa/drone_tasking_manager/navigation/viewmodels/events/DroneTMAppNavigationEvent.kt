@@ -51,6 +51,8 @@ sealed class DroneTMAppNavigationEvent {
      */
     data object OnNavigateToLogin : DroneTMAppNavigationEvent()
 
+    data object OnNavigateToProfileScreen : DroneTMAppNavigationEvent()
+
 
     /**
      * Represents a navigation event that triggers navigation to the Projects screen.
