@@ -4,22 +4,20 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,12 +28,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.google.gson.JsonObject
 import kotlinx.coroutines.launch
-import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.events.ProjectDetailEvent
+import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
+import np.com.naxa.drone_tasking_manager.core.services.storage.StorageKeys
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTaskState
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
-import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskLockOrUnlockState
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
-import np.com.naxa.drone_tasking_manager.local_providers.LocalProjectDetailViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,6 +47,8 @@ fun ProjectTaskInfoBottomSheet(
 
     val scope = rememberCoroutineScope()
     val navigationEventsViewModel = LocalNavigationEventsViewModel.current
+
+    val storageService = remember { MMKVStorageService.getInstance() }
 
     val tasksViewModel = LocalTasksViewModel.current
 
@@ -85,6 +84,51 @@ fun ProjectTaskInfoBottomSheet(
         )
     }
 
+    val userName by remember(infoJsonObject) {
+        mutableStateOf(
+            try {
+                infoJsonObject?.get("name")?.asString
+            } catch (e: Exception) {
+                null
+            }
+        )
+    }
+
+    val userId by remember(infoJsonObject) {
+        mutableStateOf(
+            try {
+                infoJsonObject?.get("userId")?.asString
+            } catch (e: Exception) {
+                null
+            }
+        )
+    }
+
+    val isSelf by remember(userId, storageService) {
+        derivedStateOf {
+            storageService.get(StorageKeys.User.ID, "110412063342847231417") == userId
+        }
+    }
+
+    val messageAsPerState by remember(taskState, userName, isSelf) {
+        derivedStateOf {
+            when (taskState) {
+                ProjectTaskState.RequestForMapping -> "This task is requested for mapping by ${if (isSelf) "you" else userName}."
+                ProjectTaskState.UnlockedToMap -> "This task is unlocked and available for mapping."
+                ProjectTaskState.LockedForMapping -> if (isSelf) "You have locked this task for mapping." else "$userName has locked this task for mapping."
+                ProjectTaskState.UnlockedToValidate -> "This task is unlocked and available for validation."
+                ProjectTaskState.LockedForValidation -> if (isSelf) "You have locked this task for validation." else "$userName has locked this task for validation."
+                ProjectTaskState.UnlockedDone -> "This task has been completed and is unlocked."
+                ProjectTaskState.UnflyableTask -> "This task is marked as unflyable."
+                ProjectTaskState.ImageUploaded -> if (isSelf) "You have uploaded the image." else "$userName has uploaded the image for this task."
+                ProjectTaskState.ImageProcessingFailed -> if (isSelf) "Image processing initiated by you has failed." else "Image processing initiated by $userName has failed."
+                ProjectTaskState.ImageProcessingStarted -> if (isSelf) "Image processing initiated by you has started." else "Image processing initiated by $userName has started."
+                ProjectTaskState.ImageProcessingFinished -> if (isSelf) "Image processing initiated by you has finished." else "Image processing initiated by $userName has finished."
+                null -> "This task is available for mapping. Lock this task and start mapping."
+            }
+        }
+    }
+
     if (show) {
         ModalBottomSheet(
             modifier = modifier
@@ -108,53 +152,36 @@ fun ProjectTaskInfoBottomSheet(
                     )
                     Text(
                         modifier = Modifier.padding(bottom = 8.dp),
-                        text = "Project #$projectId",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                    Text(
-                        modifier = Modifier.padding(bottom = 8.dp),
-                        text = "State ${taskState?.key ?: "No"}",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                    Text(
-                        modifier = Modifier.padding(bottom = 8.dp),
-                        text = try {
-                            it.get("name").asString
-                        } catch (e: Exception) {
-                            ""
-                        },
-                        style = MaterialTheme.typography.labelMedium
+                        text = messageAsPerState,
+                        style = MaterialTheme.typography.bodyLarge,
                     )
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Start,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
 
                         AnimatedVisibility(
                             modifier = Modifier.weight(1f),
-                            visible = taskState == null || listOf(
+                            visible = (listOf(
                                 ProjectTaskState.LockedForMapping,
                                 ProjectTaskState.UnlockedToMap,
                                 ProjectTaskState.UnlockedDone,
-                            ).contains(taskState)
+                            ).contains(taskState) || taskState == null) && (isSelf || userId == null)
                         ) {
-                            ElevatedButton(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 16.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = Color.White
-                                ),
-                                onClick = {
-                                    scope.launch {
-                                        if (taskId == null || projectId == null) return@launch
+                            if (taskState == ProjectTaskState.LockedForMapping) {
+                                OutlinedButton(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 16.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(
+                                        contentColor = MaterialTheme.colorScheme.primary,
+                                    ),
+                                    onClick = {
+                                        scope.launch {
+                                            if (taskId == null || projectId == null) return@launch
 
-                                        if (taskState == ProjectTaskState.LockedForMapping) {
                                             tasksViewModel.triggerEvent(
                                                 TasksEvent.UnlockTask(
                                                     taskId!!,
@@ -162,38 +189,56 @@ fun ProjectTaskInfoBottomSheet(
                                                 )
                                             )
                                             infoSheetState.hide()
-                                            return@launch
                                         }
-
-                                        tasksViewModel.triggerEvent(
-                                            TasksEvent.LockTask(
-                                                taskId!!,
-                                                projectId!!,
-                                            )
-                                        )
-                                        infoSheetState.hide()
                                     }
+                                ) {
+                                    Text(
+                                        "Unlock Task",
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
                                 }
-                            ) {
-                                Text(
-                                    if (taskState == ProjectTaskState.LockedForMapping) "Unlock" else "Lock",
-                                    color = Color.White
-                                )
+                            } else {
+                                ElevatedButton(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 16.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = Color.White
+                                    ),
+                                    onClick = {
+                                        scope.launch {
+                                            if (taskId == null || projectId == null) return@launch
+
+                                            tasksViewModel.triggerEvent(
+                                                TasksEvent.LockTask(
+                                                    taskId!!,
+                                                    projectId!!,
+                                                )
+                                            )
+                                            infoSheetState.hide()
+                                        }
+                                    }
+                                ) {
+                                    Text(
+                                        "Lock Task",
+                                        color = Color.White
+                                    )
+                                }
                             }
                         }
 
-                        Spacer(modifier = Modifier.width(12.dp))
-
                         AnimatedVisibility(
                             modifier = Modifier.weight(1f),
-                            visible = listOf(
+                            visible = (isSelf && listOf(
+                                ProjectTaskState.RequestForMapping,
                                 ProjectTaskState.LockedForMapping,
                                 ProjectTaskState.ImageUploaded,
                                 ProjectTaskState.ImageProcessingStarted,
                                 ProjectTaskState.ImageProcessingFinished,
                                 ProjectTaskState.ImageProcessingFailed,
                                 ProjectTaskState.LockedForValidation,
-                            ).contains(taskState)
+                            ).contains(taskState)) || (!isSelf && taskState == ProjectTaskState.ImageProcessingFinished)
                         ) {
                             ElevatedButton(
                                 modifier = Modifier

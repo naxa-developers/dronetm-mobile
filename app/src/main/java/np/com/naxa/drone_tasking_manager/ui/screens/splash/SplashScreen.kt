@@ -23,7 +23,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.core.content.ContextCompat
-import kotlinx.coroutines.delay
 import np.com.naxa.drone_tasking_manager.R
 import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
 import np.com.naxa.drone_tasking_manager.core.services.storage.StorageKeys
@@ -50,7 +49,7 @@ fun SplashScreen(
 
         val storageService = MMKVStorageService.getInstance()
 
-        if (storageService.get<String>(StorageKeys.User.ACCESS_TOKEN, "").trim().isNotBlank()) {
+        if (storageService.contains(StorageKeys.User.ACCESS_TOKEN)) {
             loginViewModel.onEvent(LoginEvents.RefreshToken(onRefreshed = {
                 if (it) {
                     navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToProjects)

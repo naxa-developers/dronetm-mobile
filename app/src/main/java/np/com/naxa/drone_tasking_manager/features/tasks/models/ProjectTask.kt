@@ -62,7 +62,16 @@ data class ProjectTask(
             "properties" to mapOf(
                 "id" to id,
                 "projectId" to projectId,
+                "projectTaskIndex" to projectTaskIndex,
+                "state" to state?.key?.uppercase(),
+                "userId" to userId,
                 "name" to userName,
+                "imageCount" to imageCount,
+                "assetsUrl" to assetsUrl,
+                "totalAreaSqkm" to totalAreaSqkm,
+                "flightTimeMinutes" to flightTimeMinutes,
+                "flightDistanceKm" to flightDistanceKm,
+                "totalImageUploaded" to totalImageUploaded,
                 "icon" to if (state == ProjectTaskState.LockedForMapping) "locked-icon--" else null,
             ),
             "geometry" to mapOf(
