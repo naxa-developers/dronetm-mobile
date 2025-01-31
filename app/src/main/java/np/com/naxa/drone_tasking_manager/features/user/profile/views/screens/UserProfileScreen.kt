@@ -6,6 +6,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -15,11 +16,22 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.events.UserProfileEvents
 import np.com.naxa.drone_tasking_manager.features.user.profile.views.widgets.ProfileNavData
+import np.com.naxa.drone_tasking_manager.local_providers.LocalUserProfileViewModel
 
 @Composable
 fun UserProfileScreen() {
     val navController = rememberNavController()
+
+    val viewModel = LocalUserProfileViewModel.current
+//    val state by viewModel.userProfileState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.onEvent(UserProfileEvents.FetchUserProfile(forceRefresh = false))
+    }
+
+
     val tabs = listOf(
         ProfileNavData.BasicScreen,
         ProfileNavData.OtherScreen,

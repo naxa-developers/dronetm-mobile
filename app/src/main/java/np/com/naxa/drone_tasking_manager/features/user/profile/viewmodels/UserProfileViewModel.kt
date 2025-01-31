@@ -32,7 +32,7 @@ class UserProfileViewModel @Inject constructor(
     fun onEvent(event: UserProfileEvents) {
         when (event) {
             is UserProfileEvents.FetchUserProfile -> {
-                fetchUserProfile()
+                fetchUserProfile(forceRefresh = event.forceRefresh)
             }
 
             is UserProfileEvents.UpdateBasicDetails -> {
@@ -46,10 +46,9 @@ class UserProfileViewModel @Inject constructor(
     }
 
 
-    private fun fetchUserProfile() {
-        Log.d("TAG", "fetchUserProfile: I am Here at Start")
+    private fun fetchUserProfile(forceRefresh: Boolean) {
         viewModelScope.launch {
-            fetchUserProfileUseCase.invoke(forceRefresh = true).collect { result ->
+            fetchUserProfileUseCase.invoke(forceRefresh = forceRefresh).collect { result ->
                 when (result) {
 
                     is Response.Loading -> {

@@ -52,12 +52,14 @@ fun SplashScreen(
 
             if (storageService.get<String>(StorageKeys.User.ACCESS_TOKEN, "").trim().isNotBlank()) {
                 navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToProjects)
+//                navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToLogin)
                 return@LaunchedEffect
             } else {
                 navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToLogin)
                 return@LaunchedEffect
             }
         }catch (e: DataUtils.EncryptionException){
+            // navigate to login screen if access token is not found/empty or error while decrypting the saved access token
             navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToLogin)
             return@LaunchedEffect
         }

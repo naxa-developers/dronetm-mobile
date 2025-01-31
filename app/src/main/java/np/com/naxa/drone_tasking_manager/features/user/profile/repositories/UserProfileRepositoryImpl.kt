@@ -1,5 +1,6 @@
 package np.com.naxa.drone_tasking_manager.features.user.profile.repositories
 
+import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import np.com.naxa.drone_tasking_manager.core.services.ApiService
@@ -20,6 +21,7 @@ class UserProfileRepositoryImpl @Inject constructor(private val apiService: ApiS
                 try {
                     apiService.fetchMyInfo(forceRefresh)
                 } catch (e: HttpException) {
+                    e.printStackTrace()
                     // Handle HTTP-specific exceptions
                     return@flow emit(Response.Error(e.message()))
                 } catch (e: IOException) {
@@ -28,11 +30,10 @@ class UserProfileRepositoryImpl @Inject constructor(private val apiService: ApiS
                     return@flow emit(Response.Error(e.message ?: "Could not load data"))
                 } catch (e: Exception) {
                     // Handle any other unexpected exceptions
+                    e.printStackTrace()
                     return@flow emit(Response.Error(e.message ?: "Unknown Error"))
                 }
-
             val myInfoDetails = response.toUserProfile()
-
 
             emit(Response.Success(data = myInfoDetails))
 

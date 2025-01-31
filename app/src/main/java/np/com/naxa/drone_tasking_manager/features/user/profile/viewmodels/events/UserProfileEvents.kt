@@ -2,7 +2,7 @@ package np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.event
 
 sealed class UserProfileEvents {
     //fetch my info
-    data object FetchUserProfile : UserProfileEvents()
+    data class FetchUserProfile(val forceRefresh: Boolean) : UserProfileEvents()
 
 
     data class UpdateBasicDetails(

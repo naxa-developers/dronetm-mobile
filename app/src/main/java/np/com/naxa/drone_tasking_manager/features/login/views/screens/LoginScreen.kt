@@ -44,13 +44,10 @@ fun LoginScreen(){
 
         //trigger to fetch project list
         //and navigate to the project screen
-
             storageService.save(StorageKeys.User.IS_LOGGED_IN, rememberMeChecked)
 
-        Log.d("TAG", "LoginScreen Access Token: ${storageService.get(StorageKeys.User.ACCESS_TOKEN, "")}")
-
-        navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToProfileScreen)
-//        navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToProjects)
+//        Log.d("TAG", "LoginScreen Access Token: ${storageService.get(StorageKeys.User.ACCESS_TOKEN, "")}")
+        navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToProjects)
     }
 
 
