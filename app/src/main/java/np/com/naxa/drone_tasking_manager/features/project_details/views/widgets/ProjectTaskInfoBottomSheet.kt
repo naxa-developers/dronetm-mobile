@@ -48,6 +48,8 @@ fun ProjectTaskInfoBottomSheet(
     val scope = rememberCoroutineScope()
     val navigationEventsViewModel = LocalNavigationEventsViewModel.current
 
+    val showUnlockAlertDialog = remember { mutableStateOf(false) }
+
     val storageService = remember { MMKVStorageService.getInstance() }
 
     val tasksViewModel = LocalTasksViewModel.current
@@ -179,17 +181,7 @@ fun ProjectTaskInfoBottomSheet(
                                         contentColor = MaterialTheme.colorScheme.primary,
                                     ),
                                     onClick = {
-                                        scope.launch {
-                                            if (taskId == null || projectId == null) return@launch
-
-                                            tasksViewModel.triggerEvent(
-                                                TasksEvent.UnlockTask(
-                                                    taskId!!,
-                                                    projectId!!,
-                                                )
-                                            )
-                                            infoSheetState.hide()
-                                        }
+                                        showUnlockAlertDialog.value = true
                                     }
                                 ) {
                                     Text(
@@ -259,5 +251,25 @@ fun ProjectTaskInfoBottomSheet(
                 }
             }
         }
+    }
+
+    if (showUnlockAlertDialog.value) {
+        UnlockTaskAlertDialog(
+            onDismissRequest = { showUnlockAlertDialog.value = false },
+            onConfirm = {
+                showUnlockAlertDialog.value = false
+                scope.launch {
+                    if (taskId == null || projectId == null) return@launch
+
+                    tasksViewModel.triggerEvent(
+                        TasksEvent.UnlockTask(
+                            taskId!!,
+                            projectId!!,
+                        )
+                    )
+                    infoSheetState.hide()
+                }
+            }
+        )
     }
 }
