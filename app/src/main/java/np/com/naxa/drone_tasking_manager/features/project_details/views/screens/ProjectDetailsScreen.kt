@@ -113,37 +113,55 @@ fun ProjectDetailsScreen(
     // React to changes in lockTaskState
     LaunchedEffect(lockTaskState) {
         if (lockTaskState is TaskLockOrUnlockState.Success && projectId != null) {
-            viewModel.triggerEvent(ProjectDetailEvent.FetchProjectById(projectId, true))
+            viewModel.triggerEvent(
+                ProjectDetailEvent.FetchProjectById(
+                    projectId,
+                    forceRefresh = true,
+                )
+            )
         }
 
         if (lockTaskState is TaskLockOrUnlockState.Error) {
             val error = (lockTaskState as TaskLockOrUnlockState.Error).message
-            navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnSnackBarShow(
-                message = error
-            ))
+            navigationEventsViewModel.sendEvent(
+                DroneTMAppNavigationEvent.OnSnackBarShow(
+                    message = error
+                )
+            )
         }
 
-        tasksViewModel.triggerEvent(TasksEvent.ResetState(
-            lockState = true,
-        ))
+        tasksViewModel.triggerEvent(
+            TasksEvent.ResetState(
+                lockState = true,
+            )
+        )
     }
 
     // React to changes in unlockTaskState
     LaunchedEffect(unlockTaskState) {
         if (unlockTaskState is TaskLockOrUnlockState.Success && projectId != null) {
-            viewModel.triggerEvent(ProjectDetailEvent.FetchProjectById(projectId, true))
+            viewModel.triggerEvent(
+                ProjectDetailEvent.FetchProjectById(
+                    projectId,
+                    forceRefresh = true,
+                )
+            )
         }
 
         if (unlockTaskState is TaskLockOrUnlockState.Error) {
             val error = (unlockTaskState as TaskLockOrUnlockState.Error).message
-            navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnSnackBarShow(
-                message = error
-            ))
+            navigationEventsViewModel.sendEvent(
+                DroneTMAppNavigationEvent.OnSnackBarShow(
+                    message = error
+                )
+            )
         }
 
-        tasksViewModel.triggerEvent(TasksEvent.ResetState(
-            unlockState = true,
-        ))
+        tasksViewModel.triggerEvent(
+            TasksEvent.ResetState(
+                unlockState = true,
+            )
+        )
     }
 
     when (state) {
