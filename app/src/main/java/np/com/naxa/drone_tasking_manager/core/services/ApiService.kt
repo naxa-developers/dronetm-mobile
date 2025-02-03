@@ -56,12 +56,6 @@ interface ApiService {
     ): LoginResponseDto
 
     /**
-     * Data class representing the response from the refresh token API.
-     */
-    @GET("api/users/refresh-token")
-    suspend fun refreshToken(@Query("force_refresh") forceRefresh: Boolean = true): LoginResponseDto
-
-    /**
      * This interface defines the API endpoints for interacting with project data.
      */
     @GET("api/projects/")

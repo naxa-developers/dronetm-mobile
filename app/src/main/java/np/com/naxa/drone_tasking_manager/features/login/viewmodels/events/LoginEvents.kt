@@ -6,6 +6,4 @@ sealed class LoginEvents {
         LoginEvents()
 
     data class GoogleLogin(val role: String, val code: String, val state: String) : LoginEvents()
-
-    data class RefreshToken(val onRefreshed: (Boolean) -> Unit) : LoginEvents()
 }

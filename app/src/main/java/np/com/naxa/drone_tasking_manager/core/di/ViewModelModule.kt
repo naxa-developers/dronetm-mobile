@@ -11,7 +11,6 @@ import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.UserPr
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.usecases.FetchUserProfileUseCase
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.usecases.UpdateBasicUserDetailsUseCase
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.usecases.UpdateOtherUserDetailsUseCase
-import javax.inject.Singleton
 
 @Module
 @InstallIn(ViewModelComponent::class, SingletonComponent::class)
