@@ -1,16 +1,18 @@
 package np.com.naxa.drone_tasking_manager.app
 
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.LineStyle
 import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,7 +24,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -35,17 +36,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
-import np.com.naxa.drone_tasking_manager.R
 import np.com.naxa.drone_tasking_manager.Routes
+import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
 import np.com.naxa.drone_tasking_manager.core.theme.DroneTMAppTheme
+import np.com.naxa.drone_tasking_manager.core.utils.clearAllViewModels
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.LoginViewModel
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.UserProfileViewModel
 import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.ProjectDetailViewModel
@@ -96,6 +97,9 @@ fun DroneTMApp(
             backStackEntry?.destination?.route?.route()
         }
     }
+
+    val viewModels = LocalViewModelStoreOwner.current!!
+    val context = LocalContext.current
 
     val loginViewModel = hiltViewModel<LoginViewModel>()
     val userProfileViewModel = hiltViewModel<UserProfileViewModel>()
@@ -286,25 +290,55 @@ fun DroneTMApp(
                             },
 
                             actions = {
-                                IconButton(onClick = {
-                                    navigationEventsViewModel.sendEvent(
-                                        DroneTMAppNavigationEvent.OnNavigateToProfileScreen
+//                                IconButton(onClick = {
+//                                    navigationEventsViewModel.sendEvent(
+//                                        DroneTMAppNavigationEvent.OnNavigateToProfileScreen
+//                                    )
+//                                }) {
+//                                    Surface(
+//                                        shape = CircleShape,
+//                                        modifier = Modifier
+//                                            .size(24.dp)
+//                                            .padding(bottom = 0.dp),
+//                                        color = Color.Red
+//                                    ) {
+//                                        Icon(
+//                                            painter = painterResource(id = R.drawable.ic_drone_operator_icon_24),
+//                                            contentDescription = "Profile",
+//                                            tint = Color.White,
+//                                            modifier = Modifier.padding(4.dp),
+//                                        )
+//                                    }
+//                                }
+
+                                // Overflow menu button
+                                IconButton(onClick = { menuExpanded = !menuExpanded }) {
+                                    Icon(
+                                        imageVector = Icons.Default.MoreVert,
+                                        contentDescription = "More options"
                                     )
-                                }) {
-                                    Surface(
-                                        shape = CircleShape,
-                                        modifier = Modifier
-                                            .size(24.dp)
-                                            .padding(bottom = 0.dp),
-                                        color = Color.Red
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_drone_operator_icon_24),
-                                            contentDescription = "Profile",
-                                            tint = Color.White,
-                                            modifier = Modifier.padding(4.dp),
-                                        )
-                                    }
+                                }
+
+                                // Dropdown menu
+                                DropdownMenu(
+                                    expanded = menuExpanded,
+                                    onDismissRequest = { menuExpanded = false }
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text("Profile") },
+                                        onClick = {
+                                            onProfileClick(navigationEventsViewModel)
+                                            menuExpanded = false
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("Logout") },
+                                        onClick = {
+
+                                            onLogout(navigationEventsViewModel, viewModels, context)
+                                            menuExpanded = false
+                                        }
+                                    )
                                 }
 
                             },
@@ -353,4 +387,30 @@ fun DroneTMApp(
         }
 
     }
+}
+
+fun onLogout(navigationEventsViewModel: NavigationEventsViewModel, viewModels: ViewModelStoreOwner, context: Context) {
+
+    MMKVStorageService.getInstance().clear()
+
+    clearAllViewModels(viewModels)
+
+    //restart the app
+    val packageManager: PackageManager = context.packageManager
+    val intent: Intent = packageManager.getLaunchIntentForPackage(context.packageName)!!
+    val componentName: ComponentName = intent.component!!
+    val restartIntent: Intent = Intent.makeRestartActivityTask(componentName)
+    context.startActivity(restartIntent)
+    Runtime.getRuntime().exit(0)
+
+//    navigationEventsViewModel.sendEvent(
+//        DroneTMAppNavigationEvent.OnNavigateToLogin
+//    )
+
+}
+
+fun onProfileClick(navigationEventsViewModel: NavigationEventsViewModel) {
+    navigationEventsViewModel.sendEvent(
+        DroneTMAppNavigationEvent.OnNavigateToProfileScreen
+    )
 }
