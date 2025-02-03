@@ -79,7 +79,8 @@ sealed class DroneTMAppNavigationEvent {
      *
      * @property id The unique identifier of the task to navigate to.
      *   This ID is used to fetch and display the relevant task data on the detail screen.
+     * @property project The id of the project
      * @constructor Creates an instance of OnNavigateToTaskDetail with the specified task ID.
      */
-    data class OnNavigateToTaskDetail(val id: String) : DroneTMAppNavigationEvent()
+    data class OnNavigateToTaskDetail(val id: String, val project: String? = null) : DroneTMAppNavigationEvent()
 }

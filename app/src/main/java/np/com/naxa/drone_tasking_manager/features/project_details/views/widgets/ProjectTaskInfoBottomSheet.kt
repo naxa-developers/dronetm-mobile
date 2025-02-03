@@ -245,7 +245,8 @@ fun ProjectTaskInfoBottomSheet(
                                     if (taskId != null) {
                                         navigationEventsViewModel.sendEvent(
                                             DroneTMAppNavigationEvent.OnNavigateToTaskDetail(
-                                                taskId!!
+                                                taskId!!,
+                                                projectId
                                             )
                                         )
                                     }

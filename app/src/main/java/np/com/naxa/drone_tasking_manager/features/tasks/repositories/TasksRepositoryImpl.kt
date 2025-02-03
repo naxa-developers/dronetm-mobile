@@ -1,5 +1,7 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.repositories
 
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import np.com.naxa.drone_tasking_manager.core.services.ApiService
@@ -29,7 +31,13 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
                     forceRefresh = forceRefresh
                 )
 
-                emit(Response.Success(response.toProjectTask()))
+                emit(
+                    Response.Success(
+                        response.toProjectTask().copy(
+                            id = id,
+                        )
+                    )
+                )
 
             } catch (e: Exception) {
                 emit(Response.Error(e.message ?: "Error fetching task"))
@@ -84,6 +92,66 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
 
             } catch (e: Exception) {
                 emit(Response.Error(e.cause?.message ?: "Error unlocking task $taskId"))
+            }
+        }
+    }
+
+    override suspend fun taskWayPoints(
+        taskId: String,
+        projectId: String,
+        rotationAngle: Int,
+        download: Boolean,
+        forceRefresh: Boolean
+    ): Flow<Response<JsonObject>> {
+        return flow {
+            emit(Response.Loading())
+
+            try {
+                val response = apiService.taskWayPointsOrWayLines(
+                    projectId = projectId,
+                    taskId = taskId,
+                    rotationAngle = rotationAngle,
+                    download = download,
+                    mode = "waypoints",
+                    forceRefresh = forceRefresh
+                )
+
+                val jsonObject = Gson().fromJson(response.string(), JsonObject::class.java)
+
+                emit(Response.Success(jsonObject))
+
+            } catch (e: Exception) {
+                emit(Response.Error(e.cause?.message ?: "Error fetching task: $taskId waypoints"))
+            }
+        }
+    }
+
+    override suspend fun taskWayLines(
+        taskId: String,
+        projectId: String,
+        rotationAngle: Int,
+        download: Boolean,
+        forceRefresh: Boolean
+    ): Flow<Response<JsonObject>> {
+        return flow {
+            emit(Response.Loading())
+
+            try {
+                val response = apiService.taskWayPointsOrWayLines(
+                    projectId = projectId,
+                    taskId = taskId,
+                    rotationAngle = rotationAngle,
+                    download = download,
+                    mode = "waylines",
+                    forceRefresh = forceRefresh
+                )
+
+                val jsonObject = Gson().fromJson(response.string(), JsonObject::class.java)
+
+                emit(Response.Success(jsonObject))
+
+            } catch (e: Exception) {
+                emit(Response.Error(e.cause?.message ?: "Error fetching task: $taskId waylines"))
             }
         }
     }

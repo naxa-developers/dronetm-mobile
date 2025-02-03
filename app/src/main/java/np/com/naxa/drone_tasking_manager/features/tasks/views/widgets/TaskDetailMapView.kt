@@ -1,10 +1,13 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.views.widgets
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -17,6 +20,9 @@ import np.com.naxa.drone_tasking_manager.R
 import np.com.naxa.drone_tasking_manager.core.widgets.MaplibreCompose
 import np.com.naxa.drone_tasking_manager.core.widgets.rememberCameraPosition
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
+import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
+import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskWayPointsOrWayLinesState
+import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
 import np.com.naxa.drone_tasking_manager.utils.LatLngUtils
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
@@ -25,7 +31,6 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.LineLayer
-import org.maplibre.android.style.layers.PaintPropertyValue
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.layers.PropertyValue
 import org.maplibre.android.style.layers.SymbolLayer
@@ -47,8 +52,11 @@ fun TaskDetailMapView(
 ) {
 
     val context = LocalContext.current
+    val tasksViewModel = LocalTasksViewModel.current
 
     var libreMap: MapLibreMap? by remember { mutableStateOf(null) }
+
+    val waypointsOrWayLinesState by tasksViewModel.taskWayPointsOrWayLinesState.collectAsState()
 
     // For waypoints
     val waypointsSourceId = "task-waypoints-geojson-source-${task.id}"
@@ -57,6 +65,8 @@ fun TaskDetailMapView(
     // For waypoints lines
     val waypointsLineSourceId = "task-waypoints-line-geojson-source-${task.id}"
     val waypointsLineLayerId = "task-waypoints-line-layer-${task.id}"
+    val waypointsTakeOffSymbolLayerId = "task-waypoints-takeoff-symbol-layer-${task.id}"
+    val takeOffIconName = "takeoff-symbol-image--"
 
     // For Indicator arrow
     val waypointsArrowIndicatorSourceId = "task-waypoints-arrow-indicator-geojson-source-${task.id}"
@@ -73,6 +83,21 @@ fun TaskDetailMapView(
         initialTarget = LatLng(27.82, 85.32),
         initialZoom = 12.0,
     )
+
+    LaunchedEffect(task) {
+        if (task.id == null || task.projectId == null) return@LaunchedEffect
+
+        tasksViewModel.triggerEvent(
+            TasksEvent.FetchWayPointsOrWayLines(
+                taskId = task.id,
+                projectId = task.projectId,
+                rotationAngle = 0,
+                download = false,
+                isWayPoints = true,
+                forceRefresh = true
+            )
+        )
+    }
 
     fun applyWaypointsCircleLayer() {
         if (libreMap == null) return
@@ -103,6 +128,10 @@ fun TaskDetailMapView(
                 libreMap?.style?.removeLayer(waypointsCircleLayerId)
             }
 
+            if (libreMap?.style?.getImage(takeOffIconName) != null) {
+                libreMap?.style?.removeImage(takeOffIconName)
+            }
+
             libreMap?.style?.removeSource(waypointsSourceId)
         }
 
@@ -113,6 +142,11 @@ fun TaskDetailMapView(
                 // uri = URI.create("https://dev.dronetm.org/api/waypoint/task/${task.id}/?project_id=${task.projectId}&download=false&mode=waylines&rotation_angle=0")
             )
         ).also {
+
+            ContextCompat.getDrawable(context, R.drawable.location_pin_24)?.let { drawable ->
+                libreMap?.style?.addImage(takeOffIconName, drawable)
+            }
+
             libreMap?.style?.addLayer(
                 CircleLayer(
                     waypointsCircleLayerId,
@@ -129,12 +163,35 @@ fun TaskDetailMapView(
                                     Expression.ExpressionLiteral("#484848")
                                 )
                             ),
-                            PropertyFactory.circleRadius(4.0f),
+                            PropertyFactory.circleRadius(3.0f),
                             PropertyFactory.circleStrokeWidth(1.5f),
                             PropertyFactory.circleStrokeColor("#D73F3F")
                         )
                     )
                     withProperties(*propertyValues.toTypedArray())
+                    withFilter(Expression.not(Expression.eq(Expression.get("index"), 0)))
+                }
+            )
+
+            libreMap?.style?.addLayer(
+                SymbolLayer(
+                    waypointsTakeOffSymbolLayerId,
+                    waypointsSourceId,
+                ).apply {
+
+                    val propertyValues = mutableListOf<PropertyValue<*>>()
+
+                    propertyValues.addAll(
+                        listOf(
+                            PropertyFactory.iconImage(takeOffIconName),
+                            PropertyFactory.iconSize(0.9f),
+                            PropertyFactory.iconAllowOverlap(true),
+                            PropertyFactory.iconIgnorePlacement(true)
+                        )
+                    )
+
+                    withProperties(*propertyValues.toTypedArray())
+                    withFilter(Expression.eq(Expression.get("index"), 0))
                 }
             )
         }
@@ -149,6 +206,10 @@ fun TaskDetailMapView(
 
             if (libreMap?.style?.getLayer(waypointsArrowIndicatorSymbolLayerId) != null) {
                 libreMap?.style?.removeLayer(waypointsArrowIndicatorSymbolLayerId)
+            }
+
+            if (libreMap?.style?.getImage(arrowIndicatorIconName) != null) {
+                libreMap?.style?.removeImage(arrowIndicatorIconName)
             }
 
             libreMap?.style?.removeSource(waypointsArrowIndicatorSourceId)
@@ -281,6 +342,27 @@ fun TaskDetailMapView(
         applyWaypointsArrowLayer(coordinates)
     }
 
+
+    // Listen waypoints or way lines data and apply layer to the map
+    when (waypointsOrWayLinesState) {
+        TaskWayPointsOrWayLinesState.Idle, TaskWayPointsOrWayLinesState.Loading -> {}
+        is TaskWayPointsOrWayLinesState.Success -> {
+            val jsonObject =
+                (waypointsOrWayLinesState as TaskWayPointsOrWayLinesState.Success).jsonObject
+            val isWayPoints =
+                (waypointsOrWayLinesState as TaskWayPointsOrWayLinesState.Success).isWayPoints
+
+            applyWaypointsCircleLayer()
+            applyWaypointsLineLayer()
+        }
+
+        is TaskWayPointsOrWayLinesState.Error -> {
+            val error = (waypointsOrWayLinesState as TaskWayPointsOrWayLinesState.Error).message
+            Log.d("AMIT", "TaskDetailMapView: $error")
+        }
+    }
+
+
     Box(modifier = modifier.fillMaxSize()) {
         MaplibreCompose(
             modifier = Modifier.fillMaxSize(),
@@ -290,13 +372,17 @@ fun TaskDetailMapView(
             onMapReady = { libre, _ ->
                 libreMap = libre
 
-                applyWaypointsCircleLayer()
-                applyWaypointsLineLayer()
+                // applyWaypointsCircleLayer()
+                // applyWaypointsLineLayer()
 
                 libre.addOnMapClickListener { latLng ->
                     val point = libre.projection.toScreenLocation(latLng)
                     val queried = libre.queryRenderedFeatures(
-                        point, *listOf(waypointsCircleLayerId).toTypedArray()
+                        point,
+                        *listOf(
+                            waypointsCircleLayerId,
+                            waypointsTakeOffSymbolLayerId
+                        ).toTypedArray()
                     )
 
                     if (queried.isNotEmpty()) {

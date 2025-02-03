@@ -1,5 +1,6 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.repositories
 
+import com.google.gson.JsonObject
 import kotlinx.coroutines.flow.Flow
 import np.com.naxa.drone_tasking_manager.core.utils.Response
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
@@ -66,4 +67,57 @@ interface TasksRepository {
         taskId: String,
         projectId: String
     ): Flow<Response<TaskLockUnlockResponse>>
+
+    /**
+     * Retrieves the waypoints associated with a specific task.
+     *
+     * This function fetches the waypoints related to a given task ID within a specific project.
+     * It allows for optional rotation adjustment and force-refreshing of the data.
+     *
+     * @param taskId The unique identifier of the task. This is a mandatory parameter.
+     * @param projectId The unique identifier of the project to which the task belongs. This is a mandatory parameter.
+     * @param rotationAngle An optional integer representing a rotation adjustment to be applied to the waypoints. Defaults to 0 (no rotation).
+     * @param download Either download or not
+     * @param forceRefresh A boolean flag indicating whether to force a refresh of the data from the server, bypassing any cached data. Defaults to `true`.
+     * @return A [Flow] emitting [Response] objects containing a [JsonObject].
+     *         - On success, the [Response] will contain the waypoints data in the [JsonObject] within the body.
+     *         - On failure, the [Response] will have an error code and potentially an error body.
+     *         - The [Flow] allows for asynchronous handling of the response data stream.
+     *
+     */
+    suspend fun taskWayPoints(
+        taskId: String,
+        projectId: String,
+        rotationAngle: Int = 0,
+        download: Boolean = false,
+        forceRefresh: Boolean = true
+    ): Flow<Response<JsonObject>>
+
+    /**
+     * Retrieves the way lines associated with a specific task.
+     *
+     * This function fetches the way lines for a given task within a project. Way lines often
+     * represent the path or route that the task involves. It supports rotation and forced refresh
+     * to ensure the data is up-to-date.
+     *
+     * @param taskId The unique identifier of the task for which to retrieve way lines.
+     *               Must not be null or empty.
+     * @param projectId The unique identifier of the project to which the task belongs.
+     *                  Must not be null or empty.
+     * @param rotationAngle An optional integer representing the rotation applied to the way lines'
+     *                 coordinates. Defaults to 0 (no rotation). Common values are 0, 90, 180, 270.
+     * @param download Either download or not
+     * @param forceRefresh A boolean indicating whether to force a refresh of the data from the
+     *                     source, bypassing any cached data. Defaults to true. If set to false, the
+     *                     function may return cached data if available.
+     * @return A Flow emitting a Response object containing a JsonObject representing the way lines.
+     *
+     */
+    suspend fun taskWayLines(
+        taskId: String,
+        projectId: String,
+        rotationAngle: Int = 0,
+        download: Boolean = false,
+        forceRefresh: Boolean = true
+    ): Flow<Response<JsonObject>>
 }

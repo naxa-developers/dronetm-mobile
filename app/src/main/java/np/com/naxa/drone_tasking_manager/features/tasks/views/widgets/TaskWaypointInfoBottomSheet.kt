@@ -144,6 +144,20 @@ fun TaskWaypointInfoBottomSheet(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                 ) {
+
+                    // loop from 0 to it.size
+                    for (i in 0 until it.size()) {
+                        val key = it.keySet().toList()[i]
+                        val value = it.get(key)
+
+                        Text(
+                            modifier = Modifier.padding(bottom = 8.dp),
+                            text = "$key: $value",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+
                     Text(
                         modifier = Modifier.padding(bottom = 8.dp),
                         text = "Task #$taskId",

@@ -89,6 +89,6 @@ enum class Routes(
      */
     TaskDetails(
         label = "Task Details",
-        path = "task-details/{id}"
+        path = "task-details/{id}/{project}"
     ),
 }

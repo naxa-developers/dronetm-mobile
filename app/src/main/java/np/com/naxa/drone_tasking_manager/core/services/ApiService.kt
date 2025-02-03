@@ -1,5 +1,6 @@
 package np.com.naxa.drone_tasking_manager.core.services
 
+import com.google.gson.JsonObject
 import np.com.naxa.drone_tasking_manager.features.login.dto.LoginResponseDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.project.ProjectDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects.ProjectsResponseDto
@@ -10,6 +11,7 @@ import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskLockUnlockRespon
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileDto
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileUpdateDto
 import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -105,6 +107,21 @@ interface ApiService {
         @Path("task_id") taskId: String,
         @Body body: LockOrUnlockEventRequestBody
     ): TaskLockUnlockResponseDto
+
+    /**
+     * Interface defining API calls related to task waypoints or way lines.
+     * @param mode: It will be waylines or waypoints
+     */
+    @POST("api/waypoint/task/{task_id}")
+    suspend fun taskWayPointsOrWayLines(
+        @Path("task_id") taskId: String,
+        @Query("project_id") projectId: String,
+        @Query("download") download: Boolean,
+        @Query("rotation_angle") rotationAngle: Int,
+        @Query("mode") mode: String,
+        @Query("force_refresh") forceRefresh: Boolean = true,
+        @Body body: JsonObject = JsonObject()
+    ): ResponseBody
 
     @GET("api/users/my-info/")
     suspend fun fetchMyInfo(

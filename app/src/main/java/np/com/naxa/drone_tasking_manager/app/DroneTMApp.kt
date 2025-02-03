@@ -187,10 +187,15 @@ fun DroneTMApp(
                 is DroneTMAppNavigationEvent.OnNavigateToTaskDetail -> {
                     if (currentRoute?.path != Routes.TaskDetails.path) {
                         navController.navigate(
-                            Routes.TaskDetails.path.replace(
-                                "{id}",
-                                event.id
-                            )
+                            Routes.TaskDetails.path
+                                .replace(
+                                    "{id}",
+                                    event.id
+                                )
+                                .replace(
+                                    "{project}",
+                                    event.project ?: ""
+                                )
                         )
                     }
                 }

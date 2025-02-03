@@ -140,9 +140,11 @@ fun DroneTMAppNavHost(
             },
         ) { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")
+            val project = backStackEntry.arguments?.getString("project")
             TaskDetailsScreen(
                 modifier = modifier,
                 taskId = id,
+                projectId = project
             )
         }
 

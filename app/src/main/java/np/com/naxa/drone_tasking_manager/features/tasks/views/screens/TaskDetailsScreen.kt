@@ -51,7 +51,8 @@ import kotlin.math.roundToInt
 @Composable
 fun TaskDetailsScreen(
     modifier: Modifier = Modifier,
-    taskId: String?,
+    taskId: String? = null,
+    projectId: String? = null
 ) {
 
     val scope = rememberCoroutineScope()
@@ -112,7 +113,9 @@ fun TaskDetailsScreen(
         }
 
         is TaskDetailState.Success -> {
-            val task = (state as TaskDetailState.Success).project
+            val task = (state as TaskDetailState.Success).projectTask.copy(
+                projectId = projectId
+            )
             Box(modifier = modifier.fillMaxSize()) {
                 LazyColumn(
                     state = listState,

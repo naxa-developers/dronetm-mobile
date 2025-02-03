@@ -58,6 +58,31 @@ sealed class TasksEvent {
     data class LockTask(val taskId: String, val projectId: String) : TasksEvent()
 
     /**
+     * Data class representing a request to fetch waypoints or waylines.
+     *
+     * This class encapsulates the necessary information for triggering the retrieval
+     * of either waypoints or waylines associated with a specific task and project.
+     * It also includes options for controlling the data retrieval behavior, such as
+     * rotation angle, whether to download data, whether to fetch waypoints or waylines,
+     * and whether to force a refresh of the data.
+     *
+     * @property taskId The unique identifier of the task associated with the waypoints/waylines.
+     * @property projectId The unique identifier of the project associated with the task.
+     * @property rotationAngle The rotation angle (in degrees) to be applied to the waypoints/waylines. Defaults to 0.
+     * @property download Indicates whether the fetched data should be downloaded. Defaults to false.
+     * @property isWayPoints A flag indicating whether waypoints (true) or waylines (false) are being requested.
+     * @property forceRefresh If true, forces a refresh of the data, bypassing any cached data. Defaults to false.
+     */
+    data class FetchWayPointsOrWayLines(
+        val taskId: String,
+        val projectId: String,
+        val rotationAngle: Int = 0,
+        val download: Boolean = false,
+        val isWayPoints: Boolean,
+        val forceRefresh: Boolean = true
+    ) : TasksEvent()
+
+    /**
      * Represents the state of various reset actions within the application.
      *
      * This data class encapsulates the state of three distinct reset actions:
@@ -79,6 +104,7 @@ sealed class TasksEvent {
     data class ResetState(
         val lockState: Boolean = false,
         val unlockState: Boolean = false,
-        val taskDetailState: Boolean = false
+        val taskDetailState: Boolean = false,
+        val taskWayPointsOrWayLinesState: Boolean = false
     ) : TasksEvent()
 }

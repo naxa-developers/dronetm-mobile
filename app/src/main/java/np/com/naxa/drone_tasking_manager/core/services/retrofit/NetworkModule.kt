@@ -32,7 +32,9 @@ class NetworkModule {
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
+            // .hostnameVerifier { hostname, session -> true }
             .addInterceptor(CacheInterceptor())
+
             .build()
     }
 

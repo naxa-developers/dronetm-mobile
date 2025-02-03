@@ -17,7 +17,7 @@ import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
  */
 sealed class TaskDetailState {
     data object Idle : TaskDetailState()
-    data class Success(val project: ProjectTask) : TaskDetailState()
+    data class Success(val projectTask: ProjectTask) : TaskDetailState()
     data class Error(val message: String) : TaskDetailState()
     data object Loading : TaskDetailState()
 }
