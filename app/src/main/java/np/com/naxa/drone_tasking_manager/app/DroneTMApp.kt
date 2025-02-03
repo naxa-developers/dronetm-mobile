@@ -296,9 +296,6 @@ fun DroneTMApp(
 
                             actions = {
                                 IconButton(onClick = {
-//                                    navigationEventsViewModel.sendEvent(
-//                                        DroneTMAppNavigationEvent.OnNavigateToProfileScreen
-//                                    )
                                     menuExpanded = !menuExpanded
                                 }) {
                                     Surface(
