@@ -274,3 +274,23 @@ fun Color.toColor(): Int {
         (this.blue * 255).toInt()
     )
 }
+
+/**
+ * Rounds a Double to a specified number of decimal places.
+ *
+ * This function formats the Double as a string with the specified number of decimal places
+ * and then parses the resulting string back to a Double.
+ *
+ * @param to The number of decimal places to round to. Must be a non-negative integer.
+ * @return The rounded Double value.
+ * @throws IllegalArgumentException if 'to' is negative.
+ *
+ * Example:
+ * ```kotlin
+ * val number = 3.14159
+ * val roundedNumber = number.round(2) // roundedNumber will be 3.14
+ * val roundedNumber2 = number.round(0) // roundedNumber2 will be 3.0
+ * val roundedNumber3 = 3.999.round(0) // roundedNumber3 will be 4.0
+ * ```
+ */
+fun Double.round(to: Int) = "%.${to}f".format(this).toDouble()

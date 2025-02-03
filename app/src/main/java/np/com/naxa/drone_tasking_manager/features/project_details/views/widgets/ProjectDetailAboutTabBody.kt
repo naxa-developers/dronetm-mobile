@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import np.com.naxa.drone_tasking_manager.features.projects.models.Project
+import np.com.naxa.drone_tasking_manager.utils.round
 
 @Composable
 fun ProjectDetailAboutTabBody(
@@ -28,7 +29,7 @@ fun ProjectDetailAboutTabBody(
         )
         Text(modifier = Modifier.weight(0.25f), text = ":")
         Text(
-            modifier = Modifier.weight(2f),
+            modifier = Modifier.weight(1f),
             text = value,
             style = MaterialTheme.typography.titleSmall
         )
@@ -41,11 +42,22 @@ fun ProjectDetailAboutTabBody(
     ) {
         Text(
             modifier = Modifier.padding(vertical = 10.dp),
-            text =project.description ?: "",
+            text = project.description ?: "",
             style = MaterialTheme.typography.bodyMedium
         )
-        label(title = "Total Project Area", value = project.projectArea?.toString() ?: "")
-        label(title = "Project Created By", value = project.authorName ?: "")
+        label(
+            title = "Total Project Area",
+            value = project.projectArea?.round(4)?.toString() ?: "0.0"
+        )
+
         label(title = "Total Tasks", value = project.tasks.size.toString())
+
+        label(title = "Project Created By", value = project.authorName ?: "")
+
+        label(
+            title = "Require Approval to Lock Task",
+            value = if (project.requiresApprovalFromManagerForLocking == true) "Yes" else "No"
+        )
+
     }
 }
