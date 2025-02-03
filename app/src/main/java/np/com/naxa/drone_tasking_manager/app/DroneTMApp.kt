@@ -7,11 +7,12 @@ import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.LineStyle
 import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -24,6 +25,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -36,23 +38,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
+import np.com.naxa.drone_tasking_manager.R
 import np.com.naxa.drone_tasking_manager.Routes
 import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
 import np.com.naxa.drone_tasking_manager.core.theme.DroneTMAppTheme
 import np.com.naxa.drone_tasking_manager.core.utils.clearAllViewModels
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.LoginViewModel
-import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.UserProfileViewModel
 import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.ProjectDetailViewModel
 import np.com.naxa.drone_tasking_manager.features.projects.viewmodels.ProjectsViewModel
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.TasksViewModel
 import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.viewmodels.RefreshTokenViewModel
+import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.UserProfileViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalDownloadAndTransferFileViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalLoginViewModel
@@ -290,34 +295,28 @@ fun DroneTMApp(
                             },
 
                             actions = {
-//                                IconButton(onClick = {
+                                IconButton(onClick = {
 //                                    navigationEventsViewModel.sendEvent(
 //                                        DroneTMAppNavigationEvent.OnNavigateToProfileScreen
 //                                    )
-//                                }) {
-//                                    Surface(
-//                                        shape = CircleShape,
-//                                        modifier = Modifier
-//                                            .size(24.dp)
-//                                            .padding(bottom = 0.dp),
-//                                        color = Color.Red
-//                                    ) {
-//                                        Icon(
-//                                            painter = painterResource(id = R.drawable.ic_drone_operator_icon_24),
-//                                            contentDescription = "Profile",
-//                                            tint = Color.White,
-//                                            modifier = Modifier.padding(4.dp),
-//                                        )
-//                                    }
-//                                }
-
-                                // Overflow menu button
-                                IconButton(onClick = { menuExpanded = !menuExpanded }) {
-                                    Icon(
-                                        imageVector = Icons.Default.MoreVert,
-                                        contentDescription = "More options"
-                                    )
+                                    menuExpanded = !menuExpanded
+                                }) {
+                                    Surface(
+                                        shape = CircleShape,
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .padding(bottom = 0.dp),
+                                        color = Color.Red
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_drone_operator_icon_24),
+                                            contentDescription = "Profile",
+                                            tint = Color.White,
+                                            modifier = Modifier.padding(4.dp),
+                                        )
+                                    }
                                 }
+
 
                                 // Dropdown menu
                                 DropdownMenu(
@@ -389,7 +388,11 @@ fun DroneTMApp(
     }
 }
 
-fun onLogout(navigationEventsViewModel: NavigationEventsViewModel, viewModels: ViewModelStoreOwner, context: Context) {
+fun onLogout(
+    navigationEventsViewModel: NavigationEventsViewModel,
+    viewModels: ViewModelStoreOwner,
+    context: Context
+) {
 
     MMKVStorageService.getInstance().clear()
 
