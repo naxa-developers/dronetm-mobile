@@ -14,6 +14,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,13 +25,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.delay
 import np.com.naxa.drone_tasking_manager.R
 import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
 import np.com.naxa.drone_tasking_manager.core.services.storage.StorageKeys
 import np.com.naxa.drone_tasking_manager.core.theme.PrimaryColor
 import np.com.naxa.drone_tasking_manager.core.utils.DataUtils
+import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.viewmodels.RefreshTokenViewModel
+import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.viewmodels.events.RefreshTokenEvents
+import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.viewmodels.states.RefreshTokenState
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalRefreshTokenViewModel
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 
 @Composable
@@ -40,6 +47,15 @@ fun SplashScreen(
     val alphaAnimation = remember { Animatable(0f) }
     val navigationEventsViewModel = LocalNavigationEventsViewModel.current
 
+    val refreshTokenViewModel = LocalRefreshTokenViewModel.current
+    val refreshTokenState by refreshTokenViewModel.state.collectAsState()
+
+
+    LaunchedEffect (Unit){
+        refreshTokenViewModel.onEvent(RefreshTokenEvents.RefreshToken(forceRefresh = true))
+    }
+
+
     LaunchedEffect(Unit) {
         alphaAnimation.animateTo(
             targetValue = 1f,
@@ -47,24 +63,30 @@ fun SplashScreen(
         )
         delay(2000)
 
-        try {
-            val storageService = MMKVStorageService.getInstance()
+        if(refreshTokenState.isSuccess){
+            try {
+                val storageService = MMKVStorageService.getInstance()
 
-            if (storageService.get<String>(StorageKeys.User.ACCESS_TOKEN, "").trim().isNotBlank()) {
-                navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToProjects)
+                if (storageService.get<String>(StorageKeys.User.ACCESS_TOKEN, "").trim().isNotBlank()) {
+                    navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToProjects)
 //                navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToLogin)
-                return@LaunchedEffect
-            } else {
+                    return@LaunchedEffect
+                } else {
+                    navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToLogin)
+                    return@LaunchedEffect
+                }
+            }catch (e: DataUtils.EncryptionException){
+                // navigate to login screen if access token is not found/empty or error while decrypting the saved access token
                 navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToLogin)
                 return@LaunchedEffect
             }
-        }catch (e: DataUtils.EncryptionException){
-            // navigate to login screen if access token is not found/empty or error while decrypting the saved access token
-            navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToLogin)
-            return@LaunchedEffect
         }
 
+
     }
+
+
+
 
     Box(
         modifier = modifier
