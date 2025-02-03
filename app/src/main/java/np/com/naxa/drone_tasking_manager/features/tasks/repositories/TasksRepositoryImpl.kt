@@ -1,7 +1,5 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.repositories
 
-import com.google.gson.Gson
-import com.google.gson.JsonObject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import np.com.naxa.drone_tasking_manager.core.services.ApiService
@@ -12,6 +10,7 @@ import np.com.naxa.drone_tasking_manager.features.tasks.mapper.toTaskLockUnlockR
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.models.TaskLockUnlockResponse
 import np.com.naxa.drone_tasking_manager.utils.DateUtils
+import org.maplibre.geojson.FeatureCollection
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -102,10 +101,9 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
         rotationAngle: Int,
         download: Boolean,
         forceRefresh: Boolean
-    ): Flow<Response<JsonObject>> {
+    ): Flow<Response<FeatureCollection>> {
         return flow {
             emit(Response.Loading())
-
             try {
                 val response = apiService.taskWayPointsOrWayLines(
                     projectId = projectId,
@@ -116,9 +114,7 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
                     forceRefresh = forceRefresh
                 )
 
-                val jsonObject = Gson().fromJson(response.string(), JsonObject::class.java)
-
-                emit(Response.Success(jsonObject))
+                emit(Response.Success(response))
 
             } catch (e: Exception) {
                 emit(Response.Error(e.cause?.message ?: "Error fetching task: $taskId waypoints"))
@@ -132,7 +128,7 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
         rotationAngle: Int,
         download: Boolean,
         forceRefresh: Boolean
-    ): Flow<Response<JsonObject>> {
+    ): Flow<Response<FeatureCollection>> {
         return flow {
             emit(Response.Loading())
 
@@ -146,9 +142,7 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
                     forceRefresh = forceRefresh
                 )
 
-                val jsonObject = Gson().fromJson(response.string(), JsonObject::class.java)
-
-                emit(Response.Success(jsonObject))
+                emit(Response.Success(response))
 
             } catch (e: Exception) {
                 emit(Response.Error(e.cause?.message ?: "Error fetching task: $taskId waylines"))

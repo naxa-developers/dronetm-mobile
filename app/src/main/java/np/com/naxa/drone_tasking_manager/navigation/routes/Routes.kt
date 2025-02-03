@@ -92,7 +92,7 @@ enum class Routes(
 
     /**
      * Route for displaying the Task Details screen.
-     * Path: /task-details/{id}
+     * Path: /task-details/{id}/{project}
      */
     TaskDetails(
         label = "Task Details",

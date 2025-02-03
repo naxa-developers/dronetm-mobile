@@ -12,11 +12,15 @@ import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.dto.Ref
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileDto
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileUpdateDto
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
+import org.maplibre.geojson.FeatureCollection
 import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.Headers
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -107,7 +111,7 @@ interface ApiService {
      * Interface defining API calls related to task waypoints or way lines.
      * @param mode: It will be waylines or waypoints
      */
-    @POST("api/waypoint/task/{task_id}")
+    @POST("api/waypoint/task/{task_id}/")
     suspend fun taskWayPointsOrWayLines(
         @Path("task_id") taskId: String,
         @Query("project_id") projectId: String,
@@ -115,8 +119,10 @@ interface ApiService {
         @Query("rotation_angle") rotationAngle: Int,
         @Query("mode") mode: String,
         @Query("force_refresh") forceRefresh: Boolean = true,
-        @Body body: JsonObject = JsonObject()
-    ): ResponseBody
+        @Header("Accept") accept: String = "application/json",
+        @Header("Content-Type") contentType: String = "application/json",
+        @Body body: RequestBody = "".toRequestBody(null)
+    ): FeatureCollection
 
     @GET("api/users/my-info/")
     suspend fun fetchMyInfo(

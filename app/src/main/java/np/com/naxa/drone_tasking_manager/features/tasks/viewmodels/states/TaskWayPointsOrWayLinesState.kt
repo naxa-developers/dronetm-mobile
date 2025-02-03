@@ -1,6 +1,7 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states
 
 import com.google.gson.JsonObject
+import org.maplibre.geojson.FeatureCollection
 
 /**
  * Represents the state of loading and processing Task Waypoints or Waylines data.
@@ -11,7 +12,7 @@ import com.google.gson.JsonObject
  */
 sealed class TaskWayPointsOrWayLinesState {
     data object Idle : TaskWayPointsOrWayLinesState()
-    data class Success(val jsonObject: JsonObject, val isWayPoints: Boolean) :
+    data class Success(val geoJson: FeatureCollection, val isWayPoints: Boolean) :
         TaskWayPointsOrWayLinesState()
     data class Error(val message: String) : TaskWayPointsOrWayLinesState()
     data object Loading : TaskWayPointsOrWayLinesState()
