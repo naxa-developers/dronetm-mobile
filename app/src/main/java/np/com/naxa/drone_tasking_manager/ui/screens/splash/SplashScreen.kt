@@ -47,6 +47,7 @@ fun SplashScreen(
     val alphaAnimation = remember { Animatable(0f) }
     val navigationEventsViewModel = LocalNavigationEventsViewModel.current
 
+
     val refreshTokenViewModel = LocalRefreshTokenViewModel.current
     val refreshTokenState by refreshTokenViewModel.state.collectAsState()
 
