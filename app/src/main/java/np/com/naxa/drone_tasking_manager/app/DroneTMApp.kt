@@ -237,6 +237,7 @@ fun DroneTMApp(
                 topBar = {
                     if (currentRoute != Routes.Splash
                         && currentRoute != Routes.Home
+                        && currentRoute != Routes.Login
                         && currentRoute != Routes.ProjectsMap
                         && currentRoute != Routes.ProjectDetails
                     ) {
@@ -295,6 +296,7 @@ fun DroneTMApp(
                             },
 
                             actions = {
+                                if(currentRoute == Routes.ProjectsList){
                                 IconButton(onClick = {
                                     menuExpanded = !menuExpanded
                                 }) {
@@ -312,6 +314,7 @@ fun DroneTMApp(
                                             modifier = Modifier.padding(4.dp),
                                         )
                                     }
+                                }
                                 }
 
 
