@@ -1,5 +1,7 @@
 package np.com.naxa.drone_tasking_manager.features.user.profile.models
 
+import java.math.BigInteger
+
 data class UserProfile(
     val certificate_file: String?,
     val certificate_url: String?,
@@ -23,5 +25,5 @@ data class UserProfile(
     val registration_certificate_url: String?,
     val registration_file: String?,
     val role: List<String?>?,
-    val user_id: Long?
+    val user_id: BigInteger?
 )

@@ -15,6 +15,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import np.com.naxa.drone_tasking_manager.navigation.routes.Routes
 import np.com.naxa.drone_tasking_manager.features.login.views.screens.LoginScreen
+import np.com.naxa.drone_tasking_manager.features.user.profile.views.screens.UserProfileScreen
 import np.com.naxa.drone_tasking_manager.features.project_details.views.screens.ProjectDetailsScreen
 import np.com.naxa.drone_tasking_manager.features.projects.views.screens.ProjectsListScreen
 import np.com.naxa.drone_tasking_manager.features.projects.views.screens.ProjectsMapScreen
@@ -69,6 +70,11 @@ fun DroneTMAppNavHost(
         // Route for the Home Screen
         composable(Routes.Login.path) {
             LoginScreen()
+        }
+
+        // Route for the Home screen
+        composable(Routes.ProfileScreen.path) {
+            UserProfileScreen()
         }
 
         navigation(

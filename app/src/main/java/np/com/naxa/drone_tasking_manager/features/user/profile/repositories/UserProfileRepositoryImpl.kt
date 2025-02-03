@@ -25,6 +25,7 @@ class UserProfileRepositoryImpl @Inject constructor(private val apiService: ApiS
                 try {
                     apiService.fetchMyInfo(forceRefresh)
                 } catch (e: HttpException) {
+                    e.printStackTrace()
                     // Handle HTTP-specific exceptions
                     return@flow emit(Response.Error(e.message()))
                 } catch (e: IOException) {
@@ -33,9 +34,9 @@ class UserProfileRepositoryImpl @Inject constructor(private val apiService: ApiS
                     return@flow emit(Response.Error(e.message ?: "Could not load data"))
                 } catch (e: Exception) {
                     // Handle any other unexpected exceptions
+                    e.printStackTrace()
                     return@flow emit(Response.Error(e.message ?: "Unknown Error"))
                 }
-
             val myInfoDetails = response.toUserProfile()
 
             storeUserData(myInfoDetails)

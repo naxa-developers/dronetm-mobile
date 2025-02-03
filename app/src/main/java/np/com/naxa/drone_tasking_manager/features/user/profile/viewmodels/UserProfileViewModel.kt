@@ -1,5 +1,6 @@
 package np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,7 +32,7 @@ class UserProfileViewModel @Inject constructor(
     fun onEvent(event: UserProfileEvents) {
         when (event) {
             is UserProfileEvents.FetchUserProfile -> {
-                fetchUserProfile()
+                fetchUserProfile(forceRefresh = event.forceRefresh)
             }
 
             is UserProfileEvents.UpdateBasicDetails -> {
@@ -45,16 +46,18 @@ class UserProfileViewModel @Inject constructor(
     }
 
 
-    private fun fetchUserProfile() {
+    private fun fetchUserProfile(forceRefresh: Boolean) {
         viewModelScope.launch {
-            fetchUserProfileUseCase.invoke(forceRefresh = true).collect { result ->
+            fetchUserProfileUseCase.invoke(forceRefresh = forceRefresh).collect { result ->
                 when (result) {
+
                     is Response.Loading -> {
                         _userProfileState.value = _userProfileState.value.copy(
                             isUserProfileLoading = true,
                             isUserProfileSuccess = false,
                         )
                     }
+
 
                     is Response.Success -> {
                         _userProfileState.value = _userProfileState.value.copy(
@@ -73,13 +76,6 @@ class UserProfileViewModel @Inject constructor(
                         )
                     }
 
-                    else -> {
-                        _userProfileState.value = _userProfileState.value.copy(
-                            isUserProfileLoading = false,
-                            isUserProfileSuccess = false,
-                            userProfileError = "Unknown Error"
-                        )
-                    }
                 }
             }
         }

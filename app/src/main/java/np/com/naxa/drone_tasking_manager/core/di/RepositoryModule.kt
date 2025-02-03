@@ -11,6 +11,8 @@ import np.com.naxa.drone_tasking_manager.features.projects.repositories.Projects
 import np.com.naxa.drone_tasking_manager.features.projects.repositories.ProjectsRepositoryImpl
 import np.com.naxa.drone_tasking_manager.features.tasks.repositories.TasksRepository
 import np.com.naxa.drone_tasking_manager.features.tasks.repositories.TasksRepositoryImpl
+import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.repositories.RefreshTokenRepository
+import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.repositories.RefreshTokenRepositoryImpl
 import np.com.naxa.drone_tasking_manager.features.user.profile.repositories.UserProfileRepository
 import np.com.naxa.drone_tasking_manager.features.user.profile.repositories.UserProfileRepositoryImpl
 import javax.inject.Singleton
@@ -60,5 +62,11 @@ abstract class RepositoryModule {
     abstract fun bindUserProfileRepository(
         userProfileRepositoryImpl: UserProfileRepositoryImpl
     ): UserProfileRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRefreshTokenRepository(
+        refreshTokenRepositoryImpl: RefreshTokenRepositoryImpl
+    ): RefreshTokenRepository
 
 }

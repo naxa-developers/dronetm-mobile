@@ -11,7 +11,6 @@ import np.com.naxa.drone_tasking_manager.features.login.viewmodels.events.LoginE
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.states.LoginStates
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.usecases.GoogleLoginUseCase
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.usecases.NormalLoginUseCase
-import np.com.naxa.drone_tasking_manager.features.login.viewmodels.usecases.RefreshTokenUseCase
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.UserProfileViewModel
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.events.UserProfileEvents
 import javax.inject.Inject
@@ -20,7 +19,6 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val normalLoginUseCase: NormalLoginUseCase,
     private val googleLoginUseCase: GoogleLoginUseCase,
-    private val refreshTokenUseCase: RefreshTokenUseCase,
     private val userProfileViewModel: UserProfileViewModel
 ) : ViewModel() {
 
@@ -35,10 +33,6 @@ class LoginViewModel @Inject constructor(
 
             is LoginEvents.GoogleLogin -> {
                 googleLogin(event.role, event.code, event.state)
-            }
-
-            is LoginEvents.RefreshToken -> {
-                refreshToken { event.onRefreshed.invoke(it) }
             }
         }
     }
@@ -56,7 +50,11 @@ class LoginViewModel @Inject constructor(
                         result.data?.let { loginResponse ->
 
                             // Fetch User profile after successful login
-                            userProfileViewModel.onEvent(UserProfileEvents.FetchUserProfile)
+                            userProfileViewModel.onEvent(
+                                UserProfileEvents.FetchUserProfile(
+                                    forceRefresh = true
+                                )
+                            )
 
                             _state.value = _state.value.copy(
                                 isLoginSuccess = loginResponse,
@@ -125,21 +123,5 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun refreshToken(onRefreshed: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            refreshTokenUseCase.invoke().collect { result ->
-                when (result) {
-                    is Response.Loading -> {}
-                    is Response.Success -> {
-                        onRefreshed.invoke(true)
-                    }
-
-                    is Response.Error -> {
-                        onRefreshed.invoke(false)
-                    }
-                }
-            }
-        }
-    }
 
 }

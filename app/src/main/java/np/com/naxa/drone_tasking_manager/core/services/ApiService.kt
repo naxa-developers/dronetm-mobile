@@ -8,6 +8,7 @@ import np.com.naxa.drone_tasking_manager.features.projects.dto.projects_centroid
 import np.com.naxa.drone_tasking_manager.features.tasks.dto.LockOrUnlockEventRequestBody
 import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskDto
 import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskLockUnlockResponseDto
+import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.dto.RefreshTokenDto
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileDto
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileUpdateDto
 import okhttp3.RequestBody
@@ -134,4 +135,10 @@ interface ApiService {
         @Path("id") userId: String,
         @Body body: RequestBody
     ): UserProfileUpdateDto
+
+
+    @GET("api/users/refresh-token")
+    suspend fun refreshToken(
+        @Query("force_refresh") forceRefresh: Boolean = true
+    ): RefreshTokenDto
 }
