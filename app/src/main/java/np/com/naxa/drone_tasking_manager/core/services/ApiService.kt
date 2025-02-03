@@ -104,7 +104,7 @@ interface ApiService {
     ): UserProfileUpdateDto
 
 
-    @GET("/api/users/refresh-token")
+    @GET("api/users/refresh-token")
     suspend fun refreshToken(
         @Query("force_refresh") forceRefresh: Boolean = true
     ): RefreshTokenDto

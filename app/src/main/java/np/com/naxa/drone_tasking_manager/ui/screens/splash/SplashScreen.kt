@@ -51,11 +51,6 @@ fun SplashScreen(
     val refreshTokenState by refreshTokenViewModel.state.collectAsState()
 
 
-    LaunchedEffect (Unit){
-        refreshTokenViewModel.onEvent(RefreshTokenEvents.RefreshToken(forceRefresh = true))
-    }
-
-
     LaunchedEffect(Unit) {
         alphaAnimation.animateTo(
             targetValue = 1f,
@@ -63,13 +58,13 @@ fun SplashScreen(
         )
         delay(2000)
 
-        if(refreshTokenState.isSuccess){
             try {
                 val storageService = MMKVStorageService.getInstance()
 
                 if (storageService.get<String>(StorageKeys.User.ACCESS_TOKEN, "").trim().isNotBlank()) {
-                    navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToProjects)
-//                navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToLogin)
+//                    navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToProjects)
+                    refreshTokenViewModel.onEvent(RefreshTokenEvents.RefreshToken(forceRefresh = true))
+
                     return@LaunchedEffect
                 } else {
                     navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToLogin)
@@ -80,9 +75,17 @@ fun SplashScreen(
                 navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToLogin)
                 return@LaunchedEffect
             }
-        }
 
 
+    }
+
+
+    // check refresh token state and navigate to respective screen
+    if(refreshTokenState.isSuccess && !refreshTokenState.isLoading && refreshTokenState.errorMessage.isEmpty()){
+        navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToProjects)
+    }
+    else if(!refreshTokenState.isSuccess && !refreshTokenState.isLoading && refreshTokenState.errorMessage.isNotEmpty()){
+        navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToLogin)
     }
 
 

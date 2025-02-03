@@ -1,5 +1,6 @@
 package np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.repositories
 
+import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import np.com.naxa.drone_tasking_manager.core.services.ApiService
@@ -52,6 +53,8 @@ class RefreshTokenRepositoryImpl @Inject constructor(private val apiService: Api
 
 
     private fun updateTokenData(response: RefreshToken) {
+
+        Log.d("RefreshTokenRepositoryImpl", "updateTokenData: $response")
 
         storageService.save(StorageKeys.User.ACCESS_TOKEN, response.access_token)
         storageService.save(StorageKeys.User.REFRESH_TOKEN, response.refresh_token)
