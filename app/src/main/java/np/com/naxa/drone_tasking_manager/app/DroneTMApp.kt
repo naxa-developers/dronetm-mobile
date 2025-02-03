@@ -51,12 +51,14 @@ import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.UserPr
 import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.ProjectDetailViewModel
 import np.com.naxa.drone_tasking_manager.features.projects.viewmodels.ProjectsViewModel
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.TasksViewModel
+import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.viewmodels.RefreshTokenViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalDownloadAndTransferFileViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalLoginViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalProjectDetailViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalProjectsViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalRefreshTokenViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalUsbDeviceViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalUserProfileViewModel
@@ -100,6 +102,7 @@ fun DroneTMApp(
     val projectsViewModel = hiltViewModel<ProjectsViewModel>()
     val projectDetailViewModel = hiltViewModel<ProjectDetailViewModel>()
     val tasksViewModel = hiltViewModel<TasksViewModel>()
+    val refreshTokenViewModel = hiltViewModel<RefreshTokenViewModel>()
 
 
     val topBarTitle by remember {
@@ -215,7 +218,8 @@ fun DroneTMApp(
         LocalUserProfileViewModel provides userProfileViewModel,
         LocalProjectsViewModel provides projectsViewModel,
         LocalProjectDetailViewModel provides projectDetailViewModel,
-        LocalTasksViewModel provides tasksViewModel
+        LocalTasksViewModel provides tasksViewModel,
+        LocalRefreshTokenViewModel provides refreshTokenViewModel
     ) {
         DroneTMAppTheme {
             Scaffold(
