@@ -16,6 +16,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.documentfile.provider.DocumentFile
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import np.com.naxa.drone_tasking_manager.navigation.routes.Routes
@@ -294,3 +296,74 @@ fun Color.toColor(): Int {
  * ```
  */
 fun Double.round(to: Int) = "%.${to}f".format(this).toDouble()
+
+/**
+ * Converts a Map<String, Any?> to a JsonObject.
+ *
+ * This function recursively transforms a Kotlin Map into a Gson JsonObject. It handles various data types
+ * including null, String, Number, Boolean, nested Maps, and Lists.
+ *
+ * The supported types within the map are:
+ *   - null: Converted to a null JSON property.
+ *   - String: Converted to a JSON string property.
+ *   - Number: Converted to a JSON number property.
+ *   - Boolean: Converted to a JSON boolean property.
+ *   - Map<String, Any?>: Recursively converted to a nested JsonObject.
+ *   - List<*>: Converted to a JsonArray. The list items can be String, Number, Boolean or Map<String, Any?>,
+ *     which will be converted accordingly.
+ *   - Other types inside the list are ignored.
+ *
+ * @receiver The Map<String, Any?> to be converted.
+ * @return A JsonObject representing the input Map.
+ * @throws ClassCastException If a nested Map is not of type Map<String, Any?>.
+ * @throws ClassCastException If a nested List contains elements that are not supported.
+ */
+fun Map<*, *>.toJsonObject(): JsonObject {
+    val jsonObject = JsonObject()
+
+    forEach { (key, value) ->
+        when (value) {
+            null -> jsonObject.addProperty(key.toString(), null as String?)
+            is String -> jsonObject.addProperty(key.toString(), value)
+            is Number -> jsonObject.addProperty(key.toString(), value)
+            is Boolean -> jsonObject.addProperty(key.toString(), value)
+            is Map<*, *> -> jsonObject.add(key.toString(), value.toJsonObject())
+            is List<*> -> jsonObject.add(key.toString(), value.toJsonArray())
+        }
+    }
+    return jsonObject
+}
+
+/**
+ * Converts a List of mixed data types to a JsonArray.
+ *
+ * This extension function iterates through a List and converts each element into its
+ * corresponding JSON representation, adding it to a JsonArray. It supports various
+ * data types including:
+ *   - null: Represented as a JSON null value.
+ *   - String: Added as a JSON string.
+ *   - Number: Added as a JSON number.
+ *   - Boolean: Added as a JSON boolean.
+ *   - Map<*, *>: Recursively converted to a JsonObject using the [toJsonObject] extension.
+ *   - List<*>: Recursively converted to a JsonArray using this [toJsonArray] extension.
+ *
+ * If an element's type is not one of the above, it's ignored for now (not added to the JsonArray)
+ *
+ * @return A JsonArray containing the JSON representation of the List's elements.
+ *
+ * @see toJsonObject
+ */
+fun List<*>.toJsonArray(): JsonArray {
+    val jsonArray = JsonArray()
+    forEach { item ->
+        when (item) {
+            null -> jsonArray.add(null as String?)
+            is String -> jsonArray.add(item)
+            is Number -> jsonArray.add(item)
+            is Boolean -> jsonArray.add(item)
+            is Map<*, *> -> jsonArray.add(item.toJsonObject())
+            is List<*> -> jsonArray.add(item.toJsonArray())
+        }
+    }
+    return jsonArray
+}

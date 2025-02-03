@@ -7,24 +7,23 @@ import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import np.com.naxa.drone_tasking_manager.features.projects.models.Project
+import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 
 @Composable
 fun ProjectDetailTabView(
     modifier: Modifier = Modifier,
+    selected: Int = 0,
+    onSelected: (Int) -> Unit = {},
     project: Project,
+    onTaskClick: (ProjectTask) -> Unit = {}
 ) {
 
     val primaryColor = MaterialTheme.colorScheme.primary
-    var selected by remember { mutableIntStateOf(0) }
     val tabTitles = listOf("About", "Available Tasks", "Instructions", "Contributions")
 
     Column(modifier = modifier) {
@@ -32,7 +31,7 @@ fun ProjectDetailTabView(
             tabTitles.forEachIndexed { index, title ->
                 Tab(
                     selected = selected == index,
-                    onClick = { selected = index },
+                    onClick = { onSelected.invoke(index) },
                     text = {
                         Text(
                             text = title,
@@ -52,6 +51,7 @@ fun ProjectDetailTabView(
             1 -> ProjectDetailAvailableTasksTabBody(
                 modifier = Modifier.fillMaxWidth(),
                 project = project,
+                onTaskClick = { onTaskClick.invoke(it) }
             )
 
             2 -> ProjectDetailInstructionsTabBody(
@@ -62,6 +62,7 @@ fun ProjectDetailTabView(
             3 -> ProjectDetailContributionsTabBody(
                 modifier = Modifier.fillMaxWidth(),
                 project = project,
+                onTaskClick = { onTaskClick.invoke(it) }
             )
         }
     }
