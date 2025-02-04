@@ -145,6 +145,10 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
 
+    /* *****************************************************
+    **** Image
+    ****************************************************** */
+    implementation(libs.coil.compose)
 
 
     /* *****************************************************

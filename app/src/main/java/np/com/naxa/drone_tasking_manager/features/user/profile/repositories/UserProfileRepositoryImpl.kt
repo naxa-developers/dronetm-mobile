@@ -6,8 +6,10 @@ import np.com.naxa.drone_tasking_manager.core.services.ApiService
 import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
 import np.com.naxa.drone_tasking_manager.core.services.storage.StorageKeys
 import np.com.naxa.drone_tasking_manager.core.utils.Response
+import np.com.naxa.drone_tasking_manager.features.user.profile.mapper.toBasicUserProfileUpdateDetails
 import np.com.naxa.drone_tasking_manager.features.user.profile.mapper.toUserProfile
 import np.com.naxa.drone_tasking_manager.features.user.profile.models.UserProfile
+import np.com.naxa.drone_tasking_manager.features.user.profile.models.UserProfileUpdateDetails
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
@@ -47,12 +49,43 @@ class UserProfileRepositoryImpl @Inject constructor(private val apiService: ApiS
     }
 
     override suspend fun updateBasicDetails(
+        userId: String,
         name: String,
         country: String,
         city: String,
         phone: String
-    ): Flow<Response<UserProfile>> {
-        TODO("Not yet implemented")
+    ): Flow<Response<UserProfileUpdateDetails>> {
+        return flow {
+            emit(Response.Loading())
+
+            val response =
+                try {
+                    apiService.updateUser(
+                        userId = userId, body = mapOf(
+                            "name" to name,
+                            "country" to country,
+                            "city" to city,
+                            "phone" to phone
+                        )
+                    )
+                } catch (e: HttpException) {
+                    e.printStackTrace()
+                    // Handle HTTP-specific exceptions
+                    return@flow emit(Response.Error(e.message()))
+                } catch (e: IOException) {
+                    // Handle network/IO-related exceptions
+                    e.printStackTrace()
+                    return@flow emit(Response.Error(e.message ?: "Could not load data"))
+                } catch (e: Exception) {
+                    // Handle any other unexpected exceptions
+                    e.printStackTrace()
+                    return@flow emit(Response.Error(e.message ?: "Unknown Error"))
+                }
+            val myInfoDetails = response.toBasicUserProfileUpdateDetails()
+
+            emit(Response.Success(data = myInfoDetails))
+
+        }
     }
 
     override suspend fun updateOtherDetails(

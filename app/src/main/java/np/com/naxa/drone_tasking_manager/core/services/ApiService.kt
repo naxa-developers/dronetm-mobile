@@ -1,6 +1,5 @@
 package np.com.naxa.drone_tasking_manager.core.services
 
-import com.google.gson.JsonObject
 import np.com.naxa.drone_tasking_manager.features.login.dto.LoginResponseDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.project.ProjectDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects.ProjectsResponseDto
@@ -13,14 +12,12 @@ import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileDt
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileUpdateDto
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.ResponseBody
 import org.maplibre.geojson.FeatureCollection
 import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Header
-import retrofit2.http.Headers
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -133,7 +130,7 @@ interface ApiService {
     @PATCH("api/users/{id}/profile")
     suspend fun updateUser(
         @Path("id") userId: String,
-        @Body body: RequestBody
+        @Body body: Map<String, String>
     ): UserProfileUpdateDto
 
 
@@ -141,4 +138,5 @@ interface ApiService {
     suspend fun refreshToken(
         @Query("force_refresh") forceRefresh: Boolean = true
     ): RefreshTokenDto
+
 }
