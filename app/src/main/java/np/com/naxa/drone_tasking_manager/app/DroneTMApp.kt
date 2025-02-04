@@ -10,6 +10,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.LineStyle
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,13 +37,19 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.R
+import np.com.naxa.drone_tasking_manager.Routes
+import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
 import np.com.naxa.drone_tasking_manager.core.theme.DroneTMAppTheme
+import np.com.naxa.drone_tasking_manager.core.utils.clearAllViewModels
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.LoginViewModel
 import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.ProjectDetailViewModel
 import np.com.naxa.drone_tasking_manager.features.projects.viewmodels.ProjectsViewModel
@@ -93,6 +101,9 @@ fun DroneTMApp(
             backStackEntry?.destination?.route?.route()
         }
     }
+
+    val viewModels = LocalViewModelStoreOwner.current!!
+    val context = LocalContext.current
 
     val loginViewModel = hiltViewModel<LoginViewModel>()
     val projectsViewModel = hiltViewModel<ProjectsViewModel>()
@@ -249,6 +260,7 @@ fun DroneTMApp(
                 topBar = {
                     if (currentRoute != Routes.Splash
                         && currentRoute != Routes.Home
+                        && currentRoute != Routes.Login
                         && currentRoute != Routes.ProjectsMap
                         && currentRoute != Routes.ProjectDetails
                         && currentRoute != Routes.TaskDetails
@@ -308,10 +320,9 @@ fun DroneTMApp(
                             },
 
                             actions = {
+                                if(currentRoute == Routes.ProjectsList){
                                 IconButton(onClick = {
-                                    navigationEventsViewModel.sendEvent(
-                                        DroneTMAppNavigationEvent.OnNavigateToProfileScreen
-                                    )
+                                    menuExpanded = !menuExpanded
                                 }) {
                                     Surface(
                                         shape = CircleShape,
@@ -327,6 +338,30 @@ fun DroneTMApp(
                                             modifier = Modifier.padding(4.dp),
                                         )
                                     }
+                                }
+                                }
+
+
+                                // Dropdown menu
+                                DropdownMenu(
+                                    expanded = menuExpanded,
+                                    onDismissRequest = { menuExpanded = false }
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text("Profile") },
+                                        onClick = {
+                                            onProfileClick(navigationEventsViewModel)
+                                            menuExpanded = false
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("Logout") },
+                                        onClick = {
+
+                                            onLogout(navigationEventsViewModel, viewModels, context)
+                                            menuExpanded = false
+                                        }
+                                    )
                                 }
 
                             },
@@ -379,4 +414,34 @@ fun DroneTMApp(
         }
 
     }
+}
+
+fun onLogout(
+    navigationEventsViewModel: NavigationEventsViewModel,
+    viewModels: ViewModelStoreOwner,
+    context: Context
+) {
+
+    MMKVStorageService.getInstance().clear()
+
+    clearAllViewModels(viewModels)
+
+    //restart the app
+    val packageManager: PackageManager = context.packageManager
+    val intent: Intent = packageManager.getLaunchIntentForPackage(context.packageName)!!
+    val componentName: ComponentName = intent.component!!
+    val restartIntent: Intent = Intent.makeRestartActivityTask(componentName)
+    context.startActivity(restartIntent)
+    Runtime.getRuntime().exit(0)
+
+//    navigationEventsViewModel.sendEvent(
+//        DroneTMAppNavigationEvent.OnNavigateToLogin
+//    )
+
+}
+
+fun onProfileClick(navigationEventsViewModel: NavigationEventsViewModel) {
+    navigationEventsViewModel.sendEvent(
+        DroneTMAppNavigationEvent.OnNavigateToProfileScreen
+    )
 }
