@@ -120,13 +120,6 @@ fun BasicDetailsScreen() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-//        OutlinedTextField(
-//            value = country,
-//            onValueChange = { country = it },
-//            label = { Text("Country") },
-//            modifier = Modifier.fillMaxWidth()
-//        )
-
         CountryDropdown(
             selectedCountry = country,
             onCountrySelected = { onSelectedCountry ->

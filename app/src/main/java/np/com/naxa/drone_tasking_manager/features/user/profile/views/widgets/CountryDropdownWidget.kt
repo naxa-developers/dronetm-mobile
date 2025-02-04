@@ -1,5 +1,6 @@
 package np.com.naxa.drone_tasking_manager.features.user.profile.views.widgets
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,12 +23,21 @@ fun CountryDropdown(
     modifier: Modifier = Modifier
 ) {
     var isExpanded by remember { mutableStateOf(false) }
-    var searchQuery by remember { mutableStateOf(selectedCountry!!) }
+    var searchQuery by remember { mutableStateOf("") }
+
+LaunchedEffect (selectedCountry){
+    selectedCountry.let {
+        searchQuery = it ?: ""
+    }
+}
+
+    Log.d("TAG", "CountryDropdown: $selectedCountry")
 
     // Sample list of countries - you can expand this
     val countries = remember {
         countryList()
     }
+
 
     val filteredCountries = countries.filter {
         it.lowercase().contains(searchQuery.lowercase())
@@ -42,11 +52,6 @@ fun CountryDropdown(
             },
             modifier = Modifier
                 .fillMaxWidth()
-//                .onFocusEvent {
-//                    it.let {
-//                        isExpanded = !isExpanded
-//                    }
-//                }
                 .onFocusChanged { if (it.isFocused) isExpanded = true },
             label = { Text("Country") },
             trailingIcon = {
