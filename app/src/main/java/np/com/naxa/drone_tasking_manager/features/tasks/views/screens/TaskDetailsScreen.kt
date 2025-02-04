@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -22,6 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -42,6 +45,7 @@ import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskDetailState
 import np.com.naxa.drone_tasking_manager.features.tasks.views.widgets.TaskDetailMapView
+import np.com.naxa.drone_tasking_manager.features.tasks.views.widgets.TaskDetailSectionView
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
@@ -68,6 +72,9 @@ fun TaskDetailsScreen(
     val mapViewMinHeightPx =
         with(LocalDensity.current) { (configuration.screenHeightDp * 0.25).dp.toPx() }
     var mapViewOffset by remember { mutableFloatStateOf(0f) }
+
+    var waypointsCount: Int? by remember { mutableStateOf(null) }
+
     val listState = rememberLazyListState()
 
     var isScrollable by remember { mutableStateOf(false) }
@@ -126,7 +133,14 @@ fun TaskDetailsScreen(
                     userScrollEnabled = isScrollable
                 ) {
                     item {
-
+                        TaskDetailSectionView(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight()
+                                .padding(16.dp),
+                            task = task,
+                            waypointsCount = waypointsCount
+                        )
                     }
                 }
 
@@ -135,7 +149,10 @@ fun TaskDetailsScreen(
                         .fillMaxWidth()
                         .height(with(density) { mapViewMaxHeightPx.toDp() })
                         .offset { IntOffset(x = 0, y = mapViewOffset.roundToInt()) },
-                    task = task
+                    task = task,
+                    onWaypointsLoaded = {
+                        waypointsCount = it
+                    }
                 )
 
                 TopAppBar(

@@ -19,22 +19,6 @@ fun ProjectDetailAboutTabBody(
     project: Project,
 ) {
 
-    @Composable
-    fun label(title: String, value: String) = Row(
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            modifier = Modifier.weight(1f), text = title,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Text(modifier = Modifier.weight(0.25f), text = ":")
-        Text(
-            modifier = Modifier.weight(1f),
-            text = value,
-            style = MaterialTheme.typography.titleSmall
-        )
-    }
-
     Column(
         modifier = modifier.padding(16.dp),
         verticalArrangement = Arrangement.Top,
@@ -45,19 +29,35 @@ fun ProjectDetailAboutTabBody(
             text = project.description ?: "",
             style = MaterialTheme.typography.bodyMedium
         )
-        label(
-            title = "Total Project Area",
+        KeyValueText(
+            key = "Total Project Area",
             value = project.projectArea?.round(4)?.toString() ?: "0.0"
         )
 
-        label(title = "Total Tasks", value = project.tasks.size.toString())
+        KeyValueText(key = "Total Tasks", value = project.tasks.size.toString())
 
-        label(title = "Project Created By", value = project.authorName ?: "")
+        KeyValueText(key = "Project Created By", value = project.authorName ?: "")
 
-        label(
-            title = "Require Approval to Lock Task",
+        KeyValueText(
+            key = "Require Approval to Lock Task",
             value = if (project.requiresApprovalFromManagerForLocking == true) "Yes" else "No"
         )
 
     }
+}
+
+@Composable
+private fun KeyValueText(key: String, value: String) = Row(
+    verticalAlignment = Alignment.CenterVertically
+) {
+    Text(
+        modifier = Modifier.weight(1f), text = key,
+        style = MaterialTheme.typography.bodyMedium
+    )
+    Text(modifier = Modifier.weight(0.25f), text = ":")
+    Text(
+        modifier = Modifier.weight(1f),
+        text = value,
+        style = MaterialTheme.typography.titleSmall
+    )
 }

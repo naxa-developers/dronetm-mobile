@@ -3,6 +3,8 @@ package np.com.naxa.drone_tasking_manager.features.tasks.views.widgets
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -12,8 +14,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.google.gson.JsonObject
 import np.com.naxa.drone_tasking_manager.R
@@ -49,6 +53,7 @@ import kotlin.random.Random
 fun TaskDetailMapView(
     modifier: Modifier = Modifier,
     task: ProjectTask,
+    onWaypointsLoaded: (Int?) -> Unit = {}
 ) {
 
     val context = LocalContext.current
@@ -122,7 +127,21 @@ fun TaskDetailMapView(
         libreMap?.style?.addSource(
             GeoJsonSource(
                 waypointsSourceId,
-                features = features
+                features
+                // features = FeatureCollection.fromFeatures(
+                //     features.features()?.map {
+                //         it.apply {
+                //             it.properties()?.apply {
+                //                 addProperty("latLng", it.geometry()?.let { g ->
+                //                     val obj = Gson().fromJson(g.toJson(), JsonObject::class.java)
+                //                     "${
+                //                         obj.getAsJsonArray("coordinates").get(0)
+                //                     },${obj.getAsJsonArray("coordinates").get(1)}"
+                //                 })
+                //             }
+                //         }
+                //     }!!.toTypedArray()
+                // )
             )
         ).also {
 
@@ -143,13 +162,22 @@ fun TaskDetailMapView(
                             PropertyFactory.circleColor(
                                 Expression.coalesce(
                                     Expression.get("color"),
-                                    Expression.match(
-                                        Expression.toNumber(Expression.get("index")),
-                                        Expression.literal(0.0),
+                                    Expression.switchCase(
+                                        Expression.eq(
+                                            Expression.toNumber(Expression.get("index")),
+                                            Expression.literal(0.0)
+                                        ),
                                         Expression.rgba(0, 0, 0, 0),
-                                        Expression.literal("#D73F3F")
+                                        Expression.eq(
+                                            Expression.toNumber(Expression.get("index")),
+                                            Expression.literal(
+                                                (features.features()?.size?.toDouble() ?: 0.0) - 1
+                                            )
+                                        ),
+                                        Expression.rgba(0, 0, 0, 0),
+                                        Expression.literal("#D73F3F"),
                                     )
-                                ),
+                                )
                             ),
                             PropertyFactory.circleRadius(3.0f),
                             PropertyFactory.circleStrokeWidth(1.5f),
@@ -157,7 +185,6 @@ fun TaskDetailMapView(
                         )
                     )
                     withProperties(*propertyValues.toTypedArray())
-//                    withFilter(Expression.not(Expression.eq(Expression.get("index"), 0)))
                 }
             )
 
@@ -337,11 +364,11 @@ fun TaskDetailMapView(
         is TaskWayPointsOrWayLinesState.Success -> {
             val features =
                 (waypointsOrWayLinesState as TaskWayPointsOrWayLinesState.Success).geoJson
-            val isWayPoints =
-                (waypointsOrWayLinesState as TaskWayPointsOrWayLinesState.Success).isWayPoints
 
-            applyWaypointsCircleLayer(features)
             applyWaypointsLineLayer(features)
+            applyWaypointsCircleLayer(features)
+
+            onWaypointsLoaded.invoke(features.features()?.size)
         }
 
         is TaskWayPointsOrWayLinesState.Error -> {
@@ -351,11 +378,10 @@ fun TaskDetailMapView(
     }
 
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(modifier = modifier) {
         MaplibreCompose(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
-            enableScrollGestures = false,
             enableRotateGestures = false,
             onMapReady = { libre, _ ->
                 libreMap = libre
@@ -371,10 +397,10 @@ fun TaskDetailMapView(
                             LatLngBounds.fromLatLngs(
                                 listOf(northeast, southwest)
                             ),
-                            100,
+                            150,
                             220,
-                            100,
-                            100
+                            150,
+                            150
                         ),
                         500
                     )
@@ -401,6 +427,27 @@ fun TaskDetailMapView(
                     true
                 }
             }
+        )
+
+        WayPointsWayLinesSwitcher(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .wrapContentHeight()
+                .padding(end = 16.dp, bottom = 8.dp),
+            onToggle = { wayLines ->
+                if (task.id == null || task.projectId == null) return@WayPointsWayLinesSwitcher
+
+                tasksViewModel.triggerEvent(
+                    TasksEvent.FetchWayPointsOrWayLines(
+                        taskId = task.id,
+                        projectId = task.projectId,
+                        rotationAngle = 0,
+                        download = false,
+                        isWayPoints = !wayLines,
+                        forceRefresh = false
+                    )
+                )
+            },
         )
 
 

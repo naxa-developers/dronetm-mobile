@@ -1,5 +1,9 @@
 package np.com.naxa.drone_tasking_manager.app
 
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -46,7 +50,6 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.R
-import np.com.naxa.drone_tasking_manager.Routes
 import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
 import np.com.naxa.drone_tasking_manager.core.theme.DroneTMAppTheme
 import np.com.naxa.drone_tasking_manager.core.utils.clearAllViewModels
@@ -320,25 +323,25 @@ fun DroneTMApp(
                             },
 
                             actions = {
-                                if(currentRoute == Routes.ProjectsList){
-                                IconButton(onClick = {
-                                    menuExpanded = !menuExpanded
-                                }) {
-                                    Surface(
-                                        shape = CircleShape,
-                                        modifier = Modifier
-                                            .size(24.dp)
-                                            .padding(bottom = 0.dp),
-                                        color = Color.Red
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_drone_operator_icon_24),
-                                            contentDescription = "Profile",
-                                            tint = Color.White,
-                                            modifier = Modifier.padding(4.dp),
-                                        )
+                                if (currentRoute == Routes.ProjectsList) {
+                                    IconButton(onClick = {
+                                        menuExpanded = !menuExpanded
+                                    }) {
+                                        Surface(
+                                            shape = CircleShape,
+                                            modifier = Modifier
+                                                .size(24.dp)
+                                                .padding(bottom = 0.dp),
+                                            color = Color.Red
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.ic_drone_operator_icon_24),
+                                                contentDescription = "Profile",
+                                                tint = Color.White,
+                                                modifier = Modifier.padding(4.dp),
+                                            )
+                                        }
                                     }
-                                }
                                 }
 
 

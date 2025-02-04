@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
+import android.graphics.drawable.Drawable
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.net.Uri
@@ -15,6 +16,7 @@ import android.os.Parcelable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.core.content.ContextCompat
 import androidx.documentfile.provider.DocumentFile
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
@@ -112,6 +114,42 @@ fun Uri.asImageBitmap(): ImageBitmap? {
         null
     }
 }
+
+
+/**
+ * Converts an integer representing a drawable resource ID to a Bitmap.
+ *
+ * This extension function takes an integer drawable resource ID, a context, and desired width and height
+ * and creates a Bitmap from the drawable.
+ *
+ * @param context The application context.
+ * @param width The desired width of the Bitmap.
+ * @param height The desired height of the Bitmap.
+ * @return A Bitmap created from the drawable resource, or null if the drawable could not be found.
+ *
+ * @throws IllegalArgumentException if width or height are less than or equal to 0
+ *
+ * Example Usage:
+ * ```kotlin
+ * val drawableId = R.drawable.my_image
+ * val myBitmap = drawableId.toBitmap(context, 100, 100)
+ * if (myBitmap != null) {
+ *     // Use the bitmap
+ *     imageView.setImageBitmap(myBitmap)
+ * } else {
+ *     // Handle the case where the drawable was not found
+ * }
+ * ```
+ */
+fun Int.toBitmap(context: Context, width: Int, height: Int): Bitmap? {
+    val drawable = ContextCompat.getDrawable(context, this) ?: return null
+    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    drawable.setBounds(0, 0, width, height)
+    drawable.draw(canvas)
+    return bitmap
+}
+
 
 /**
  * Extension function to generate a random word of specified length.
