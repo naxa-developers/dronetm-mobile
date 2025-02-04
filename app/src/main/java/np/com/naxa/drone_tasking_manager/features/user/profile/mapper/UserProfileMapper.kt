@@ -83,3 +83,10 @@ fun UserProfileUpdateDto.toBasicUserProfileUpdateDetails(): UserProfileUpdateDet
         result = this.results?.toUserProfile()
     )
 }
+
+fun UserProfileUpdateDto.toOtherUserProfileUpdateDetails(): UserProfileUpdateDetails {
+    return UserProfileUpdateDetails(
+        details = this.message,
+        result = this.results?.toUserProfile()
+    )
+}

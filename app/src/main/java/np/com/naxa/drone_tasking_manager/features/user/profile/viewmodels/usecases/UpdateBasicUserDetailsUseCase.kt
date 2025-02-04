@@ -10,9 +10,10 @@ import javax.inject.Inject
 @InstallIn(SingletonComponent::class)
 class UpdateBasicUserDetailsUseCase @Inject constructor(private val profileRepository: UserProfileRepository) {
     suspend operator fun invoke(
+        userId: String,
         name: String,
         country: String,
         city: String,
         phone: String
-    ) = profileRepository.updateBasicDetails(name, country, city, phone)
+    ) = profileRepository.updateBasicDetails(userId, name, country, city, phone)
 }

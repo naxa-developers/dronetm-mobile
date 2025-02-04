@@ -8,7 +8,6 @@ import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskLockUnlockRespon
 import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.dto.RefreshTokenDto
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileDto
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileUpdateDto
-import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -100,7 +99,7 @@ interface ApiService {
     @PATCH("api/users/{id}/profile")
     suspend fun updateUser(
         @Path("id") userId: String,
-        @Body body: RequestBody
+        @Body body: Map<String, String>
     ): UserProfileUpdateDto
 
 
@@ -108,4 +107,5 @@ interface ApiService {
     suspend fun refreshToken(
         @Query("force_refresh") forceRefresh: Boolean = true
     ): RefreshTokenDto
+
 }

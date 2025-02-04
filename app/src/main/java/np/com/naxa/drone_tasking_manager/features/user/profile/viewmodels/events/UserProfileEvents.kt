@@ -6,10 +6,15 @@ sealed class UserProfileEvents {
 
 
     data class UpdateBasicDetails(
-        val name: String, val country: String, val city: String, val phone: String
+        val userId: String,
+        val name: String,
+        val country: String,
+        val city: String,
+        val phone: String
     ) : UserProfileEvents()
 
     data class UpdateOtherDetails(
+        val userId: String,
         val certifiedDroneOperator: Boolean,
         val droneYouOwn: String,
         val experienceYears: Int,

@@ -1,14 +1,19 @@
 package np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels
 
-import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
 import np.com.naxa.drone_tasking_manager.core.utils.Response
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.events.UserProfileEvents
+import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.states.USerProfileUpdateStates
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.states.UserProfileStates
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.usecases.FetchUserProfileUseCase
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.usecases.UpdateBasicUserDetailsUseCase
@@ -25,7 +30,7 @@ class UserProfileViewModel @Inject constructor(
     private val _userProfileState = MutableStateFlow(UserProfileStates())
     var userProfileState = _userProfileState.asStateFlow()
 
-    private val _userProfileUpdateState = MutableStateFlow(UserProfileStates())
+    private val _userProfileUpdateState = MutableStateFlow(USerProfileUpdateStates())
     var userProfileUpdateState = _userProfileUpdateState.asStateFlow()
 
 
@@ -36,12 +41,54 @@ class UserProfileViewModel @Inject constructor(
             }
 
             is UserProfileEvents.UpdateBasicDetails -> {
-                TODO()
+                updateBasicDetails(event.userId, event.name, event.country, event.city, event.phone)
             }
 
             is UserProfileEvents.UpdateOtherDetails -> {
                 TODO()
             }
+        }
+    }
+
+    private fun updateBasicDetails(
+        userId: String,
+        name: String,
+        country: String,
+        city: String,
+        phone: String
+    ) {
+
+        viewModelScope.launch {
+            updateBasicUserDetailsUseCase.invoke(userId, name, country, city, phone)
+                .collect { result ->
+                    when (result) {
+                        is Response.Loading -> {
+                            _userProfileUpdateState.value = _userProfileUpdateState.value.copy(
+                                isUserProfileUpdateLoading = true,
+                                isUserProfileUpdateSuccess = false,
+                            )
+                        }
+
+                        is Response.Success -> {
+                            _userProfileUpdateState.value = _userProfileUpdateState.value.copy(
+                                isUserProfileUpdateLoading = false,
+                                isUserProfileUpdateSuccess = true,
+                                userProfileUpdateError = "",
+                                userProfileUpdate = result.data
+                            )
+
+                            fetchUserProfile(forceRefresh = true)
+                        }
+
+                        is Response.Error -> {
+                            _userProfileUpdateState.value = _userProfileUpdateState.value.copy(
+                                isUserProfileUpdateLoading = false,
+                                isUserProfileUpdateSuccess = false,
+                                userProfileUpdateError = result.message
+                            )
+                        }
+                    }
+                }
         }
     }
 

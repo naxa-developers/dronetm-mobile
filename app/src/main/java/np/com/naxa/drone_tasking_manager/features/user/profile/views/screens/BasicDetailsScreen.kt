@@ -47,7 +47,10 @@ fun BasicDetailsScreen() {
     val viewModel = LocalUserProfileViewModel.current
     val state by viewModel.userProfileState.collectAsState()
 
+    val profileUpdateState by viewModel.userProfileUpdateState.collectAsState()
 
+
+    var userId by rememberSaveable { mutableStateOf("") }
     var imgUrl by rememberSaveable { mutableStateOf("") }
     var name by rememberSaveable { mutableStateOf("") }
     var country by rememberSaveable { mutableStateOf("") }
@@ -60,6 +63,7 @@ fun BasicDetailsScreen() {
     LaunchedEffect(state.userProfile) {
         Log.d("TAG", "fetchUserProfile BasicDetailsScreen I am Here: ${state.userProfile}")
         state.userProfile?.let {
+            userId = "${it.user_id ?: ""}"
             imgUrl = it.profile_img ?: ""
             name = it.name ?: ""
             country = it.country ?: ""
@@ -100,7 +104,9 @@ fun BasicDetailsScreen() {
                 // If no image URL is provided, display the user's initials as a fallback.
                 // The initials are derived from the first letter of the name.
                 Text(
-                    text = "${name.getOrNull(0)?.uppercase()?.ifEmpty { "TM" }}", // Get the first letter, convert to uppercase, and use "TM" if the name is empty.
+                    text = "${
+                        name.getOrNull(0)?.uppercase()?.ifEmpty { "TM" }
+                    }", // Get the first letter, convert to uppercase, and use "TM" if the name is empty.
                     modifier = Modifier.wrapContentSize(), // Wrap the content size to fit the text.
                     style = MaterialTheme.typography.headlineMedium, // Apply the headlineMedium style from the MaterialTheme.
                     color = Color.White // Set the text color to white.
@@ -112,6 +118,7 @@ fun BasicDetailsScreen() {
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
+            enabled = false,
             value = name,
             onValueChange = { name = it },
             label = { Text("Name") },
@@ -151,7 +158,21 @@ fun BasicDetailsScreen() {
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { /* Handle save */ },
+            enabled = !profileUpdateState.isUserProfileUpdateLoading,
+            onClick = { /* Handle save */
+
+                if(userId.isEmpty()) return@Button
+
+                viewModel.onEvent(
+                    UserProfileEvents.UpdateBasicDetails(
+                        userId = userId,
+                        name = name,
+                        country = country,
+                        city = city,
+                        phone = phone
+                    )
+                )
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
