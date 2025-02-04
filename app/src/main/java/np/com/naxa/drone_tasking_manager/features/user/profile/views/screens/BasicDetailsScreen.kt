@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.UserProfileViewModel
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.events.UserProfileEvents
+import np.com.naxa.drone_tasking_manager.features.user.profile.views.widgets.CountryDropdown
 import np.com.naxa.drone_tasking_manager.local_providers.LocalLoginViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalUserProfileViewModel
 import np.com.naxa.drone_tasking_manager.utils.NetworkImageAvatar
@@ -119,12 +120,22 @@ fun BasicDetailsScreen() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = country,
-            onValueChange = { country = it },
-            label = { Text("Country") },
-            modifier = Modifier.fillMaxWidth()
+//        OutlinedTextField(
+//            value = country,
+//            onValueChange = { country = it },
+//            label = { Text("Country") },
+//            modifier = Modifier.fillMaxWidth()
+//        )
+
+        CountryDropdown(
+            selectedCountry = country,
+            onCountrySelected = { onSelectedCountry ->
+                country = onSelectedCountry
+            },
+            modifier = Modifier
+                .fillMaxWidth()
         )
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
