@@ -13,7 +13,8 @@ sealed class UserProfileEvents {
         val certifiedDroneOperator: Boolean,
         val droneYouOwn: String,
         val experienceYears: Int,
-        val notifyForProjectsWithinKm: Int
+        val notifyForProjectsWithinKm: Int,
+        val registrationFile: String,
     ) : UserProfileEvents()
 
 
