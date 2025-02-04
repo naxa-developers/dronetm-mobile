@@ -32,9 +32,6 @@ val LocalLoginViewModel = compositionLocalOf<LoginViewModel> {
     error("No ViewModel provided")
 }
 
-val LocalUserProfileViewModel = compositionLocalOf<UserProfileViewModel> {
-    error("No ViewModel provided")
-}
 val LocalProjectsViewModel = compositionLocalOf<ProjectsViewModel> {
     error("No ViewModel provided")
 }
@@ -47,6 +44,9 @@ val LocalTasksViewModel = compositionLocalOf<TasksViewModel> {
     error("No ViewModel provided")
 }
 
+val LocalUserProfileViewModel = compositionLocalOf<UserProfileViewModel> {
+    error("No ViewModel provided")
+}
 val LocalRefreshTokenViewModel = compositionLocalOf<RefreshTokenViewModel> {
     error("No ViewModel provided")
 }

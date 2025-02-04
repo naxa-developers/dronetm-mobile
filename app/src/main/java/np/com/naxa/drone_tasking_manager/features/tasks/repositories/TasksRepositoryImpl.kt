@@ -4,16 +4,45 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import np.com.naxa.drone_tasking_manager.core.services.ApiService
 import np.com.naxa.drone_tasking_manager.core.utils.Response
+import np.com.naxa.drone_tasking_manager.features.tasks.dto.LockOrUnlockEventRequestBody
+import np.com.naxa.drone_tasking_manager.features.tasks.mapper.toProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.mapper.toTaskLockUnlockResponse
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.models.TaskLockUnlockResponse
 import np.com.naxa.drone_tasking_manager.utils.DateUtils
+import org.maplibre.geojson.FeatureCollection
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService) :
     TasksRepository {
+    override suspend fun fetchTaskById(
+        id: String,
+        forceRefresh: Boolean
+    ): Flow<Response<ProjectTask>> {
+        return flow {
+            emit(Response.Loading())
+
+            try {
+                val response = apiService.fetchTaskById(
+                    id = id,
+                    forceRefresh = forceRefresh
+                )
+
+                emit(
+                    Response.Success(
+                        response.toProjectTask().copy(
+                            id = id,
+                        )
+                    )
+                )
+
+            } catch (e: Exception) {
+                emit(Response.Error(e.message ?: "Error fetching task"))
+            }
+        }
+    }
 
 
     override suspend fun lockTask(
@@ -27,14 +56,16 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
                 val response = apiService.lockOrUnlockTask(
                     projectId = projectId,
                     taskId = taskId,
-                    event = "request",
-                    updatedAt = DateUtils.currentDateAsStr()
+                    body = LockOrUnlockEventRequestBody(
+                        event = "request",
+                        updatedAt = DateUtils.currentDateAsStr(),
+                    ),
                 )
 
                 emit(Response.Success(response.toTaskLockUnlockResponse()))
 
             } catch (e: Exception) {
-                emit(Response.Error(e.message ?: "Error locking task $taskId"))
+                emit(Response.Error(e.cause?.message ?: "Error locking task $taskId"))
             }
         }
     }
@@ -50,14 +81,71 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
                 val response = apiService.lockOrUnlockTask(
                     projectId = projectId,
                     taskId = taskId,
-                    event = "unlock",
-                    updatedAt = DateUtils.currentDateAsStr()
+                    body = LockOrUnlockEventRequestBody(
+                        event = "unlock",
+                        updatedAt = DateUtils.currentDateAsStr(),
+                    ),
                 )
 
                 emit(Response.Success(response.toTaskLockUnlockResponse()))
 
             } catch (e: Exception) {
-                emit(Response.Error(e.message ?: "Error unlocking task $taskId"))
+                emit(Response.Error(e.cause?.message ?: "Error unlocking task $taskId"))
+            }
+        }
+    }
+
+    override suspend fun taskWayPoints(
+        taskId: String,
+        projectId: String,
+        rotationAngle: Int,
+        download: Boolean,
+        forceRefresh: Boolean
+    ): Flow<Response<FeatureCollection>> {
+        return flow {
+            emit(Response.Loading())
+            try {
+                val response = apiService.taskWayPointsOrWayLines(
+                    projectId = projectId,
+                    taskId = taskId,
+                    rotationAngle = rotationAngle,
+                    download = download,
+                    mode = "waypoints",
+                    forceRefresh = forceRefresh
+                )
+
+                emit(Response.Success(response))
+
+            } catch (e: Exception) {
+                emit(Response.Error(e.cause?.message ?: "Error fetching task: $taskId waypoints"))
+            }
+        }
+    }
+
+    override suspend fun taskWayLines(
+        taskId: String,
+        projectId: String,
+        rotationAngle: Int,
+        download: Boolean,
+        forceRefresh: Boolean
+    ): Flow<Response<FeatureCollection>> {
+        return flow {
+            emit(Response.Loading())
+
+            try {
+                val response = apiService.taskWayPointsOrWayLines(
+                    projectId = projectId,
+                    taskId = taskId,
+                    rotationAngle = rotationAngle,
+                    download = download,
+                    mode = "waylines",
+                    forceRefresh = forceRefresh
+                )
+
+                emit(Response.Success(response))
+
+            } catch (e: Exception) {
+                emit(Response.Error(e.cause?.message ?: "Error fetching task: $taskId waylines"))
             }
         }
     }

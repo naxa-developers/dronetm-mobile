@@ -19,9 +19,11 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -48,7 +50,6 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.R
-import np.com.naxa.drone_tasking_manager.Routes
 import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
 import np.com.naxa.drone_tasking_manager.core.theme.DroneTMAppTheme
 import np.com.naxa.drone_tasking_manager.core.utils.clearAllViewModels
@@ -69,6 +70,7 @@ import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalUsbDeviceViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalUserProfileViewModel
 import np.com.naxa.drone_tasking_manager.navigation.DroneTMAppNavHost
+import np.com.naxa.drone_tasking_manager.navigation.routes.Routes
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.NavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 import np.com.naxa.drone_tasking_manager.states.DownloadAndTransferState
@@ -107,10 +109,10 @@ fun DroneTMApp(
     val context = LocalContext.current
 
     val loginViewModel = hiltViewModel<LoginViewModel>()
-    val userProfileViewModel = hiltViewModel<UserProfileViewModel>()
     val projectsViewModel = hiltViewModel<ProjectsViewModel>()
     val projectDetailViewModel = hiltViewModel<ProjectDetailViewModel>()
     val tasksViewModel = hiltViewModel<TasksViewModel>()
+    val userProfileViewModel = hiltViewModel<UserProfileViewModel>()
     val refreshTokenViewModel = hiltViewModel<RefreshTokenViewModel>()
 
 
@@ -210,6 +212,22 @@ fun DroneTMApp(
                     }
                 }
 
+                is DroneTMAppNavigationEvent.OnNavigateToTaskDetail -> {
+                    if (currentRoute?.path != Routes.TaskDetails.path) {
+                        navController.navigate(
+                            Routes.TaskDetails.path
+                                .replace(
+                                    "{id}",
+                                    event.id
+                                )
+                                .replace(
+                                    "{project}",
+                                    event.project ?: ""
+                                )
+                        )
+                    }
+                }
+
                 DroneTMAppNavigationEvent.OnNavigateToProfileScreen -> {
 
                     navController.navigate(Routes.ProfileScreen.path)
@@ -224,22 +242,31 @@ fun DroneTMApp(
         LocalDownloadAndTransferFileViewModel provides downloadAndTransferViewModel,
         LocalNavigationEventsViewModel provides navigationEventsViewModel,
         LocalLoginViewModel provides loginViewModel,
-        LocalUserProfileViewModel provides userProfileViewModel,
         LocalProjectsViewModel provides projectsViewModel,
         LocalProjectDetailViewModel provides projectDetailViewModel,
         LocalTasksViewModel provides tasksViewModel,
+        LocalUserProfileViewModel provides userProfileViewModel,
         LocalRefreshTokenViewModel provides refreshTokenViewModel
     ) {
         DroneTMAppTheme {
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
-                snackbarHost = { SnackbarHost(snackBarHostState) },
+                snackbarHost = {
+                    SnackbarHost(snackBarHostState) {
+                        Snackbar(
+                            it,
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                },
                 topBar = {
                     if (currentRoute != Routes.Splash
                         && currentRoute != Routes.Home
                         && currentRoute != Routes.Login
                         && currentRoute != Routes.ProjectsMap
                         && currentRoute != Routes.ProjectDetails
+                        && currentRoute != Routes.TaskDetails
                     ) {
                         CenterAlignedTopAppBar(
                             title = {
@@ -296,25 +323,25 @@ fun DroneTMApp(
                             },
 
                             actions = {
-                                if(currentRoute == Routes.ProjectsList){
-                                IconButton(onClick = {
-                                    menuExpanded = !menuExpanded
-                                }) {
-                                    Surface(
-                                        shape = CircleShape,
-                                        modifier = Modifier
-                                            .size(24.dp)
-                                            .padding(bottom = 0.dp),
-                                        color = Color.Red
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_drone_operator_icon_24),
-                                            contentDescription = "Profile",
-                                            tint = Color.White,
-                                            modifier = Modifier.padding(4.dp),
-                                        )
+                                if (currentRoute == Routes.ProjectsList) {
+                                    IconButton(onClick = {
+                                        menuExpanded = !menuExpanded
+                                    }) {
+                                        Surface(
+                                            shape = CircleShape,
+                                            modifier = Modifier
+                                                .size(24.dp)
+                                                .padding(bottom = 0.dp),
+                                            color = Color.Red
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.ic_drone_operator_icon_24),
+                                                contentDescription = "Profile",
+                                                tint = Color.White,
+                                                modifier = Modifier.padding(4.dp),
+                                            )
+                                        }
                                     }
-                                }
                                 }
 
 
@@ -376,7 +403,11 @@ fun DroneTMApp(
             ) { innerPadding ->
                 DroneTMAppNavHost(
                     modifier = Modifier.padding(
-                        if (currentRoute != Routes.Splash && currentRoute != Routes.ProjectsMap && currentRoute != Routes.ProjectDetails) innerPadding else PaddingValues(
+                        if (currentRoute != Routes.Splash &&
+                            currentRoute != Routes.ProjectsMap &&
+                            currentRoute != Routes.ProjectDetails &&
+                            currentRoute != Routes.TaskDetails
+                        ) innerPadding else PaddingValues(
                             0.dp
                         )
                     ),

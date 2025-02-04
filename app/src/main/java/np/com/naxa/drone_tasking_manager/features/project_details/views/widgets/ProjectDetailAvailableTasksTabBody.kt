@@ -19,7 +19,7 @@ import np.com.naxa.drone_tasking_manager.core.widgets.SuperscriptText
 import np.com.naxa.drone_tasking_manager.features.projects.models.Project
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTaskState
-import java.util.Locale
+import np.com.naxa.drone_tasking_manager.utils.round
 
 @Composable
 fun ProjectDetailAvailableTasksTabBody(
@@ -86,7 +86,7 @@ fun ProjectDetailAvailableTasksTabBody(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            if (i % 2 == 0) Color.White else Color.LightGray.copy(
+                            if (i % 2 == 0) MaterialTheme.colorScheme.surface else Color.LightGray.copy(
                                 alpha = 0.35F
                             )
                         )
@@ -102,17 +102,17 @@ fun ProjectDetailAvailableTasksTabBody(
                         style = MaterialTheme.typography.bodySmall
                     )
                     Text(
-                        String.format(Locale.ENGLISH, "%.2f", task.totalAreaSqkm ?: 0.0),
+                        task.totalAreaSqkm?.round(2)?.toString() ?: "0.0",
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.bodySmall
                     )
                     Text(
-                        String.format(Locale.ENGLISH, "%.2f", task.flightTimeMinutes ?: 0.0),
+                        task.flightTimeMinutes?.round(2)?.toString() ?: "0.0",
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.bodySmall
                     )
                     Text(
-                        String.format(Locale.ENGLISH, "%.2f", task.flightTimeMinutes ?: 0.0),
+                        task.flightDistanceKm?.round(2)?.toString() ?: "0.0",
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.bodySmall
                     )

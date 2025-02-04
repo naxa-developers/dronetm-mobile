@@ -123,7 +123,6 @@ class LoginRepositoryImpl @Inject constructor(private val apiService: ApiService
         }
     }
 
-
     private fun saveUserData(loginDetails: LoginResponse) {
 
         Log.d("TAG", "saveUserData: ${loginDetails.detail}")
