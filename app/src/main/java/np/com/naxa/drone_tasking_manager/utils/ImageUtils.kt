@@ -39,7 +39,7 @@ fun NetworkImageAvatar(
             .data(imageUrl)
             .crossfade(true)
             .build(),
-        contentDescription = "Profile avatar", // Accessibility description
+        contentDescription = "$imageUrl avatar", // Accessibility description
         modifier = if (enableBorder) {
             Modifier
                 .size(size) // Set avatar size
@@ -59,7 +59,7 @@ fun NetworkImageAvatar(
         contentScale = ContentScale.Crop, // Crop image to fill the circle
         placeholder = painterResource(R.drawable.ic_image_placeholder), // Loading state
         error = painterResource(R.drawable.ic_image_error_avatar), // Error state
-        fallback = painterResource(R.drawable.ic_image_error_avatar),// Fallback state
+//        fallback = painterResource(R.drawable.ic_image_error_avatar),// Fallback state
     )
 }
 
@@ -88,7 +88,7 @@ fun NetworkImageAvatarRemember(
 
     Image(
         painter = painter,
-        contentDescription = null,
+        contentDescription = "$imageUrl avatar", // Accessibility description
         modifier = if (enableBorder) {
             Modifier
                 .size(size) // Set avatar size

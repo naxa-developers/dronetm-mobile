@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -27,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -35,6 +37,8 @@ import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.UserPr
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.events.UserProfileEvents
 import np.com.naxa.drone_tasking_manager.local_providers.LocalLoginViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalUserProfileViewModel
+import np.com.naxa.drone_tasking_manager.utils.NetworkImageAvatar
+import np.com.naxa.drone_tasking_manager.utils.NetworkImageAvatarRemember
 
 @Composable
 fun BasicDetailsScreen() {
@@ -43,15 +47,19 @@ fun BasicDetailsScreen() {
     val state by viewModel.userProfileState.collectAsState()
 
 
+    var imgUrl by rememberSaveable { mutableStateOf("") }
     var name by rememberSaveable { mutableStateOf("") }
     var country by rememberSaveable { mutableStateOf("") }
     var city by rememberSaveable { mutableStateOf("") }
     var phone by rememberSaveable { mutableStateOf("") }
 
+    val profileAvatarSize by remember { mutableStateOf(84.dp) }
+
 
     LaunchedEffect(state.userProfile) {
         Log.d("TAG", "fetchUserProfile BasicDetailsScreen I am Here: ${state.userProfile}")
         state.userProfile?.let {
+            imgUrl = it.profile_img ?: ""
             name = it.name ?: ""
             country = it.country ?: ""
             city = it.city ?: ""
@@ -78,16 +86,26 @@ fun BasicDetailsScreen() {
 
         // Profile Avatar
         Surface(
-            modifier = Modifier.size(64.dp),
-            shape = MaterialTheme.shapes.medium,
+            modifier = Modifier
+                .size(profileAvatarSize)
+                .align(Alignment.CenterHorizontally),
+            shape = CircleShape,
             color = MaterialTheme.colorScheme.primary
         ) {
-            Text(
-                text = "N",
-                modifier = Modifier.wrapContentSize(),
-                style = MaterialTheme.typography.headlineMedium,
-                color = Color.White
-            )
+            if (imgUrl.isNotEmpty()) {
+                // If an image URL is provided, load the image from the network.
+                NetworkImageAvatarRemember(imageUrl = imgUrl, size = profileAvatarSize)
+            } else {
+                // If no image URL is provided, display the user's initials as a fallback.
+                // The initials are derived from the first letter of the name.
+                Text(
+                    text = "${name.getOrNull(0)?.uppercase()?.ifEmpty { "TM" }}", // Get the first letter, convert to uppercase, and use "TM" if the name is empty.
+                    modifier = Modifier.wrapContentSize(), // Wrap the content size to fit the text.
+                    style = MaterialTheme.typography.headlineMedium, // Apply the headlineMedium style from the MaterialTheme.
+                    color = Color.White // Set the text color to white.
+                )
+            }
+
         }
 
         Spacer(modifier = Modifier.height(16.dp))
