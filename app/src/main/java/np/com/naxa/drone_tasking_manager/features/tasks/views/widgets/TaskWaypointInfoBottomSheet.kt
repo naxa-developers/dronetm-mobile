@@ -12,6 +12,7 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
@@ -44,14 +45,15 @@ fun TaskWaypointInfoBottomSheet(
             }
         ) {
             infoJsonObject?.let {
+                val keys = remember { it.keySet().toList().sortedBy { if (it == "index") 0 else 1 } }
+
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                 ) {
-
                     for (i in 0 until it.size()) {
-                        val key = it.keySet().toList()[i]
+                        val key = keys[i]
                         val value = it.get(key)
                         val valueStr = when {
                             value.isJsonPrimitive -> {
@@ -63,7 +65,6 @@ fun TaskWaypointInfoBottomSheet(
                                     else -> ""
                                 }
                             }
-
                             else -> ""
                         }
 
