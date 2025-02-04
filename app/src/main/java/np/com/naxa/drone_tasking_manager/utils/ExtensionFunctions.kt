@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
+import android.graphics.drawable.Drawable
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.net.Uri
@@ -15,10 +16,13 @@ import android.os.Parcelable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.core.content.ContextCompat
 import androidx.documentfile.provider.DocumentFile
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import np.com.naxa.drone_tasking_manager.Routes
+import np.com.naxa.drone_tasking_manager.navigation.routes.Routes
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -110,6 +114,42 @@ fun Uri.asImageBitmap(): ImageBitmap? {
         null
     }
 }
+
+
+/**
+ * Converts an integer representing a drawable resource ID to a Bitmap.
+ *
+ * This extension function takes an integer drawable resource ID, a context, and desired width and height
+ * and creates a Bitmap from the drawable.
+ *
+ * @param context The application context.
+ * @param width The desired width of the Bitmap.
+ * @param height The desired height of the Bitmap.
+ * @return A Bitmap created from the drawable resource, or null if the drawable could not be found.
+ *
+ * @throws IllegalArgumentException if width or height are less than or equal to 0
+ *
+ * Example Usage:
+ * ```kotlin
+ * val drawableId = R.drawable.my_image
+ * val myBitmap = drawableId.toBitmap(context, 100, 100)
+ * if (myBitmap != null) {
+ *     // Use the bitmap
+ *     imageView.setImageBitmap(myBitmap)
+ * } else {
+ *     // Handle the case where the drawable was not found
+ * }
+ * ```
+ */
+fun Int.toBitmap(context: Context, width: Int, height: Int): Bitmap? {
+    val drawable = ContextCompat.getDrawable(context, this) ?: return null
+    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    drawable.setBounds(0, 0, width, height)
+    drawable.draw(canvas)
+    return bitmap
+}
+
 
 /**
  * Extension function to generate a random word of specified length.
@@ -273,4 +313,95 @@ fun Color.toColor(): Int {
         (this.green * 255).toInt(),
         (this.blue * 255).toInt()
     )
+}
+
+/**
+ * Rounds a Double to a specified number of decimal places.
+ *
+ * This function formats the Double as a string with the specified number of decimal places
+ * and then parses the resulting string back to a Double.
+ *
+ * @param to The number of decimal places to round to. Must be a non-negative integer.
+ * @return The rounded Double value.
+ * @throws IllegalArgumentException if 'to' is negative.
+ *
+ * Example:
+ * ```kotlin
+ * val number = 3.14159
+ * val roundedNumber = number.round(2) // roundedNumber will be 3.14
+ * val roundedNumber2 = number.round(0) // roundedNumber2 will be 3.0
+ * val roundedNumber3 = 3.999.round(0) // roundedNumber3 will be 4.0
+ * ```
+ */
+fun Double.round(to: Int) = "%.${to}f".format(this).toDouble()
+
+/**
+ * Converts a Map<String, Any?> to a JsonObject.
+ *
+ * This function recursively transforms a Kotlin Map into a Gson JsonObject. It handles various data types
+ * including null, String, Number, Boolean, nested Maps, and Lists.
+ *
+ * The supported types within the map are:
+ *   - null: Converted to a null JSON property.
+ *   - String: Converted to a JSON string property.
+ *   - Number: Converted to a JSON number property.
+ *   - Boolean: Converted to a JSON boolean property.
+ *   - Map<String, Any?>: Recursively converted to a nested JsonObject.
+ *   - List<*>: Converted to a JsonArray. The list items can be String, Number, Boolean or Map<String, Any?>,
+ *     which will be converted accordingly.
+ *   - Other types inside the list are ignored.
+ *
+ * @receiver The Map<String, Any?> to be converted.
+ * @return A JsonObject representing the input Map.
+ * @throws ClassCastException If a nested Map is not of type Map<String, Any?>.
+ * @throws ClassCastException If a nested List contains elements that are not supported.
+ */
+fun Map<*, *>.toJsonObject(): JsonObject {
+    val jsonObject = JsonObject()
+
+    forEach { (key, value) ->
+        when (value) {
+            null -> jsonObject.addProperty(key.toString(), null as String?)
+            is String -> jsonObject.addProperty(key.toString(), value)
+            is Number -> jsonObject.addProperty(key.toString(), value)
+            is Boolean -> jsonObject.addProperty(key.toString(), value)
+            is Map<*, *> -> jsonObject.add(key.toString(), value.toJsonObject())
+            is List<*> -> jsonObject.add(key.toString(), value.toJsonArray())
+        }
+    }
+    return jsonObject
+}
+
+/**
+ * Converts a List of mixed data types to a JsonArray.
+ *
+ * This extension function iterates through a List and converts each element into its
+ * corresponding JSON representation, adding it to a JsonArray. It supports various
+ * data types including:
+ *   - null: Represented as a JSON null value.
+ *   - String: Added as a JSON string.
+ *   - Number: Added as a JSON number.
+ *   - Boolean: Added as a JSON boolean.
+ *   - Map<*, *>: Recursively converted to a JsonObject using the [toJsonObject] extension.
+ *   - List<*>: Recursively converted to a JsonArray using this [toJsonArray] extension.
+ *
+ * If an element's type is not one of the above, it's ignored for now (not added to the JsonArray)
+ *
+ * @return A JsonArray containing the JSON representation of the List's elements.
+ *
+ * @see toJsonObject
+ */
+fun List<*>.toJsonArray(): JsonArray {
+    val jsonArray = JsonArray()
+    forEach { item ->
+        when (item) {
+            null -> jsonArray.add(null as String?)
+            is String -> jsonArray.add(item)
+            is Number -> jsonArray.add(item)
+            is Boolean -> jsonArray.add(item)
+            is Map<*, *> -> jsonArray.add(item.toJsonObject())
+            is List<*> -> jsonArray.add(item.toJsonArray())
+        }
+    }
+    return jsonArray
 }

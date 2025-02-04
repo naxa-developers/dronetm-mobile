@@ -6,8 +6,10 @@ import android.os.Bundle
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
@@ -41,7 +43,7 @@ import org.maplibre.android.maps.Style
 @Composable
 fun MaplibreCompose(
     modifier: Modifier = Modifier,
-    initialStyle: String = "https://tiles.basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+    initialStyle: String = if (isSystemInDarkTheme()) "https://tiles.basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json" else "https://tiles.basemaps.cartocdn.com/gl/positron-gl-style/style.json",
     cameraPositionState: MutableState<CameraPosition> = rememberCameraPosition(),
     onMapReady: (MapLibreMap, MapView) -> Unit = { _, _ -> },
     enableScrollGestures: Boolean = true,

@@ -1,5 +1,6 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -8,31 +9,51 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.core.utils.Response
+import np.com.naxa.drone_tasking_manager.features.tasks.usecases.FetchTaskDetailUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.LockTaskUseCase
+import np.com.naxa.drone_tasking_manager.features.tasks.usecases.TaskWayPointsOrWayLinesUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.UnlockTaskUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
+import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskDetailState
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskLockOrUnlockState
+import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskWayPointsOrWayLinesState
 import javax.inject.Inject
 
 @HiltViewModel
 class TasksViewModel @Inject constructor(
+    private val fetchTaskDetailUseCase: FetchTaskDetailUseCase,
     private val lockTaskUseCase: LockTaskUseCase,
-    private val unlockTaskUseCase: UnlockTaskUseCase
+    private val unlockTaskUseCase: UnlockTaskUseCase,
+    private val wayPointsOrWayLinesUseCase: TaskWayPointsOrWayLinesUseCase,
 ) : ViewModel() {
+
+    /**
+     * Represents the different states of task details.
+     */
+    private val _taskDetailState =
+        MutableStateFlow<TaskDetailState>(TaskDetailState.Idle)
+    val taskDetailState = _taskDetailState.asStateFlow()
 
     /**
      * Represents the different states of locking task.
      */
-    private val _tasksLockState =
+    private val _taskLockState =
         MutableStateFlow<TaskLockOrUnlockState>(TaskLockOrUnlockState.Idle)
-    val tasksLockState = _tasksLockState.asStateFlow()
+    val taskLockState = _taskLockState.asStateFlow()
 
     /**
      * Represents the different states of unlocking task.
      */
-    private val _tasksUnlockState =
+    private val _taskUnlockState =
         MutableStateFlow<TaskLockOrUnlockState>(TaskLockOrUnlockState.Idle)
-    val tasksUnlockState = _tasksUnlockState.asStateFlow()
+    val taskUnlockState = _taskUnlockState.asStateFlow()
+
+    /**
+     * Represents the different states of task way points or way lines.
+     */
+    private val _taskWayPointsOrWayLinesState =
+        MutableStateFlow<TaskWayPointsOrWayLinesState>(TaskWayPointsOrWayLinesState.Idle)
+    val taskWayPointsOrWayLinesState = _taskWayPointsOrWayLinesState.asStateFlow()
 
 
     /**
@@ -57,6 +78,45 @@ class TasksViewModel @Inject constructor(
                 unlockTask(
                     taskId = event.taskId,
                     projectId = event.projectId
+                )
+            }
+
+            is TasksEvent.FetchTaskById -> {
+                fetchTask(
+                    id = event.id,
+                    forceRefresh = event.forceRefresh
+                )
+
+            }
+
+            is TasksEvent.ResetState -> {
+                viewModelScope.launch {
+                    if (event.lockState) {
+                        _taskLockState.emit(TaskLockOrUnlockState.Idle)
+                    }
+
+                    if (event.unlockState) {
+                        _taskUnlockState.emit(TaskLockOrUnlockState.Idle)
+                    }
+
+                    if (event.taskDetailState) {
+                        _taskDetailState.emit(TaskDetailState.Idle)
+                    }
+
+                    if (event.taskWayPointsOrWayLinesState) {
+                        _taskWayPointsOrWayLinesState.emit(TaskWayPointsOrWayLinesState.Idle)
+                    }
+                }
+            }
+
+            is TasksEvent.FetchWayPointsOrWayLines -> {
+                fetchWayPointsOrWayLines(
+                    taskId = event.taskId,
+                    projectId = event.projectId,
+                    rotationAngle = event.rotationAngle,
+                    download = event.download,
+                    isWayPoints = event.isWayPoints,
+                    forceRefresh = event.forceRefresh
                 )
             }
         }
@@ -94,17 +154,17 @@ class TasksViewModel @Inject constructor(
             lockTaskUseCase.invoke(taskId, projectId).collect { result ->
                 when (result) {
                     is Response.Loading -> {
-                        _tasksLockState.emit(TaskLockOrUnlockState.Requesting)
+                        _taskLockState.emit(TaskLockOrUnlockState.Requesting)
                     }
 
                     is Response.Success -> {
-                        _tasksLockState.emit(
+                        _taskLockState.emit(
                             TaskLockOrUnlockState.Success(result.data!!)
                         )
                     }
 
                     is Response.Error -> {
-                        _tasksLockState.emit(TaskLockOrUnlockState.Error(result.message))
+                        _taskLockState.emit(TaskLockOrUnlockState.Error(result.message))
                     }
                 }
             }
@@ -134,21 +194,141 @@ class TasksViewModel @Inject constructor(
             unlockTaskUseCase.invoke(taskId, projectId).collect { result ->
                 when (result) {
                     is Response.Loading -> {
-                        _tasksUnlockState.emit(TaskLockOrUnlockState.Requesting)
+                        _taskUnlockState.emit(TaskLockOrUnlockState.Requesting)
                     }
 
                     is Response.Success -> {
-                        _tasksUnlockState.emit(
+                        _taskUnlockState.emit(
                             TaskLockOrUnlockState.Success(result.data!!)
                         )
                     }
 
                     is Response.Error -> {
-                        _tasksUnlockState.emit(TaskLockOrUnlockState.Error(result.message))
+                        _taskUnlockState.emit(TaskLockOrUnlockState.Error(result.message))
                     }
                 }
             }
         }
     }
 
+    /**
+     * Fetches the details of a task from the data source.
+     *
+     * This function retrieves the details of a task identified by the given `id`.
+     * It uses the `fetchTaskDetailUseCase` to interact with the data layer and collect the results.
+     * The result is then processed and emitted to the `_tasksDetailState` as a `TaskDetailState`.
+     *
+     * @param id The unique identifier of the task to fetch.
+     * @param forceRefresh A boolean indicating whether to force a refresh of the data from the
+     *                     source, ignoring any cached data. Defaults to `false`.
+     *
+     * The function handles different states of the response from the use case:
+     * - `Response.Loading`: Emits `TaskDetailState.Loading`.
+     * - `Response.Error`: Emits `TaskDetailState.Error` with the error message.
+     * - `Response.Success`:
+     *   - If the data is not null, emits `TaskDetailState.Success` with the task details.
+     *   - If the data is null, emits `TaskDetailState.Error` with a "No task found" message.
+     *
+     * The function operates on the `viewModelScope` using the `Dispatchers.IO` for background operations.
+     */
+    private fun fetchTask(
+        id: String,
+        forceRefresh: Boolean = false
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            fetchTaskDetailUseCase.invoke(
+                taskId = id,
+                forceRefresh = forceRefresh,
+            ).collect { result ->
+                when (result) {
+                    is Response.Loading -> {
+                        _taskDetailState.emit(TaskDetailState.Loading)
+                    }
+
+                    is Response.Error -> {
+                        _taskDetailState.emit(TaskDetailState.Error(result.message))
+                    }
+
+                    is Response.Success -> {
+
+                        if (result.data != null) {
+                            _taskDetailState.emit(
+                                TaskDetailState.Success(
+                                    result.data!!,
+                                )
+                            )
+
+                            return@collect
+                        }
+                        _taskDetailState.emit(
+                            TaskDetailState.Error("No task found with the given id")
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Fetches waypoints or waylines for a given task and project.
+     *
+     * This function retrieves either waypoints or waylines associated with a specific task within a project.
+     * It interacts with a use case to perform the data fetching and updates a state object to reflect the current status
+     * (loading, success, or error) of the operation.
+     *
+     * @param taskId The ID of the task for which to fetch waypoints or waylines.
+     * @param projectId The ID of the project to which the task belongs.
+     * @param rotationAngle An optional rotation angle (in degrees) that might be applied to the fetched data. Defaults to 0.
+     * @param download A boolean flag indicating whether the data should be downloaded. Defaults to false.
+     *                 If set to true, the function might attempt to download the data from a remote source.
+     * @param isWayPoints A boolean flag indicating whether to fetch waypoints (true) or waylines (false).
+     * @param forceRefresh A boolean flag indicating whether to force a refresh of the data, bypassing any potential cache.
+     *                     Defaults to true.
+     */
+    private fun fetchWayPointsOrWayLines(
+        taskId: String,
+        projectId: String,
+        rotationAngle: Int = 0,
+        download: Boolean = false,
+        isWayPoints: Boolean,
+        forceRefresh: Boolean = true,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            wayPointsOrWayLinesUseCase.invoke(
+                taskId,
+                projectId,
+                rotationAngle,
+                download,
+                isWayPoints,
+                forceRefresh
+            ).collect { result ->
+                when (result) {
+                    is Response.Loading -> {
+                        _taskWayPointsOrWayLinesState.emit(TaskWayPointsOrWayLinesState.Loading)
+                    }
+
+                    is Response.Error -> {
+                        _taskWayPointsOrWayLinesState.emit(TaskWayPointsOrWayLinesState.Error(result.message))
+                    }
+
+                    is Response.Success -> {
+                        if (result.data != null) {
+                            _taskWayPointsOrWayLinesState.emit(
+                                TaskWayPointsOrWayLinesState.Success(
+                                    result.data!!,
+                                    isWayPoints
+                                )
+                            )
+
+                            return@collect
+                        }
+
+                        _taskWayPointsOrWayLinesState.emit(
+                            TaskWayPointsOrWayLinesState.Error("No task ${if (isWayPoints) "waypoints" else "waylines"} found with the given id")
+                        )
+                    }
+                }
+            }
+        }
+    }
 }

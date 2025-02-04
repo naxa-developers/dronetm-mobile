@@ -7,9 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,11 +41,11 @@ import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectDetailMapView(
     modifier: Modifier = Modifier,
     project: Project,
+    onFeatureClick: (JsonObject?) -> Unit
 ) {
 
     val context = LocalContext.current
@@ -61,11 +59,6 @@ fun ProjectDetailMapView(
     val lockedIconName = "locked-icon--"
 
     var libreMap: MapLibreMap? by remember { mutableStateOf(null) }
-
-    var infoJsonObject: JsonObject? by remember { mutableStateOf(null) }
-    var showInfoBottomSheet by remember { mutableStateOf(false) }
-    val infoSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-
 
     val cameraPositionState = rememberCameraPosition(
         initialTarget = LatLng(27.82, 85.32),
@@ -254,8 +247,7 @@ fun ProjectDetailMapView(
                     if (queried.isNotEmpty()) {
                         val feature = queried.first()
                         if (feature.properties()?.has("point_count") == false) {
-                            infoJsonObject = feature.properties()
-                            showInfoBottomSheet = true
+                            onFeatureClick.invoke(feature.properties())
                         }
                     }
 
@@ -274,16 +266,6 @@ fun ProjectDetailMapView(
                 .padding(12.dp)
                 .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(8.dp))
 
-        )
-
-        ProjectTaskInfoBottomSheet(
-            infoJsonObject = infoJsonObject,
-            infoSheetState = infoSheetState,
-            show = showInfoBottomSheet,
-            onDismiss = {
-                infoJsonObject = null
-                showInfoBottomSheet = false
-            }
         )
     }
 }

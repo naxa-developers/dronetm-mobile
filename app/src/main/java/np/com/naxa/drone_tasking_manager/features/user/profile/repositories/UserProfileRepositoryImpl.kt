@@ -1,9 +1,10 @@
 package np.com.naxa.drone_tasking_manager.features.user.profile.repositories
 
-import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import np.com.naxa.drone_tasking_manager.core.services.ApiService
+import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
+import np.com.naxa.drone_tasking_manager.core.services.storage.StorageKeys
 import np.com.naxa.drone_tasking_manager.core.utils.Response
 import np.com.naxa.drone_tasking_manager.features.user.profile.mapper.toUserProfile
 import np.com.naxa.drone_tasking_manager.features.user.profile.models.UserProfile
@@ -13,6 +14,9 @@ import javax.inject.Inject
 
 class UserProfileRepositoryImpl @Inject constructor(private val apiService: ApiService) :
     UserProfileRepository {
+
+    private val storageService = MMKVStorageService.getInstance()
+
     override suspend fun fetchMyInfo(forceRefresh: Boolean): Flow<Response<UserProfile>> {
         return flow {
             emit(Response.Loading())
@@ -34,6 +38,8 @@ class UserProfileRepositoryImpl @Inject constructor(private val apiService: ApiS
                     return@flow emit(Response.Error(e.message ?: "Unknown Error"))
                 }
             val myInfoDetails = response.toUserProfile()
+
+            storeUserData(myInfoDetails)
 
             emit(Response.Success(data = myInfoDetails))
 
@@ -58,6 +64,16 @@ class UserProfileRepositoryImpl @Inject constructor(private val apiService: ApiS
         registrationFile: String
     ): Flow<Response<UserProfile>> {
         TODO("Not yet implemented")
+    }
+
+    private fun storeUserData(myInfoDetails: UserProfile) {
+        try {
+            storageService.save(StorageKeys.User.ID, myInfoDetails.id)
+            storageService.save(StorageKeys.User.USER_NAME, myInfoDetails.name)
+        } catch (e: Exception) {
+            // Handle any exceptions that might occur during data storage
+            e.printStackTrace()
+        }
     }
 
 }

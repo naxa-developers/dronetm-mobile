@@ -13,12 +13,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import np.com.naxa.drone_tasking_manager.Routes
+import np.com.naxa.drone_tasking_manager.navigation.routes.Routes
 import np.com.naxa.drone_tasking_manager.features.login.views.screens.LoginScreen
 import np.com.naxa.drone_tasking_manager.features.user.profile.views.screens.UserProfileScreen
 import np.com.naxa.drone_tasking_manager.features.project_details.views.screens.ProjectDetailsScreen
 import np.com.naxa.drone_tasking_manager.features.projects.views.screens.ProjectsListScreen
 import np.com.naxa.drone_tasking_manager.features.projects.views.screens.ProjectsMapScreen
+import np.com.naxa.drone_tasking_manager.features.tasks.views.screens.TaskDetailsScreen
 import np.com.naxa.drone_tasking_manager.ui.screens.download_and_transfer.DownloadAndTransferFileScreen
 import np.com.naxa.drone_tasking_manager.ui.screens.home.HomeScreen
 import np.com.naxa.drone_tasking_manager.ui.screens.splash.SplashScreen
@@ -125,6 +126,31 @@ fun DroneTMAppNavHost(
             ProjectDetailsScreen(
                 modifier = modifier,
                 projectId = id,
+            )
+        }
+
+        // Route for the Task Details screen
+        composable(
+            Routes.TaskDetails.path,
+            enterTransition = {
+                slideIn(
+                    animationSpec = tween(),
+                    initialOffset = { IntOffset(it.width, 0) }
+                )
+            },
+            exitTransition = {
+                slideOut(
+                    animationSpec = tween(),
+                    targetOffset = { IntOffset(0, 0) },
+                )
+            },
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id")
+            val project = backStackEntry.arguments?.getString("project")
+            TaskDetailsScreen(
+                modifier = modifier,
+                taskId = id,
+                projectId = project
             )
         }
 

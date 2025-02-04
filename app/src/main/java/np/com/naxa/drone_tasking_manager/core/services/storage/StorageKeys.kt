@@ -14,6 +14,8 @@ object StorageKeys {
         const val REFRESH_TOKEN = "refresh_token"
         const val ROLE = "user_role"
         const val TOKEN_TYPE = "token_type"
+        const val ID = "user_id"
+        const val USER_NAME = "user_name"
 
     }
 

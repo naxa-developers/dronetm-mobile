@@ -37,7 +37,7 @@ class ProjectDetailViewModel @Inject constructor(
     fun triggerEvent(event: ProjectDetailEvent) {
         when (event) {
             is ProjectDetailEvent.FetchProjectById -> {
-                fetchProjectById(event.id)
+                fetchProjectById(event.id, event.forceRefresh)
             }
         }
     }

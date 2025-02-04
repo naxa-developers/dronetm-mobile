@@ -8,9 +8,11 @@ import dagger.hilt.components.SingletonComponent
 import np.com.naxa.drone_tasking_manager.BuildConfig
 import np.com.naxa.drone_tasking_manager.core.services.ApiService
 import np.com.naxa.drone_tasking_manager.core.services.retrofit.utils.LongNumDeserializer
+import np.com.naxa.drone_tasking_manager.core.services.retrofit.utils.GeoJsonStringDeserializer
 import np.com.naxa.drone_tasking_manager.features.projects.dto.project.Outline
 import np.com.naxa.drone_tasking_manager.features.projects.dto.project.OutlineDeserializer
 import okhttp3.OkHttpClient
+import org.maplibre.geojson.FeatureCollection
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
@@ -32,7 +34,11 @@ class NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
-        return OkHttpClient.Builder().addInterceptor(CacheInterceptor()).build()
+        return OkHttpClient
+            .Builder()
+            .hostnameVerifier({_,_ -> true})
+            .addInterceptor(CacheInterceptor())
+            .build()
     }
 
     /**
@@ -45,9 +51,10 @@ class NetworkModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         val gson = GsonBuilder()
-                .registerTypeAdapter(String::class.java, LongNumDeserializer())
-                .registerTypeAdapter(Outline::class.java, OutlineDeserializer())
-                .create()
+            .registerTypeAdapter(String::class.java, LongNumDeserializer())
+            .registerTypeAdapter(Outline::class.java, OutlineDeserializer())
+            .registerTypeAdapter(FeatureCollection::class.java, GeoJsonStringDeserializer())
+            .create()
 
         return Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
