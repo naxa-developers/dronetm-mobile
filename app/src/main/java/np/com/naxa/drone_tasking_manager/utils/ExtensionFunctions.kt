@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
-import android.graphics.drawable.Drawable
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.net.Uri
@@ -23,11 +22,15 @@ import com.google.gson.JsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import np.com.naxa.drone_tasking_manager.navigation.routes.Routes
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.geojson.Point
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
+import kotlin.math.cos
+import kotlin.math.sin
 
 inline fun <reified T : Parcelable> Bundle.parcelable(key: String): T? = when {
     Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> getParcelable(key, T::class.java)
@@ -404,4 +407,45 @@ fun List<*>.toJsonArray(): JsonArray {
         }
     }
     return jsonArray
+}
+
+/**
+ * Rotates a geographic coordinate (longitude, latitude) around a given pivot point (centroid).
+ *
+ * This function applies a 2D rotation transformation to a `Point` using the provided centroid as
+ * the pivot. The rotation is performed in a counterclockwise direction.
+ *
+ * ### Rotation Formula:
+ * Given a point (x, y) and a pivot (cx, cy), the rotation transformation is:
+ *
+ * ```
+ * x' = (x - cx) * cos(θ) - (y - cy) * sin(θ) + cx
+ * y' = (x - cx) * sin(θ) + (y - cy) * cos(θ) + cy
+ * ```
+ *
+ * where θ is the rotation angle in radians.
+ *
+ * @param centroid The pivot point around which the rotation occurs.
+ * @param angleDegree The angle of rotation in degrees (counterclockwise).
+ * @return A new `Point` representing the rotated coordinate.
+ */
+fun Point.rotate(centroid: Point, angleDegree: Double): Point {
+    // Convert the angle from degrees to radians
+    val angleRadians = Math.toRadians(angleDegree)
+
+    // Translate point to origin (centroid as reference)
+    val x = longitude() - centroid.longitude()
+    val y = latitude() - centroid.latitude()
+
+    // Apply the rotation matrix
+    val rotatedX = x * cos(angleRadians) - y * sin(angleRadians)
+    val rotatedY = x * sin(angleRadians) + y * cos(angleRadians)
+
+    // Translate back to original coordinate system
+    return Point.fromLngLat(
+        rotatedX + centroid.longitude(),
+        rotatedY + centroid.latitude(),
+        altitude(),
+        bbox()
+    )
 }
