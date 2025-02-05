@@ -106,7 +106,7 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
             emit(Response.Loading())
 
             try {
-                val response = apiService.lockOrUnlockTask(
+                val response = apiService.unFlyableTask(
                     projectId = projectId,
                     taskId = taskId,
                     body = TaskEventRequestBody(
