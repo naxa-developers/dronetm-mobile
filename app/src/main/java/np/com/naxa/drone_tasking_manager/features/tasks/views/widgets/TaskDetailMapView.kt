@@ -29,11 +29,9 @@ import np.com.naxa.drone_tasking_manager.core.widgets.MaplibreCompose
 import np.com.naxa.drone_tasking_manager.core.widgets.rememberCameraPosition
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
-import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskUnFlyableRequestState
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskWayPointsOrWayLinesState
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
-import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 import np.com.naxa.drone_tasking_manager.utils.LatLngUtils
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
