@@ -1,6 +1,5 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.repositories
 
-import com.google.gson.JsonObject
 import kotlinx.coroutines.flow.Flow
 import np.com.naxa.drone_tasking_manager.core.utils.Response
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
