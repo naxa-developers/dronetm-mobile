@@ -1,6 +1,5 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -9,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.core.utils.Response
+import np.com.naxa.drone_tasking_manager.features.projects.dto.projects_centroid.Centroid
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.FetchTaskDetailUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.LockTaskUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.TaskWayPointsOrWayLinesUseCase
@@ -17,6 +17,11 @@ import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksE
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskDetailState
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskLockOrUnlockState
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskWayPointsOrWayLinesState
+import np.com.naxa.drone_tasking_manager.utils.rotate
+import org.maplibre.geojson.Feature
+import org.maplibre.geojson.FeatureCollection
+import org.maplibre.geojson.Point
+import org.maplibre.geojson.Point.fromLngLat
 import javax.inject.Inject
 
 @HiltViewModel
@@ -54,6 +59,19 @@ class TasksViewModel @Inject constructor(
     private val _taskWayPointsOrWayLinesState =
         MutableStateFlow<TaskWayPointsOrWayLinesState>(TaskWayPointsOrWayLinesState.Idle)
     val taskWayPointsOrWayLinesState = _taskWayPointsOrWayLinesState.asStateFlow()
+
+
+    /**
+     * The collection of features to be displayed on the map.
+     *
+     * This property holds the GeoJSON FeatureCollection that defines the features
+     * (e.g., points, lines, polygons) to be visualized.  Setting this property
+     * triggers an update to the map's displayed features.
+     *
+     * If `null`, no features will be displayed.
+     */
+    private var _featureCollection: FeatureCollection? = null
+    private var _rotatedFeatureCollection: FeatureCollection? = null
 
 
     /**
@@ -117,6 +135,14 @@ class TasksViewModel @Inject constructor(
                     download = event.download,
                     isWayPoints = event.isWayPoints,
                     forceRefresh = event.forceRefresh
+                )
+            }
+
+            is TasksEvent.RotateWayPointsOrWayLines -> {
+                rotate(
+                    angle = event.angle,
+                    centroid = event.centroid,
+                    onRotatedSuccess = event.onRotatedSuccess
                 )
             }
         }
@@ -304,6 +330,8 @@ class TasksViewModel @Inject constructor(
             ).collect { result ->
                 when (result) {
                     is Response.Loading -> {
+                        _featureCollection = null
+                        _rotatedFeatureCollection = null
                         _taskWayPointsOrWayLinesState.emit(TaskWayPointsOrWayLinesState.Loading)
                     }
 
@@ -312,6 +340,8 @@ class TasksViewModel @Inject constructor(
                     }
 
                     is Response.Success -> {
+                        _featureCollection = result.data
+
                         if (result.data != null) {
                             _taskWayPointsOrWayLinesState.emit(
                                 TaskWayPointsOrWayLinesState.Success(
@@ -327,6 +357,70 @@ class TasksViewModel @Inject constructor(
                             TaskWayPointsOrWayLinesState.Error("No task ${if (isWayPoints) "waypoints" else "waylines"} found with the given id")
                         )
                     }
+                }
+            }
+        }
+    }
+
+    /**
+     * Rotates the features in the current feature collection around a given centroid by a specified angle.
+     *
+     * This function performs the rotation operation asynchronously on the IO dispatcher.
+     * It iterates through the features of the internal [_featureCollection],
+     * rotates each `Point` geometry around the provided `centroid` using the given `angle`, and creates a new `FeatureCollection` with the rotated geometries.
+     * Non-`Point` geometries are not rotated.
+     *
+     * @param angle The angle of rotation in degrees. Positive values rotate clockwise, negative values rotate counterclockwise.
+     * @param centroid An optional [Centroid] representing the point around which the features should be rotated.
+     *                 If `null`, no rotation will occur.
+     * @param onRotatedSuccess A callback function that is invoked with the new [FeatureCollection] containing the rotated features
+     *                         if rotation was successful (i.e., `centroid` is not null).
+     *                         This callback is executed on the main thread.
+     */
+    private fun rotate(
+        angle: Float,
+        centroid: Centroid? = null,
+        onRotatedSuccess: (FeatureCollection) -> Unit
+    ) {
+        if (angle == 0f) {
+            _featureCollection?.let {
+                viewModelScope.launch(Dispatchers.Main) {
+                    onRotatedSuccess.invoke(it)
+                }
+            }
+
+            return
+        }
+
+        if (_rotatedFeatureCollection == null) _rotatedFeatureCollection = _featureCollection
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val rotated = centroid?.let {
+                FeatureCollection.fromFeatures(
+                    _rotatedFeatureCollection?.features()?.map { feature ->
+                        Feature.fromGeometry(
+                            when (val geometry = feature.geometry()) {
+                                is Point -> geometry.rotate(
+                                    fromLngLat(
+                                        it.coordinates.first(),
+                                        it.coordinates.last()
+                                    ), angle.toDouble()
+                                )
+
+                                else -> geometry
+                            },
+                            feature.properties(),
+                            feature.id(),
+                            feature.bbox()
+                        )
+                    }?.toTypedArray() ?: emptyArray()
+                )
+            }
+
+            rotated?.let {
+                _rotatedFeatureCollection = it
+                launch(Dispatchers.Main) {
+                    onRotatedSuccess.invoke(it)
                 }
             }
         }

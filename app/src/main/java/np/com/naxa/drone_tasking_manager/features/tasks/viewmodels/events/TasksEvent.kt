@@ -1,5 +1,8 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events
 
+import np.com.naxa.drone_tasking_manager.features.projects.dto.projects_centroid.Centroid
+import org.maplibre.geojson.FeatureCollection
+
 
 sealed class TasksEvent {
 
@@ -80,6 +83,31 @@ sealed class TasksEvent {
         val download: Boolean = false,
         val isWayPoints: Boolean,
         val forceRefresh: Boolean = true
+    ) : TasksEvent()
+
+    /**
+     * Represents an event to rotate waypoints or waylines.
+     *
+     * This data class encapsulates the parameters required to perform a rotation operation on a
+     * collection of waypoints or waylines represented as a [FeatureCollection].
+     *
+     * @property angle The angle (in degrees) by which to rotate the waypoints or waylines.
+     *                 Positive values indicate clockwise rotation, while negative values
+     *                 indicate counterclockwise rotation.
+     * @property centroid An optional [Centroid] object representing the center point around
+     *                    which the rotation should occur. If `null`, the rotation will be
+     *                    performed around the geometric center of the waypoints/waylines.
+     *                    If it's not provided, it will be computed based on the FeatureCollection.
+     * @property onRotatedSuccess A lambda function that will be invoked when the rotation
+     *                             operation is successfully completed. It receives the
+     *                             rotated [FeatureCollection] as a parameter.
+     *
+     * @constructor Creates a new instance of RotateWayPointsOrWayLines.
+     */
+    data class RotateWayPointsOrWayLines(
+        val angle: Float,
+        val centroid: Centroid? = null,
+        val onRotatedSuccess: (FeatureCollection) -> Unit
     ) : TasksEvent()
 
     /**
