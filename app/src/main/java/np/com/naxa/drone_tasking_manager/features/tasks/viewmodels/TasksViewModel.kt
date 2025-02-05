@@ -12,10 +12,12 @@ import np.com.naxa.drone_tasking_manager.features.projects.dto.projects_centroid
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.FetchTaskDetailUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.LockTaskUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.TaskWayPointsOrWayLinesUseCase
+import np.com.naxa.drone_tasking_manager.features.tasks.usecases.UnFlyableTaskUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.UnlockTaskUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskDetailState
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskLockOrUnlockState
+import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskUnFlyableRequestState
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskWayPointsOrWayLinesState
 import np.com.naxa.drone_tasking_manager.utils.rotate
 import org.maplibre.geojson.Feature
@@ -29,6 +31,7 @@ class TasksViewModel @Inject constructor(
     private val fetchTaskDetailUseCase: FetchTaskDetailUseCase,
     private val lockTaskUseCase: LockTaskUseCase,
     private val unlockTaskUseCase: UnlockTaskUseCase,
+    private val unFlyableTaskUseCase: UnFlyableTaskUseCase,
     private val wayPointsOrWayLinesUseCase: TaskWayPointsOrWayLinesUseCase,
 ) : ViewModel() {
 
@@ -52,6 +55,13 @@ class TasksViewModel @Inject constructor(
     private val _taskUnlockState =
         MutableStateFlow<TaskLockOrUnlockState>(TaskLockOrUnlockState.Idle)
     val taskUnlockState = _taskUnlockState.asStateFlow()
+
+    /**
+     * Represents the different states of task un flyable request
+     */
+    private val _taskUnFlyableRequestState =
+        MutableStateFlow<TaskUnFlyableRequestState>(TaskUnFlyableRequestState.Idle)
+    val taskUnFlyableRequestState = _taskUnFlyableRequestState.asStateFlow()
 
     /**
      * Represents the different states of task way points or way lines.
@@ -145,6 +155,14 @@ class TasksViewModel @Inject constructor(
                     onRotatedSuccess = event.onRotatedSuccess
                 )
             }
+
+            is TasksEvent.FlagTaskAsUnFlyable -> {
+                unFlyableTask(
+                    taskId = event.taskId,
+                    projectId = event.projectId,
+                    comment = event.comment
+                )
+            }
         }
     }
 
@@ -231,6 +249,28 @@ class TasksViewModel @Inject constructor(
 
                     is Response.Error -> {
                         _taskUnlockState.emit(TaskLockOrUnlockState.Error(result.message))
+                    }
+                }
+            }
+        }
+    }
+
+    private fun unFlyableTask(taskId: String, projectId: String, comment: String? = null) {
+        viewModelScope.launch(Dispatchers.IO) {
+            unFlyableTaskUseCase.invoke(taskId, projectId, comment).collect { result ->
+                when (result) {
+                    is Response.Loading -> {
+                        _taskUnFlyableRequestState.emit(TaskUnFlyableRequestState.Requesting)
+                    }
+
+                    is Response.Success -> {
+                        _taskUnFlyableRequestState.emit(
+                            TaskUnFlyableRequestState.Success(result.data!!)
+                        )
+                    }
+
+                    is Response.Error -> {
+                        _taskUnFlyableRequestState.emit(TaskUnFlyableRequestState.Error(result.message))
                     }
                 }
             }
