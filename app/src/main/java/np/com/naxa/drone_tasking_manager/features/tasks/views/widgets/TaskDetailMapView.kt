@@ -32,7 +32,6 @@ import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksE
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskWayPointsOrWayLinesState
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
-import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 import np.com.naxa.drone_tasking_manager.utils.LatLngUtils
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
@@ -99,26 +98,24 @@ fun TaskDetailMapView(
         )
     }
 
-
     // Listen waypoints or way lines data and apply layer to the map
-    when (waypointsOrWayLinesState) {
-        TaskWayPointsOrWayLinesState.Idle, TaskWayPointsOrWayLinesState.Loading -> {}
-        is TaskWayPointsOrWayLinesState.Success -> {
-            val features =
-                (waypointsOrWayLinesState as TaskWayPointsOrWayLinesState.Success).geoJson
+    LaunchedEffect(waypointsOrWayLinesState) {
+        when (waypointsOrWayLinesState) {
+            TaskWayPointsOrWayLinesState.Idle, TaskWayPointsOrWayLinesState.Loading -> {}
+            is TaskWayPointsOrWayLinesState.Success -> {
+                val features =
+                    (waypointsOrWayLinesState as TaskWayPointsOrWayLinesState.Success).geoJson
 
-            isWaypoints =
-                (waypointsOrWayLinesState as TaskWayPointsOrWayLinesState.Success).isWayPoints
+                isWaypoints =
+                    (waypointsOrWayLinesState as TaskWayPointsOrWayLinesState.Success).isWayPoints
 
-            applyWaypointsLineLayer(context, features, libreMap)
-            applyWaypointsCircleLayer(context, features, libreMap)
+                applyWaypointsLineLayer(context, features, libreMap)
+                applyWaypointsCircleLayer(context, features, libreMap)
 
-            onWaypointsLoaded.invoke(features.features()?.size)
-        }
+                onWaypointsLoaded.invoke(features.features()?.size)
+            }
 
-        is TaskWayPointsOrWayLinesState.Error -> {
-            val error = (waypointsOrWayLinesState as TaskWayPointsOrWayLinesState.Error).message
-            navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnSnackBarShow(message = error))
+            is TaskWayPointsOrWayLinesState.Error -> {}
         }
     }
 

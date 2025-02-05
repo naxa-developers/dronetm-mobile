@@ -111,6 +111,24 @@ sealed class TasksEvent {
     ) : TasksEvent()
 
     /**
+     * Represents an event indicating that a task has been flagged as un-flyable.
+     *
+     * This event is typically triggered when a task is determined to be impossible
+     * or unsafe to execute, for example, due to resource constraints, environmental
+     * conditions, or unexpected dependencies.
+     *
+     * @property taskId The unique identifier of the task that is flagged as un-flyable.
+     * @property projectId The unique identifier of the project to which the task belongs.
+     * @property comment An optional comment providing further context or explanation
+     *                   for why the task was flagged as un-flyable.
+     */
+    data class FlagTaskAsUnFlyable(
+        val taskId: String,
+        val projectId: String,
+        val comment: String? = null
+    ) : TasksEvent()
+
+    /**
      * Represents the state of various reset actions within the application.
      *
      * This data class encapsulates the state of three distinct reset actions:
@@ -126,12 +144,15 @@ sealed class TasksEvent {
      *
      * @property lockState `true` if the lock state should be reset, `false` otherwise. Defaults to `false`.
      * @property unlockState `true` if the unlock state should be reset, `false` otherwise. Defaults to `false`.
+     * @property unFlyableState `true` if the task un-flyable request state should be reset, `false` otherwise. Defaults to `false`.
      * @property taskDetailState `true` if the task detail view's state should be reset, `false` otherwise. Defaults to `false`.
+     * @property taskWayPointsOrWayLinesState `true` if the task waypoints state should be reset, `false` otherwise. Defaults to `false`.
      * @constructor Creates a [ResetState] instance with optional initial values for each state.
      */
     data class ResetState(
         val lockState: Boolean = false,
         val unlockState: Boolean = false,
+        val unFlyableState: Boolean = false,
         val taskDetailState: Boolean = false,
         val taskWayPointsOrWayLinesState: Boolean = false
     ) : TasksEvent()
