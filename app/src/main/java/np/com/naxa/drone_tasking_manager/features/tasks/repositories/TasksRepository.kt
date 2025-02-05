@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import np.com.naxa.drone_tasking_manager.core.utils.Response
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.models.TaskLockUnlockResponse
+import np.com.naxa.drone_tasking_manager.features.tasks.models.TaskUnFlyableResponse
 import org.maplibre.geojson.FeatureCollection
 
 interface TasksRepository {
@@ -68,6 +69,28 @@ interface TasksRepository {
         taskId: String,
         projectId: String
     ): Flow<Response<TaskLockUnlockResponse>>
+
+    /**
+     * Marks a task as un-flyable (unable to be executed).
+     *
+     * This function communicates with the backend to update the status of a specific task,
+     * indicating that it cannot be executed or scheduled for execution.
+     *
+     * @param taskId The unique identifier of the task to be marked as un-flyable.
+     *        Must not be empty.
+     * @param projectId The identifier of the project to which the task belongs.
+     *        Must not be empty.
+     * @param comment The comment text entered by the user while making this task un flyable
+     * @return A Flow emitting a Response object containing the result of the operation.
+     *         - On success, the Response will contain a TaskUnFlyableResponse.
+     *         - On failure, the Response will contain an error status and message.
+     *
+     */
+    suspend fun taskUnFlyable(
+        taskId: String,
+        projectId: String,
+        comment: String? = null
+    ): Flow<Response<TaskUnFlyableResponse>>
 
     /**
      * Retrieves the waypoints associated with a specific task.

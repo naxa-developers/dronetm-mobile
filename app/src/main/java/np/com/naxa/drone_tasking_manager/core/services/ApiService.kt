@@ -4,9 +4,9 @@ import np.com.naxa.drone_tasking_manager.features.login.dto.LoginResponseDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.project.ProjectDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects.ProjectsResponseDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects_centroid.CentroidResult
-import np.com.naxa.drone_tasking_manager.features.tasks.dto.LockOrUnlockEventRequestBody
+import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskEventRequestBody
 import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskDto
-import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskLockUnlockResponseDto
+import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskEventResponseDto
 import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.dto.RefreshTokenDto
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileDto
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileUpdateDto
@@ -101,8 +101,18 @@ interface ApiService {
     suspend fun lockOrUnlockTask(
         @Path("project_id") projectId: String,
         @Path("task_id") taskId: String,
-        @Body body: LockOrUnlockEventRequestBody
-    ): TaskLockUnlockResponseDto
+        @Body body: TaskEventRequestBody
+    ): TaskEventResponseDto
+
+    /**
+     * Interface defining API calls related to lock or unlock task.
+     */
+    @POST("api/tasks/event/{project_id}/{task_id}")
+    suspend fun unFlyableTask(
+        @Path("project_id") projectId: String,
+        @Path("task_id") taskId: String,
+        @Body body: TaskEventRequestBody
+    ): TaskEventResponseDto
 
     /**
      * Interface defining API calls related to task waypoints or way lines.
