@@ -127,6 +127,10 @@ class TasksViewModel @Inject constructor(
                         _taskUnlockState.emit(TaskLockOrUnlockState.Idle)
                     }
 
+                    if (event.unFlyableState) {
+                        _taskUnFlyableRequestState.emit(TaskUnFlyableRequestState.Idle)
+                    }
+
                     if (event.taskDetailState) {
                         _taskDetailState.emit(TaskDetailState.Idle)
                     }

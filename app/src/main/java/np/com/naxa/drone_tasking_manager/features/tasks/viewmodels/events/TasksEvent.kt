@@ -144,12 +144,15 @@ sealed class TasksEvent {
      *
      * @property lockState `true` if the lock state should be reset, `false` otherwise. Defaults to `false`.
      * @property unlockState `true` if the unlock state should be reset, `false` otherwise. Defaults to `false`.
+     * @property unFlyableState `true` if the task un-flyable request state should be reset, `false` otherwise. Defaults to `false`.
      * @property taskDetailState `true` if the task detail view's state should be reset, `false` otherwise. Defaults to `false`.
+     * @property taskWayPointsOrWayLinesState `true` if the task waypoints state should be reset, `false` otherwise. Defaults to `false`.
      * @constructor Creates a [ResetState] instance with optional initial values for each state.
      */
     data class ResetState(
         val lockState: Boolean = false,
         val unlockState: Boolean = false,
+        val unFlyableState: Boolean = false,
         val taskDetailState: Boolean = false,
         val taskWayPointsOrWayLinesState: Boolean = false
     ) : TasksEvent()
