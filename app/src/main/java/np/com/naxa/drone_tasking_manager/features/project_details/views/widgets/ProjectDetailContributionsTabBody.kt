@@ -78,7 +78,8 @@ fun ProjectDetailContributionsTabBody(
                     it.state == ProjectTaskState.ImageProcessingStarted ||
                     it.state == ProjectTaskState.ImageProcessingFailed ||
                     it.state == ProjectTaskState.ImageUploaded ||
-                    it.state == ProjectTaskState.LockedForMapping
+                    it.state == ProjectTaskState.LockedForMapping ||
+                    it.state == ProjectTaskState.UnflyableTask
         }
             .mapIndexed { i, task ->
                 Row(
