@@ -36,7 +36,7 @@ class NetworkModule {
     fun provideOkHttpClient(): OkHttpClient {
         return OkHttpClient
             .Builder()
-            .hostnameVerifier({_,_ -> true})
+            .hostnameVerifier { _, _ -> true }
             .addInterceptor(CacheInterceptor())
             .build()
     }

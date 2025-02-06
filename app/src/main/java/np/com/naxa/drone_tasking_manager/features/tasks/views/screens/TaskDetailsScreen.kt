@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -44,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskDetailState
+import np.com.naxa.drone_tasking_manager.features.tasks.views.widgets.DownloadTaskFlightPlanIconButton
 import np.com.naxa.drone_tasking_manager.features.tasks.views.widgets.TaskDetailMapView
 import np.com.naxa.drone_tasking_manager.features.tasks.views.widgets.TaskDetailSectionView
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
@@ -177,7 +179,20 @@ fun TaskDetailsScreen(
                         )
                     }
 
-                    Text("#${task.projectTaskIndex ?: ""}", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "#${task.projectTaskIndex ?: ""}",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                    if (waypointsCount != null)
+                        Spacer(modifier = Modifier.weight(1f))
+
+                    if (waypointsCount != null)
+                        DownloadTaskFlightPlanIconButton(
+                            task = task.copy(
+                                projectId = projectId
+                            )
+                        )
                 }
             }
         }
