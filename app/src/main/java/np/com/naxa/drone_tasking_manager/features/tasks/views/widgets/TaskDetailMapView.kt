@@ -1,6 +1,7 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.views.widgets
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,6 +39,8 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapLibreMap.OnMapClickListener
+import org.maplibre.android.maps.MapLibreMap.OnMapLongClickListener
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.LineLayer
@@ -97,6 +101,70 @@ fun TaskDetailMapView(
         )
     }
 
+    // Map Click Listener
+    DisposableEffect(libreMap) {
+        val clickListener = OnMapClickListener { latLng ->
+            val point = libreMap?.projection?.toScreenLocation(latLng)
+            val queried = point?.let {
+                libreMap?.queryRenderedFeatures(
+                    it,
+                    *listOf(
+                        "task-waypoints-circle-layer--",
+                        "task-waypoints-takeoff-symbol-layer--"
+                    ).toTypedArray()
+                )
+            }
+
+            if (!queried.isNullOrEmpty()) {
+                val feature = queried.first()
+                if (feature.properties()?.has("point_count") == false) {
+                    infoJsonObject = feature.properties()
+                    showInfoBottomSheet = true
+                }
+            }
+
+            true
+        }
+
+        libreMap?.addOnMapClickListener(clickListener)
+
+        onDispose {
+            libreMap?.removeOnMapClickListener(clickListener)
+        }
+    }
+
+    // Map Long Click Listener
+    DisposableEffect(libreMap) {
+        val longClickListener = OnMapLongClickListener { latLng ->
+            val point = libreMap?.projection?.toScreenLocation(latLng)
+            val queried = point?.let {
+                libreMap?.queryRenderedFeatures(
+                    it,
+                    *listOf(
+                        "task-waypoints-circle-layer--",
+                        "task-waypoints-takeoff-symbol-layer--"
+                    ).toTypedArray()
+                )
+            }
+
+            if (!queried.isNullOrEmpty()) {
+                val feature = queried.first()
+                if (feature.properties()?.has("point_count") == false) {
+                    infoJsonObject = feature.properties()
+                    showInfoBottomSheet = true
+                }
+            }
+
+            true
+        }
+
+        libreMap?.addOnMapLongClickListener(longClickListener)
+
+        onDispose {
+            libreMap?.removeOnMapLongClickListener(longClickListener)
+        }
+    }
+
     // Listen waypoints or way lines data and apply layer to the map
     LaunchedEffect(waypointsOrWayLinesState) {
         when (waypointsOrWayLinesState) {
@@ -144,27 +212,6 @@ fun TaskDetailMapView(
                         ),
                         500
                     )
-                }
-
-                libre.addOnMapClickListener { latLng ->
-                    val point = libre.projection.toScreenLocation(latLng)
-                    val queried = libre.queryRenderedFeatures(
-                        point,
-                        *listOf(
-                            "task-waypoints-circle-layer--",
-                            "task-waypoints-takeoff-symbol-layer--"
-                        ).toTypedArray()
-                    )
-
-                    if (queried.isNotEmpty()) {
-                        val feature = queried.first()
-                        if (feature.properties()?.has("point_count") == false) {
-                            infoJsonObject = feature.properties()
-                            showInfoBottomSheet = true
-                        }
-                    }
-
-                    true
                 }
             }
         )
