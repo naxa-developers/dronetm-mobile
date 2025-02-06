@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -30,7 +31,6 @@ import np.com.naxa.drone_tasking_manager.core.widgets.rememberCameraPosition
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskWayPointsOrWayLinesState
-import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
 import np.com.naxa.drone_tasking_manager.utils.LatLngUtils
 import org.maplibre.android.camera.CameraUpdateFactory
@@ -64,14 +64,13 @@ fun TaskDetailMapView(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val tasksViewModel = LocalTasksViewModel.current
-    val navigationEventsViewModel = LocalNavigationEventsViewModel.current
 
     var libreMap: MapLibreMap? by remember { mutableStateOf(null) }
 
     val waypointsOrWayLinesState by tasksViewModel.taskWayPointsOrWayLinesState.collectAsState()
 
     var isWaypoints by remember { mutableStateOf(false) }
-    var angle by remember { mutableStateOf(0f) }
+    var angle by remember { mutableFloatStateOf(0f) }
 
     var infoJsonObject: JsonObject? by remember { mutableStateOf(null) }
     var showInfoBottomSheet by remember { mutableStateOf(false) }
