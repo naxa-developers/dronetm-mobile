@@ -10,18 +10,20 @@ import javax.inject.Inject
 @InstallIn(SingletonComponent::class)
 class UpdateOtherUserDetailsUseCase @Inject constructor(private val profileRepository: UserProfileRepository) {
     suspend operator fun invoke(
+        userId: String,
         certifiedDroneOperator: Boolean,
         droneYouOwn: String,
         experienceYears: Int,
         notifyForProjectsWithinKm: Int,
-        registrationCertificateUrl: String,
-        registrationFile: String
+        certificateFile: String?,
+        registrationFile: String?,
     ) = profileRepository.updateOtherDetails(
+        userId,
         certifiedDroneOperator,
         droneYouOwn,
         experienceYears,
         notifyForProjectsWithinKm,
-        registrationCertificateUrl,
+        certificateFile,
         registrationFile
     )
 }

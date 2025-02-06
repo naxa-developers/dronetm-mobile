@@ -18,11 +18,12 @@ interface UserProfileRepository {
 
 
     suspend fun updateOtherDetails(
+        userId: String,
         certifiedDroneOperator: Boolean,
         droneYouOwn: String,
         experienceYears: Int,
         notifyForProjectsWithinKm: Int,
-        registrationCertificateUrl: String,
-        registrationFile: String
-    ): Flow<Response<UserProfile>>
+        certificateFile: String?,
+        registrationFile: String?
+    ): Flow<Response<UserProfileUpdateDetails>>
 }

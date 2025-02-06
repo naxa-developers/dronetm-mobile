@@ -10,6 +10,7 @@ import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskLockUnlockRespon
 import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.dto.RefreshTokenDto
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileDto
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileUpdateDto
+import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.maplibre.geojson.FeatureCollection
@@ -20,6 +21,7 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.PATCH
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -131,6 +133,14 @@ interface ApiService {
     suspend fun updateUser(
         @Path("id") userId: String,
         @Body body: Map<String, String>
+    ): UserProfileUpdateDto
+
+    @PATCH("api/users/{id}/profile")
+    suspend fun updateUserOtherDetails(
+        @Path("id") userId: String,
+        @Part body: Map<String, Any>,
+        @Part certificateFile: MultipartBody.Part?,
+        @Part registrationFile: MultipartBody.Part?
     ): UserProfileUpdateDto
 
 
