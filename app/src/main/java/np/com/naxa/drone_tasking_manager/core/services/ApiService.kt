@@ -19,9 +19,11 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Part
+import retrofit2.http.PartMap
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -135,10 +137,11 @@ interface ApiService {
         @Body body: Map<String, String>
     ): UserProfileUpdateDto
 
+    @Multipart
     @PATCH("api/users/{id}/profile")
     suspend fun updateUserOtherDetails(
         @Path("id") userId: String,
-        @Part body: Map<String, Any>,
+        @PartMap body: Map<String, String>,
         @Part certificateFile: MultipartBody.Part?,
         @Part registrationFile: MultipartBody.Part?
     ): UserProfileUpdateDto

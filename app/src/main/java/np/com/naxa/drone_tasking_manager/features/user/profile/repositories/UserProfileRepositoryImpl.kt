@@ -105,10 +105,10 @@ class UserProfileRepositoryImpl @Inject constructor(private val apiService: ApiS
                 try {
                     apiService.updateUserOtherDetails(
                         userId = userId, body = mapOf(
-                            "certificate_drone_operator" to certifiedDroneOperator,
+                            "certificate_drone_operator" to "$certifiedDroneOperator",
                             "drone_you_own" to droneYouOwn,
-                            "experience_years" to experienceYears,
-                            "notify_for_projects_within_km" to notifyForProjectsWithinKm
+                            "experience_years" to "$experienceYears",
+                            "notify_for_projects_within_km" to "$notifyForProjectsWithinKm"
                         ),
                         FileToMultipartFileUtils.getMultipartBodyPart(filePath = certificateFile, "certificate_file"),
                         FileToMultipartFileUtils.getMultipartBodyPart(filePath = registrationFile, "registration_file")

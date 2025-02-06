@@ -449,3 +449,24 @@ fun Point.rotate(centroid: Point, angleDegree: Double): Point {
         bbox()
     )
 }
+
+
+/**
+ * Extracts the file name from a given URL string.
+ *
+ * @return The file name as a String?, or null if the URL is invalid or doesn't contain a file name.
+ */
+fun String.getFileNameFromUrl(): String? {
+    return this.let {
+        if(it.isNotEmpty()) {
+            // Parse the URL string into a Uri object
+            val uri = Uri.parse(it)
+            // Extract the path from the Uri
+            val path = uri.path
+            // Extract the substring after the last '/' character, which represents the file name
+            path?.substringAfterLast('/')
+        }else{
+            ""
+        }
+    }
+}

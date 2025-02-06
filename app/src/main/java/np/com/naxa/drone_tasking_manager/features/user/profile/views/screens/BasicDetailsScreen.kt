@@ -177,7 +177,6 @@ fun BasicDetailsScreen() {
                 .fillMaxWidth()
                 .height(48.dp)
                 .padding(0.dp),
-//            enabled = enableView,
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Red,
                 contentColor = MaterialTheme.colorScheme.onSurface
