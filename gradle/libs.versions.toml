@@ -57,6 +57,7 @@ firebaseBom = "33.8.0"
 
 ##Image
 coil = "2.6.0"
+playServicesLocation = "21.3.0"
 
 [libraries]
 android-sdk = { module = "org.maplibre.gl:android-sdk", version.ref = "androidSdk" }
@@ -131,6 +132,9 @@ firebase-auth = { module = "com.google.firebase:firebase-auth" }
 
 #Image
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+
+#Location
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 
 
 [plugins]

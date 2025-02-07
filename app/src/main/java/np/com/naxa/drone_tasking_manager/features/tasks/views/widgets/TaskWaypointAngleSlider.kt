@@ -142,7 +142,8 @@ fun TaskWaypointAngleSlider(
             Text(
                 "Rotate",
                 style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 9.sp
+                    fontSize = 10.sp,
+                    letterSpacing = 0.5.sp
                 )
             )
         }

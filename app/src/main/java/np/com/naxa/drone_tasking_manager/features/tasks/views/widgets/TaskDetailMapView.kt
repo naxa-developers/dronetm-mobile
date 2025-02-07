@@ -1,8 +1,12 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.views.widgets
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PointF
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,6 +32,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.google.android.gms.location.LocationServices
 import com.google.gson.JsonObject
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.R
@@ -59,6 +64,7 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
+@SuppressLint("MissingPermission")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskDetailMapView(
@@ -93,6 +99,39 @@ fun TaskDetailMapView(
     var draggedFeatureIndex by remember { mutableStateOf<Int?>(null) }
     var updatedTakeOffPointLatLng: LatLng? by remember { mutableStateOf(null) }
     var showTakeOffPointUpdateAlertDialog by remember { mutableStateOf(false) }
+
+    // For Pick off point change
+    val takeOffPointChangeOptionsBottomSheetState =
+        rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    var showTakeOffPointChangeOptionsBottomSheet by remember { mutableStateOf(false) }
+    var takeOffPointChangeOptions by remember { mutableStateOf<TakeOffPointChangeOptions?>(null) }
+
+
+    // Define the permissions to request
+    val locationPermissions = arrayOf(
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    )
+
+    // Launcher for location permission
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allPermissionsGranted = permissions.all { it.value }
+        if (allPermissionsGranted) {
+            scope.launch {
+                val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                    location?.let {
+                        updatedTakeOffPointLatLng = LatLng(it.latitude, it.longitude)
+                        showTakeOffPointUpdateAlertDialog = true
+                        draggedFeatureIndex = null
+                    }
+                }
+            }
+        }
+    }
+
 
     LaunchedEffect(task) {
         if (task.id == null || task.projectId == null) return@LaunchedEffect
@@ -352,7 +391,12 @@ fun TaskDetailMapView(
             TakeOffPointDraggableUnDraggableToggle(
                 draggable = draggable,
                 onToggled = {
-                    draggable = it
+                    if (draggable) {
+                        draggable = false
+                        return@TakeOffPointDraggableUnDraggableToggle
+                    }
+
+                    showTakeOffPointChangeOptionsBottomSheet = true
                 }
             )
 
@@ -388,14 +432,17 @@ fun TaskDetailMapView(
             UpdateTakeOffPointAlertDialog(
                 onDismissRequest = {
                     showTakeOffPointUpdateAlertDialog = false
+                    updatedTakeOffPointLatLng = null
 
                     // resetting state to original one
-                    tasksViewModel.triggerEvent(
-                        TasksEvent.RestoreFeatureCollection { features ->
-                            applyWaypointsLineLayer(context, features, libreMap)
-                            applyWaypointsCircleLayer(context, features, libreMap)
-                        }
-                    )
+                    if (draggable) {
+                        tasksViewModel.triggerEvent(
+                            TasksEvent.RestoreFeatureCollection { features ->
+                                applyWaypointsLineLayer(context, features, libreMap)
+                                applyWaypointsCircleLayer(context, features, libreMap)
+                            }
+                        )
+                    }
                 },
                 onConfirm = {
                     showTakeOffPointUpdateAlertDialog = false
@@ -417,6 +464,31 @@ fun TaskDetailMapView(
                 }
             )
         }
+
+        TakeOffPointChangeOptionsBottomSheet(
+            sheetState = takeOffPointChangeOptionsBottomSheetState,
+            show = showTakeOffPointChangeOptionsBottomSheet,
+            onDismiss = {
+                showTakeOffPointChangeOptionsBottomSheet = false
+                takeOffPointChangeOptions = null
+                draggable = false
+            },
+            onOptionSelected = {
+                showTakeOffPointChangeOptionsBottomSheet = false
+
+                when (it) {
+                    TakeOffPointChangeOptions.Drag -> {
+                        draggable = true
+                    }
+
+                    TakeOffPointChangeOptions.CurrentLocation -> {
+                        scope.launch {
+                            locationPermissionLauncher.launch(locationPermissions)
+                        }
+                    }
+                }
+            }
+        )
     }
 }
 

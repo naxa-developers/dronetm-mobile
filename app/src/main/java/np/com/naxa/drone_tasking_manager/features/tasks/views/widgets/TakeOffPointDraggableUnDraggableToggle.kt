@@ -1,5 +1,7 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.views.widgets
 
+
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,6 +12,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Swipe
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -39,27 +42,30 @@ fun TakeOffPointDraggableUnDraggableToggle(
             modifier = modifier
                 .size(24.dp)
                 .clip(CircleShape)
-                .background(
-                    if (draggable) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(
-                        alpha = 0.2f
-                    )
-                )
+                .background(MaterialTheme.colorScheme.primary)
                 .clickable {
                     onToggled?.invoke(!draggable)
                 },
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                modifier = Modifier.size((24 / 1.75).dp),
-                imageVector = Icons.Default.Swipe,
-                contentDescription = null,
-                tint = Color.White,
-            )
+
+            Crossfade(
+                targetState = draggable,
+                label = "Draggable Crossfade"
+            ) { draggable ->
+                Icon(
+                    modifier = Modifier.size((24 / 1.75).dp),
+                    imageVector = if (draggable) Icons.Default.Swipe else Icons.Default.Place,
+                    contentDescription = null,
+                    tint = Color.White,
+                )
+            }
         }
         Text(
-            "Takeoff Drag",
+            "Change Takeoff Point",
             style = MaterialTheme.typography.labelSmall.copy(
-                fontSize = 9.sp
+                fontSize = 10.sp,
+                letterSpacing = 0.5.sp
             )
         )
     }
