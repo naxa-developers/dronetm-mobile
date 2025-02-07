@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -605,13 +606,24 @@ class TasksViewModel @Inject constructor(
             ).collect { result ->
                 when (result) {
                     is Response.Loading -> {
-                        _featureCollection = null
                         _changeableFeatureCollection = null
                         _taskWayPointsOrWayLinesState.emit(TaskWayPointsOrWayLinesState.Loading)
                     }
 
                     is Response.Error -> {
                         _taskWayPointsOrWayLinesState.emit(TaskWayPointsOrWayLinesState.Error(result.message))
+
+                        delay(500)
+
+                        if (_featureCollection != null) {
+                            _taskWayPointsOrWayLinesState.emit(
+                                TaskWayPointsOrWayLinesState.Success(
+                                    _featureCollection!!,
+                                    isWayPoints
+                                )
+                            )
+                        }
+
                     }
 
                     is Response.Success -> {

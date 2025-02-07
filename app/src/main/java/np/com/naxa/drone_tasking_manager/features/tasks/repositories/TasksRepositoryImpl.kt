@@ -4,6 +4,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import np.com.naxa.drone_tasking_manager.core.services.ApiService
 import np.com.naxa.drone_tasking_manager.core.utils.Response
+import np.com.naxa.drone_tasking_manager.core.utils.responsevalidator.ErrorResponse
+import np.com.naxa.drone_tasking_manager.core.utils.responsevalidator.getErrorMessage
 import np.com.naxa.drone_tasking_manager.features.tasks.dto.TakeOffPointUpdateRequestBody
 import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskEventRequestBody
 import np.com.naxa.drone_tasking_manager.features.tasks.mapper.toProjectTask
@@ -14,6 +16,7 @@ import np.com.naxa.drone_tasking_manager.features.tasks.models.TaskLockUnlockRes
 import np.com.naxa.drone_tasking_manager.features.tasks.models.TaskUnFlyableResponse
 import np.com.naxa.drone_tasking_manager.utils.DateUtils
 import org.maplibre.geojson.FeatureCollection
+import retrofit2.HttpException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -41,6 +44,14 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
                     )
                 )
 
+            } catch (e: HttpException) {
+                return@flow emit(
+                    Response.Error(
+                        ErrorResponse.parseErrorBody(
+                            e.response()?.errorBody()?.string()
+                        ).getErrorMessage()
+                    )
+                )
             } catch (e: Exception) {
                 emit(Response.Error(e.message ?: "Error fetching task"))
             }
@@ -67,6 +78,14 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
 
                 emit(Response.Success(response.toTaskLockUnlockResponse()))
 
+            } catch (e: HttpException) {
+                return@flow emit(
+                    Response.Error(
+                        ErrorResponse.parseErrorBody(
+                            e.response()?.errorBody()?.string()
+                        ).getErrorMessage()
+                    )
+                )
             } catch (e: Exception) {
                 emit(Response.Error(e.cause?.message ?: "Error locking task $taskId"))
             }
@@ -92,6 +111,14 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
 
                 emit(Response.Success(response.toTaskLockUnlockResponse()))
 
+            } catch (e: HttpException) {
+                return@flow emit(
+                    Response.Error(
+                        ErrorResponse.parseErrorBody(
+                            e.response()?.errorBody()?.string()
+                        ).getErrorMessage()
+                    )
+                )
             } catch (e: Exception) {
                 emit(Response.Error(e.cause?.message ?: "Error unlocking task $taskId"))
             }
@@ -119,6 +146,14 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
 
                 emit(Response.Success(response.toTaskUnFlyableResponse()))
 
+            } catch (e: HttpException) {
+                return@flow emit(
+                    Response.Error(
+                        ErrorResponse.parseErrorBody(
+                            e.response()?.errorBody()?.string()
+                        ).getErrorMessage()
+                    )
+                )
             } catch (e: Exception) {
                 emit(Response.Error(e.cause?.message ?: "Error requesting task $taskId un-flyable"))
             }
@@ -146,6 +181,14 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
 
                 emit(Response.Success(response))
 
+            } catch (e: HttpException) {
+                return@flow emit(
+                    Response.Error(
+                        ErrorResponse.parseErrorBody(
+                            e.response()?.errorBody()?.string()
+                        ).getErrorMessage()
+                    )
+                )
             } catch (e: Exception) {
                 emit(Response.Error(e.cause?.message ?: "Error fetching task: $taskId"))
             }
@@ -174,6 +217,14 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
 
                 emit(Response.Success(response))
 
+            } catch (e: HttpException) {
+                return@flow emit(
+                    Response.Error(
+                        ErrorResponse.parseErrorBody(
+                            e.response()?.errorBody()?.string()
+                        ).getErrorMessage()
+                    )
+                )
             } catch (e: Exception) {
                 emit(Response.Error(e.cause?.message ?: "Error fetching task: $taskId"))
             }
@@ -209,6 +260,14 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
 
                 emit(Response.Success(response))
 
+            } catch (e: HttpException) {
+                return@flow emit(
+                    Response.Error(
+                        ErrorResponse.parseErrorBody(
+                            e.response()?.errorBody()?.string()
+                        ).getErrorMessage()
+                    )
+                )
             } catch (e: Exception) {
                 emit(
                     Response.Error(
@@ -218,6 +277,4 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
             }
         }
     }
-
-
 }

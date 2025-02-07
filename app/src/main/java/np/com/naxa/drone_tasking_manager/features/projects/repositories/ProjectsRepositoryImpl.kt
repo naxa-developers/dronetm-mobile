@@ -4,11 +4,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import np.com.naxa.drone_tasking_manager.core.utils.Response
 import np.com.naxa.drone_tasking_manager.core.services.ApiService
+import np.com.naxa.drone_tasking_manager.core.utils.responsevalidator.ErrorResponse
+import np.com.naxa.drone_tasking_manager.core.utils.responsevalidator.getErrorMessage
 import np.com.naxa.drone_tasking_manager.features.projects.mapper.toProject
 import np.com.naxa.drone_tasking_manager.features.projects.mapper.toProjectResponse
 import np.com.naxa.drone_tasking_manager.features.projects.models.Project
 import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectsResponse
 import org.maplibre.geojson.Feature
+import retrofit2.HttpException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -37,6 +40,14 @@ class ProjectsRepositoryImpl @Inject constructor(private val apiService: ApiServ
 
                 emit(Response.Success(response.toProjectResponse()))
 
+            } catch (e: HttpException) {
+                return@flow emit(
+                    Response.Error(
+                        ErrorResponse.parseErrorBody(
+                            e.response()?.errorBody()?.string()
+                        ).getErrorMessage()
+                    )
+                )
             } catch (e: Exception) {
                 emit(Response.Error(e.message ?: "Error fetching projects"))
             }
@@ -59,6 +70,14 @@ class ProjectsRepositoryImpl @Inject constructor(private val apiService: ApiServ
 
                 emit(Response.Success(response.toProject()))
 
+            } catch (e: HttpException) {
+                return@flow emit(
+                    Response.Error(
+                        ErrorResponse.parseErrorBody(
+                            e.response()?.errorBody()?.string()
+                        ).getErrorMessage()
+                    )
+                )
             } catch (e: Exception) {
                 emit(Response.Error(e.message ?: "Error fetching projects"))
             }
@@ -78,6 +97,14 @@ class ProjectsRepositoryImpl @Inject constructor(private val apiService: ApiServ
 
                 emit(Response.Success(features))
 
+            } catch (e: HttpException) {
+                return@flow emit(
+                    Response.Error(
+                        ErrorResponse.parseErrorBody(
+                            e.response()?.errorBody()?.string()
+                        ).getErrorMessage()
+                    )
+                )
             } catch (e: Exception) {
                 emit(Response.Error(e.message ?: "Error fetching projects centroids"))
             }

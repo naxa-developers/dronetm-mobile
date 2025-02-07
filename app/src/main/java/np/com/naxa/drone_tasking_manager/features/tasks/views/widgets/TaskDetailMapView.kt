@@ -41,7 +41,9 @@ import np.com.naxa.drone_tasking_manager.core.widgets.rememberCameraPosition
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskWayPointsOrWayLinesState
+import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
+import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 import np.com.naxa.drone_tasking_manager.utils.LatLngUtils
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
@@ -76,6 +78,7 @@ fun TaskDetailMapView(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val tasksViewModel = LocalTasksViewModel.current
+    val navigationEventsViewModel = LocalNavigationEventsViewModel.current
 
     var libreMap: MapLibreMap? by remember { mutableStateOf(null) }
 
@@ -229,7 +232,10 @@ fun TaskDetailMapView(
                 onWaypointsLoaded.invoke(features.features()?.size)
             }
 
-            is TaskWayPointsOrWayLinesState.Error -> {}
+            is TaskWayPointsOrWayLinesState.Error -> {
+                val error = (waypointsOrWayLinesState as TaskWayPointsOrWayLinesState.Error).message
+                navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnSnackBarShow(error))
+            }
         }
     }
 
