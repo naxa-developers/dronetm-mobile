@@ -4,6 +4,7 @@ import np.com.naxa.drone_tasking_manager.features.login.dto.LoginResponseDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.project.ProjectDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects.ProjectsResponseDto
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects_centroid.CentroidResult
+import np.com.naxa.drone_tasking_manager.features.tasks.dto.TakeOffPointUpdateRequestBody
 import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskEventRequestBody
 import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskDto
 import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskEventResponseDto
@@ -129,6 +130,23 @@ interface ApiService {
         @Header("Accept") accept: String = "application/json",
         @Header("Content-Type") contentType: String = "application/json",
         @Body body: RequestBody = "".toRequestBody(null)
+    ): FeatureCollection
+
+    /**
+     * Interface defining API calls related to update takeoff point.
+     * @param mode: It will be waylines or waypoints
+     */
+    @POST("api/waypoint/task/{task_id}/")
+    suspend fun updateTakeOffPoint(
+        @Path("task_id") taskId: String,
+        @Query("project_id") projectId: String,
+        @Query("download") download: Boolean,
+        @Query("rotation_angle") rotationAngle: Int,
+        @Query("mode") mode: String,
+        @Query("force_refresh") forceRefresh: Boolean = true,
+        @Header("Accept") accept: String = "application/json",
+        @Header("Content-Type") contentType: String = "application/json",
+        @Body body: TakeOffPointUpdateRequestBody
     ): FeatureCollection
 
     @GET("api/users/my-info/")

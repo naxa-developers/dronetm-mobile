@@ -22,8 +22,9 @@ import com.google.gson.JsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import np.com.naxa.drone_tasking_manager.navigation.routes.Routes
-import org.maplibre.android.geometry.LatLng
+import okhttp3.ResponseBody
 import org.maplibre.geojson.Point
+import retrofit2.Response
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -448,4 +449,38 @@ fun Point.rotate(centroid: Point, angleDegree: Double): Point {
         altitude(),
         bbox()
     )
+}
+
+
+/**
+ * Extracts the file name from the "Content-Disposition" header of an HTTP response.
+ *
+ * This function is an extension on [Response] of [ResponseBody] and attempts to retrieve the file name
+ * from the "Content-Disposition" header, which is commonly used to suggest a file name for
+ * downloaded content.
+ *
+ * The function first checks if the "Content-Disposition" header is present and not empty.
+ * If it is, it extracts the substring after "filename=", removes surrounding double quotes (") or single quotes ('),
+ * and returns the resulting string as the file name.
+ *
+ * If the "Content-Disposition" header is not found or is empty, the function returns `null`.
+ *
+ * Example of a "Content-Disposition" header that would be parsed:
+ *  - `attachment; filename="my_document.pdf"`
+ *  - `inline; filename=report.txt`
+ *  - `attachment; filename='image.jpg'`
+ *
+ * @receiver The [Response] object containing the HTTP response.
+ * @return The file name extracted from the "Content-Disposition" header, or `null` if the header is not present or if no filename is specified.
+ */
+fun Response<ResponseBody>.fileName(): String? {
+    val headers = headers()
+    val contentDisposition = headers["Content-Disposition"]
+    return if (!contentDisposition.isNullOrEmpty()) {
+        contentDisposition.substringAfter("filename=")
+            .removeSurrounding("\"")
+            .removeSurrounding("'")
+    } else {
+        null
+    }
 }

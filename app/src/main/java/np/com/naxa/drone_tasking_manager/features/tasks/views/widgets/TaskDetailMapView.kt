@@ -1,6 +1,13 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.views.widgets
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.PointF
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -10,6 +17,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -20,9 +28,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.google.android.gms.location.LocationServices
 import com.google.gson.JsonObject
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.R
@@ -37,6 +47,7 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapLibreMap.OnMapClickListener
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.LineLayer
@@ -53,6 +64,7 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
+@SuppressLint("MissingPermission")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskDetailMapView(
@@ -82,6 +94,45 @@ fun TaskDetailMapView(
         initialZoom = 12.0,
     )
 
+    // Just for dragging feature handling
+    var draggable by remember { mutableStateOf(false) }
+    var draggedFeatureIndex by remember { mutableStateOf<Int?>(null) }
+    var updatedTakeOffPointLatLng: LatLng? by remember { mutableStateOf(null) }
+    var showTakeOffPointUpdateAlertDialog by remember { mutableStateOf(false) }
+
+    // For Pick off point change
+    val takeOffPointChangeOptionsBottomSheetState =
+        rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    var showTakeOffPointChangeOptionsBottomSheet by remember { mutableStateOf(false) }
+    var takeOffPointChangeOptions by remember { mutableStateOf<TakeOffPointChangeOptions?>(null) }
+
+
+    // Define the permissions to request
+    val locationPermissions = arrayOf(
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    )
+
+    // Launcher for location permission
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allPermissionsGranted = permissions.all { it.value }
+        if (allPermissionsGranted) {
+            scope.launch {
+                val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                    location?.let {
+                        updatedTakeOffPointLatLng = LatLng(it.latitude, it.longitude)
+                        showTakeOffPointUpdateAlertDialog = true
+                        draggedFeatureIndex = null
+                    }
+                }
+            }
+        }
+    }
+
+
     LaunchedEffect(task) {
         if (task.id == null || task.projectId == null) return@LaunchedEffect
 
@@ -97,6 +148,69 @@ fun TaskDetailMapView(
         )
     }
 
+    // Map Click Listener
+    DisposableEffect(libreMap) {
+        val clickListener = OnMapClickListener { latLng ->
+            val point = libreMap?.projection?.toScreenLocation(latLng)
+            val queried = point?.let {
+                libreMap?.queryRenderedFeatures(
+                    it,
+                    *listOf(
+                        "task-waypoints-circle-layer--",
+                        "task-waypoints-takeoff-symbol-layer--"
+                    ).toTypedArray()
+                )
+            }
+
+            if (!queried.isNullOrEmpty()) {
+                val feature = queried.first()
+                if (feature.properties()?.has("point_count") == false) {
+                    infoJsonObject = feature.properties()
+                    showInfoBottomSheet = true
+                }
+            }
+
+            true
+        }
+
+        libreMap?.addOnMapClickListener(clickListener)
+
+        onDispose {
+            libreMap?.removeOnMapClickListener(clickListener)
+        }
+    }
+
+    // Map Long Click Listener
+    // DisposableEffect(libreMap) {
+    //     val longClickListener = OnMapLongClickListener { latLng ->
+    //         val point = libreMap?.projection?.toScreenLocation(latLng)
+    //         val queried = point?.let {
+    //             libreMap?.queryRenderedFeatures(
+    //                 it,
+    //                 *listOf(
+    //                     "task-waypoints-circle-layer--",
+    //                     "task-waypoints-takeoff-symbol-layer--"
+    //                 ).toTypedArray()
+    //             )
+    //         }
+
+    //         if (!queried.isNullOrEmpty()) {
+    //             val feature = queried.first()
+    //             if (feature.properties()?.has("point_count") == false) {
+    //
+    //             }
+    //         }
+
+    //         true
+    //     }
+
+    //     libreMap?.addOnMapLongClickListener(longClickListener)
+
+    //     onDispose {
+    //         libreMap?.removeOnMapLongClickListener(longClickListener)
+    //     }
+    // }
+
     // Listen waypoints or way lines data and apply layer to the map
     LaunchedEffect(waypointsOrWayLinesState) {
         when (waypointsOrWayLinesState) {
@@ -107,6 +221,7 @@ fun TaskDetailMapView(
 
                 isWaypoints =
                     (waypointsOrWayLinesState as TaskWayPointsOrWayLinesState.Success).isWayPoints
+                updatedTakeOffPointLatLng = null
 
                 applyWaypointsLineLayer(context, features, libreMap)
                 applyWaypointsCircleLayer(context, features, libreMap)
@@ -120,7 +235,83 @@ fun TaskDetailMapView(
 
     Box(modifier = modifier) {
         MaplibreCompose(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(draggable) {
+                    if (draggable) {
+                        detectDragGesturesAfterLongPress(
+                            onDragStart = {
+                                val point = PointF(it.x, it.y)
+                                val queried = libreMap?.queryRenderedFeatures(
+                                    point,
+                                    *listOf(
+                                        "task-waypoints-circle-layer--",
+                                        "task-waypoints-takeoff-symbol-layer--"
+                                    ).toTypedArray()
+                                )
+
+                                if (!queried.isNullOrEmpty()) {
+                                    val feature = queried.first()
+                                    val indexPrimitive = if (feature.properties()
+                                            ?.get("index")?.isJsonPrimitive == true
+                                    ) feature.properties()?.get("index")?.asJsonPrimitive else null
+
+                                    indexPrimitive?.let { ind ->
+                                        val index = if (ind.isNumber) ind.asNumber.toDouble()
+                                            .toInt() else -1
+
+                                        if (index == 0) draggedFeatureIndex = 0
+
+                                        Log.d(
+                                            "AMIT",
+                                            "TaskDetailMapView: $index, $draggedFeatureIndex"
+                                        )
+                                    }
+                                }
+                            },
+                            onDrag = { change, _ ->
+                                if (draggedFeatureIndex == 0) {
+                                    libreMap?.projection?.fromScreenLocation(
+                                        PointF(
+                                            change.position.x,
+                                            change.position.y
+                                        )
+                                    )
+                                        ?.let {
+
+                                            updatedTakeOffPointLatLng = it
+
+                                            tasksViewModel.triggerEvent(
+                                                TasksEvent.DragTakeOffPoint(
+                                                    latLng = it,
+                                                    onFeatureCollectionUpdated = { features ->
+                                                        applyWaypointsLineLayer(
+                                                            context,
+                                                            features,
+                                                            libreMap
+                                                        )
+                                                        applyWaypointsCircleLayer(
+                                                            context,
+                                                            features,
+                                                            libreMap
+                                                        )
+                                                    }
+                                                )
+                                            )
+                                        }
+                                }
+
+
+                            },
+                            onDragEnd = {
+                                if (draggedFeatureIndex == 0) {
+                                    showTakeOffPointUpdateAlertDialog = true
+                                }
+                                draggedFeatureIndex = null
+                            }
+                        )
+                    }
+                },
             cameraPositionState = cameraPositionState,
             enableRotateGestures = false,
             onMapReady = { libre, _ ->
@@ -144,27 +335,6 @@ fun TaskDetailMapView(
                         ),
                         500
                     )
-                }
-
-                libre.addOnMapClickListener { latLng ->
-                    val point = libre.projection.toScreenLocation(latLng)
-                    val queried = libre.queryRenderedFeatures(
-                        point,
-                        *listOf(
-                            "task-waypoints-circle-layer--",
-                            "task-waypoints-takeoff-symbol-layer--"
-                        ).toTypedArray()
-                    )
-
-                    if (queried.isNotEmpty()) {
-                        val feature = queried.first()
-                        if (feature.properties()?.has("point_count") == false) {
-                            infoJsonObject = feature.properties()
-                            showInfoBottomSheet = true
-                        }
-                    }
-
-                    true
                 }
             }
         )
@@ -208,16 +378,25 @@ fun TaskDetailMapView(
                     }
                 },
                 onCanceled = {
+                    // resetting state to original one
                     tasksViewModel.triggerEvent(
-                        TasksEvent.RotateWayPointsOrWayLines(
-                            angle = 0f,
-                            centroid = task.centroid,
-                            onRotatedSuccess = { features ->
-                                applyWaypointsLineLayer(context, features, libreMap)
-                                applyWaypointsCircleLayer(context, features, libreMap)
-                            }
-                        )
+                        TasksEvent.RestoreFeatureCollection { features ->
+                            applyWaypointsLineLayer(context, features, libreMap)
+                            applyWaypointsCircleLayer(context, features, libreMap)
+                        }
                     )
+                }
+            )
+
+            TakeOffPointDraggableUnDraggableToggle(
+                draggable = draggable,
+                onToggled = {
+                    if (draggable) {
+                        draggable = false
+                        return@TakeOffPointDraggableUnDraggableToggle
+                    }
+
+                    showTakeOffPointChangeOptionsBottomSheet = true
                 }
             )
 
@@ -246,6 +425,68 @@ fun TaskDetailMapView(
             onDismiss = {
                 infoJsonObject = null
                 showInfoBottomSheet = false
+            }
+        )
+
+        if (showTakeOffPointUpdateAlertDialog) {
+            UpdateTakeOffPointAlertDialog(
+                onDismissRequest = {
+                    showTakeOffPointUpdateAlertDialog = false
+                    updatedTakeOffPointLatLng = null
+
+                    // resetting state to original one
+                    if (draggable) {
+                        tasksViewModel.triggerEvent(
+                            TasksEvent.RestoreFeatureCollection { features ->
+                                applyWaypointsLineLayer(context, features, libreMap)
+                                applyWaypointsCircleLayer(context, features, libreMap)
+                            }
+                        )
+                    }
+                },
+                onConfirm = {
+                    showTakeOffPointUpdateAlertDialog = false
+                    draggable = false
+
+                    if (task.id == null || task.projectId == null || updatedTakeOffPointLatLng == null) return@UpdateTakeOffPointAlertDialog
+
+                    tasksViewModel.triggerEvent(
+                        TasksEvent.UpdateTakeOffPoint(
+                            taskId = task.id,
+                            projectId = task.projectId,
+                            latitude = updatedTakeOffPointLatLng!!.latitude,
+                            longitude = updatedTakeOffPointLatLng!!.longitude,
+                            rotationAngle = angle.roundToInt(),
+                            download = false,
+                            isWayPoints = isWaypoints,
+                        )
+                    )
+                }
+            )
+        }
+
+        TakeOffPointChangeOptionsBottomSheet(
+            sheetState = takeOffPointChangeOptionsBottomSheetState,
+            show = showTakeOffPointChangeOptionsBottomSheet,
+            onDismiss = {
+                showTakeOffPointChangeOptionsBottomSheet = false
+                takeOffPointChangeOptions = null
+                draggable = false
+            },
+            onOptionSelected = {
+                showTakeOffPointChangeOptionsBottomSheet = false
+
+                when (it) {
+                    TakeOffPointChangeOptions.Drag -> {
+                        draggable = true
+                    }
+
+                    TakeOffPointChangeOptions.CurrentLocation -> {
+                        scope.launch {
+                            locationPermissionLauncher.launch(locationPermissions)
+                        }
+                    }
+                }
             }
         )
     }
