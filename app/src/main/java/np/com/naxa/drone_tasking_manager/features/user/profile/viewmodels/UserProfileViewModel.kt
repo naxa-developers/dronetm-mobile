@@ -18,6 +18,7 @@ import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.states
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.usecases.FetchUserProfileUseCase
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.usecases.UpdateBasicUserDetailsUseCase
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.usecases.UpdateOtherUserDetailsUseCase
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -100,8 +101,8 @@ class UserProfileViewModel @Inject constructor(
         droneYouOwn: String,
         experienceYears: Int,
         notifyForProjectsWithinKm: Int,
-        certificateFile: String?,
-        registrationFile: String?
+        certificateFile: File?,
+        registrationFile: File?
     ) {
 
         viewModelScope.launch {

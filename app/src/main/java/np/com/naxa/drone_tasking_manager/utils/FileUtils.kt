@@ -5,8 +5,8 @@ import android.database.Cursor
 import android.net.Uri
 import android.provider.OpenableColumns
 
-fun getFileName(context: Context, uri: Uri): String? {
-    var fileName: String? = null
+fun getFileName(context: Context, uri: Uri): String {
+    var fileName: String = "temp_file_name"
     var fileSize: Long? = null
 
     val cursor: Cursor? = context.contentResolver.query(uri, null, null, null, null)

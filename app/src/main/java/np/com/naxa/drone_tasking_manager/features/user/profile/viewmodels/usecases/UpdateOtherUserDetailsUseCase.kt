@@ -4,6 +4,7 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import np.com.naxa.drone_tasking_manager.features.user.profile.repositories.UserProfileRepository
+import java.io.File
 import javax.inject.Inject
 
 @Module
@@ -15,8 +16,8 @@ class UpdateOtherUserDetailsUseCase @Inject constructor(private val profileRepos
         droneYouOwn: String,
         experienceYears: Int,
         notifyForProjectsWithinKm: Int,
-        certificateFile: String?,
-        registrationFile: String?,
+        certificateFile: File?,
+        registrationFile: File?,
     ) = profileRepository.updateOtherDetails(
         userId,
         certifiedDroneOperator,

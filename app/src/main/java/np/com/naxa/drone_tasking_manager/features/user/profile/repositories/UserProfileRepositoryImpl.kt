@@ -3,7 +3,7 @@ package np.com.naxa.drone_tasking_manager.features.user.profile.repositories
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import np.com.naxa.drone_tasking_manager.core.services.ApiService
-import np.com.naxa.drone_tasking_manager.core.services.retrofit.utils.FileToMultipartFileUtils
+import np.com.naxa.drone_tasking_manager.core.services.retrofit.utils.MultipartFileUtils
 import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
 import np.com.naxa.drone_tasking_manager.core.services.storage.StorageKeys
 import np.com.naxa.drone_tasking_manager.core.utils.Response
@@ -11,7 +11,12 @@ import np.com.naxa.drone_tasking_manager.features.user.profile.mapper.toBasicUse
 import np.com.naxa.drone_tasking_manager.features.user.profile.mapper.toUserProfile
 import np.com.naxa.drone_tasking_manager.features.user.profile.models.UserProfile
 import np.com.naxa.drone_tasking_manager.features.user.profile.models.UserProfileUpdateDetails
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
 import retrofit2.HttpException
+import java.io.File
 import java.io.IOException
 import javax.inject.Inject
 
@@ -95,23 +100,43 @@ class UserProfileRepositoryImpl @Inject constructor(private val apiService: ApiS
         droneYouOwn: String,
         experienceYears: Int,
         notifyForProjectsWithinKm: Int,
-        certificateFile: String?,
-        registrationFile: String?
+        certificateFile: File?,
+        registrationFile: File?
     ): Flow<Response<UserProfileUpdateDetails>> {
         return flow {
             emit(Response.Loading())
 
             val response =
                 try {
+
+                    val otherDetailsJson = JSONObject().apply {
+                        put("certificate_drone_operator", certifiedDroneOperator)
+                        put("drone_you_own", droneYouOwn)
+                        put("experience_years", experienceYears)
+                        put("notify_for_projects_within_km", notifyForProjectsWithinKm)
+                    }.toString()
+
+                    val otherDetailsRequestBody = otherDetailsJson.toRequestBody("application/json".toMediaTypeOrNull())
+
+
+
                     apiService.updateUserOtherDetails(
-                        userId = userId, body = mapOf(
-                            "certificate_drone_operator" to "$certifiedDroneOperator",
-                            "drone_you_own" to droneYouOwn,
-                            "experience_years" to "$experienceYears",
-                            "notify_for_projects_within_km" to "$notifyForProjectsWithinKm"
-                        ),
-                        FileToMultipartFileUtils.getMultipartBodyPart(filePath = certificateFile, "certificate_file"),
-                        FileToMultipartFileUtils.getMultipartBodyPart(filePath = registrationFile, "registration_file")
+                        userId = userId,
+
+//                        certifiedDroneOperator = MultipartFileUtils.createPartFromBoolean(certifiedDroneOperator),
+//                        droneYouOwn = MultipartFileUtils.createPartFromString(droneYouOwn),
+//                        experienceYears = MultipartFileUtils.createPartFromInt(experienceYears),
+//                        notifyForProjectsWithinKm = MultipartFileUtils.createPartFromInt(notifyForProjectsWithinKm),
+
+//                        body = mapOf(
+//                            "certificate_drone_operator" to MultipartFileUtils.createPartFromBoolean(certifiedDroneOperator),
+//                            "drone_you_own" to MultipartFileUtils.createPartFromString(droneYouOwn),
+//                            "experience_years" to MultipartFileUtils.createPartFromInt(experienceYears),
+//                            "notify_for_projects_within_km" to MultipartFileUtils.createPartFromInt(notifyForProjectsWithinKm)
+//                        ),
+                        body = otherDetailsRequestBody,
+                        certificateFile =  MultipartFileUtils.getMultipartBodyPart(file = certificateFile, "certificate_file"),
+                        registrationFile = MultipartFileUtils.getMultipartBodyPart(file = registrationFile, "registration_file")
                     )
                 } catch (e: HttpException) {
                     e.printStackTrace()
@@ -130,6 +155,13 @@ class UserProfileRepositoryImpl @Inject constructor(private val apiService: ApiS
 
             emit(Response.Success(data = myInfoDetails))
 
+        }
+    }
+
+
+    fun getFormDataPartMap(data: Map<String, String>): Map<String, RequestBody> {
+        return data.mapValues {
+            it.value.toRequestBody("multipart/form-data".toMediaTypeOrNull())
         }
     }
 

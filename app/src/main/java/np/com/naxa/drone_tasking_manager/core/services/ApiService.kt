@@ -19,6 +19,7 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Headers
 import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
@@ -134,14 +135,23 @@ interface ApiService {
     @PATCH("api/users/{id}/profile")
     suspend fun updateUser(
         @Path("id") userId: String,
+        @Query("force_refresh") forceRefresh: Boolean = true,
         @Body body: Map<String, String>
     ): UserProfileUpdateDto
 
+
+    @Headers("Content-Type: application/json") // ✅ Ensure JSON format
     @Multipart
     @PATCH("api/users/{id}/profile")
     suspend fun updateUserOtherDetails(
         @Path("id") userId: String,
-        @PartMap body: Map<String, String>,
+
+//        @Part("certificate_drone_operator") certifiedDroneOperator: RequestBody,
+//        @Part("drone_you_own") droneYouOwn: RequestBody,
+//        @Part("experience_years") experienceYears: RequestBody,
+//        @Part("notify_for_projects_within_km") notifyForProjectsWithinKm: RequestBody,
+        @Part ("body")body: RequestBody,
+
         @Part certificateFile: MultipartBody.Part?,
         @Part registrationFile: MultipartBody.Part?
     ): UserProfileUpdateDto

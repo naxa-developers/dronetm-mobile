@@ -51,6 +51,7 @@ import np.com.naxa.drone_tasking_manager.local_providers.LocalUserProfileViewMod
 import np.com.naxa.drone_tasking_manager.utils.PermissionUtils
 import np.com.naxa.drone_tasking_manager.utils.getFileName
 import np.com.naxa.drone_tasking_manager.utils.getFileNameFromUrl
+import java.io.File
 
 @Composable
 fun OtherDetailsScreen() {
@@ -74,8 +75,9 @@ fun OtherDetailsScreen() {
     var registrationFileUrl by remember { mutableStateOf("") }
 
     var isPickingRegistrationFile by remember { mutableStateOf(true) }
-    var certificateFileUri by remember { mutableStateOf("") }
-    var registrationFileUri by remember { mutableStateOf("") }
+    var certificateFile by remember { mutableStateOf<File?>(null) }
+    var registrationFile by remember { mutableStateOf<File?>(null) }
+
 
     LaunchedEffect(state.userProfile) {
         state.userProfile?.let {
@@ -93,12 +95,38 @@ fun OtherDetailsScreen() {
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenMultipleDocuments()
     ) { uris: List<Uri>? ->
+
+        Log.d("OtherDetailsScreen", "filePickerLauncher uris : $uris")
+
+        if (uris.isNullOrEmpty()) return@rememberLauncherForActivityResult
+
+        val uri = uris.first()
+        val file = uri.let { selectedUri ->
+            try {
+                // Use ContentResolver to get a temporary file
+
+                context.contentResolver.openInputStream(selectedUri)?.use { inputStream ->
+                    val tempFile = File(
+                        context.cacheDir, getFileName(
+                            context,
+                            uri
+                        )
+                    )
+                    tempFile.outputStream().use { fileOut ->
+                        inputStream.copyTo(fileOut)
+                    }
+                    tempFile
+                }
+            } catch (e: Exception) {
+                Log.e("OtherDetailsScreen", "Error processing file: ${e.message}")
+                null
+            }
+        }
+
         if (isPickingRegistrationFile) {
-            val uri = uris?.firstOrNull() ?: return@rememberLauncherForActivityResult
-            registrationFileUri = uri.toString()
+            registrationFile = file
         } else {
-            val uri = uris?.firstOrNull() ?: return@rememberLauncherForActivityResult
-            certificateFileUri = uri.toString()
+            certificateFile = file
         }
     }
 
@@ -156,6 +184,20 @@ fun OtherDetailsScreen() {
                     Toast.LENGTH_LONG
                 ).show()
             }
+        }
+    }
+
+    fun launchToPickFile(isRegistrationFile: Boolean = false) {
+        isPickingRegistrationFile = isRegistrationFile
+        if (!PermissionUtils.hasMediaFileAccessPermissions(context)) {
+            mediaFilesStoragePermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                )
+            )
+        } else {
+            filePickerLauncher.launch(arrayOf("application/pdf", "image/jpeg"))
         }
     }
 
@@ -221,18 +263,7 @@ fun OtherDetailsScreen() {
             OutlinedCard(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
-                    isPickingRegistrationFile = false
-                    // Else just checking requesting permission to handle media files
-                    if (!PermissionUtils.hasMediaFileAccessPermissions(context)) {
-                        mediaFilesStoragePermissionLauncher.launch(
-                            arrayOf(
-                                Manifest.permission.READ_EXTERNAL_STORAGE,
-                                Manifest.permission.WRITE_EXTERNAL_STORAGE
-                            )
-                        )
-                    } else {
-                        filePickerLauncher.launch(arrayOf("application/pdf", "image/jpeg"))
-                    }
+                    launchToPickFile(isRegistrationFile = false)
                 }
             ) {
                 Column(
@@ -242,7 +273,7 @@ fun OtherDetailsScreen() {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     IconButton(onClick = {
-
+                        launchToPickFile(isRegistrationFile = false)
                     }) {
                         Icon(
                             active = true,
@@ -259,7 +290,7 @@ fun OtherDetailsScreen() {
                 }
             }
 
-            if (certificateFileUrl.isNotEmpty() || certificateFileUri.isNotEmpty()) {
+            if (certificateFileUrl.isNotEmpty() || registrationFile != null) {
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedCard(
@@ -276,10 +307,7 @@ fun OtherDetailsScreen() {
 
                         Text(
                             text = "${
-                                getFileName(
-                                    context,
-                                    Uri.parse(certificateFileUri)
-                                ) ?: certificateFileUrl.getFileNameFromUrl()
+                                if (certificateFile != null) certificateFile?.name else certificateFileUrl.getFileNameFromUrl() ?: ""
                             }",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -315,17 +343,7 @@ fun OtherDetailsScreen() {
         OutlinedCard(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
-                isPickingRegistrationFile = true
-                if (!PermissionUtils.hasMediaFileAccessPermissions(context)) {
-                    mediaFilesStoragePermissionLauncher.launch(
-                        arrayOf(
-                            Manifest.permission.READ_EXTERNAL_STORAGE,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE
-                        )
-                    )
-                } else {
-                    filePickerLauncher.launch(arrayOf("application/pdf", "image/jpeg"))
-                }
+                launchToPickFile(isRegistrationFile = true)
             }
         ) {
             Column(
@@ -335,6 +353,7 @@ fun OtherDetailsScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 IconButton(onClick = {
+                    launchToPickFile(isRegistrationFile = true)
                 }) {
                     Icon(
                         active = true,
@@ -351,7 +370,7 @@ fun OtherDetailsScreen() {
             }
         }
 
-        if (registrationFileUrl.isNotEmpty() || registrationFileUri.isNotEmpty()) {
+        if (registrationFileUrl.isNotEmpty() || registrationFile != null) {
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedCard(
@@ -368,10 +387,7 @@ fun OtherDetailsScreen() {
 
                     Text(
                         text = "${
-                            getFileName(
-                                context,
-                                Uri.parse(registrationFileUri)
-                            ) ?: registrationFileUrl.getFileNameFromUrl()
+                            if (registrationFile != null) registrationFile?.name else registrationFileUrl.getFileNameFromUrl() ?: ""
                         }",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -410,8 +426,8 @@ fun OtherDetailsScreen() {
                         experienceYears = Integer.parseInt(experience),
                         droneYouOwn = droneOwned,
                         notifyForProjectsWithinKm = Integer.parseInt(notifyDistance),
-                        certificateFile = certificateFileUri,
-                        registrationFile = registrationFileUri,
+                        certificateFile = certificateFile,
+                        registrationFile = registrationFile,
                     )
                 )
             },
@@ -430,6 +446,4 @@ fun OtherDetailsScreen() {
         }
 
     }
-
-
 }
