@@ -53,6 +53,7 @@ import np.com.naxa.drone_tasking_manager.R
 import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
 import np.com.naxa.drone_tasking_manager.core.theme.DroneTMAppTheme
 import np.com.naxa.drone_tasking_manager.core.utils.clearAllViewModels
+import np.com.naxa.drone_tasking_manager.core.widgets.SimpleAlertDialog
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.LoginViewModel
 import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.ProjectDetailViewModel
 import np.com.naxa.drone_tasking_manager.features.projects.viewmodels.ProjectsViewModel
@@ -95,6 +96,9 @@ fun DroneTMApp(
     var menuExpanded by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
+
+    var showDialog by remember { mutableStateOf(false) }
+
 
     val backStackEntry by navController.currentBackStackEntryFlow.collectAsState(initial = null)
     val downloadAndTransferState by downloadAndTransferViewModel.downloadAndTransferState.collectAsState()
@@ -360,9 +364,8 @@ fun DroneTMApp(
                                     DropdownMenuItem(
                                         text = { Text("Logout") },
                                         onClick = {
+                                            showDialog = true
 
-                                            onLogout(navigationEventsViewModel, viewModels, context)
-                                            menuExpanded = false
                                         }
                                     )
                                 }
@@ -399,7 +402,8 @@ fun DroneTMApp(
                             }
                         }
                     }
-                }
+                },
+
             ) { innerPadding ->
                 DroneTMAppNavHost(
                     modifier = Modifier.padding(
@@ -412,6 +416,20 @@ fun DroneTMApp(
                         )
                     ),
                     navHostController = navController,
+                )
+
+                SimpleAlertDialog(
+                    showDialog = showDialog,
+                    onDismiss = { showDialog = false },
+                    onConfirm = {
+                        showDialog = false
+                        // Handle confirm action here
+                        onLogout(navigationEventsViewModel, viewModels, context)
+                        menuExpanded = false
+                    },
+                    alertTitle = "Logout",
+                    alertMessage = "Are you sure you want to logout?",
+                    positiveButtonText = "Logout"
                 )
             }
         }
