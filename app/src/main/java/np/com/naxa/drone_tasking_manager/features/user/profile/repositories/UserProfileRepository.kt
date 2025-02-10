@@ -27,4 +27,12 @@ interface UserProfileRepository {
         certificateFile: File?,
         registrationFile: File?
     ): Flow<Response<UserProfileUpdateDetails>>
+
+
+    suspend fun updateUserPassword(
+        userId: String,
+        oldPassword: String,
+        newPassword: String,
+        confirmPassword: String,
+    ): Flow<Response<UserProfileUpdateDetails>>
 }

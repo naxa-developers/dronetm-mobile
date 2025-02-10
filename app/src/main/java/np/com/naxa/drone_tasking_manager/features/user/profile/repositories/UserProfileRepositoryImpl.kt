@@ -162,6 +162,44 @@ class UserProfileRepositoryImpl @Inject constructor(private val apiService: ApiS
         }
     }
 
+    override suspend fun updateUserPassword(
+        userId: String,
+        oldPassword: String,
+        newPassword: String,
+        confirmPassword: String
+    ): Flow<Response<UserProfileUpdateDetails>> {
+        return flow {
+            emit(Response.Loading())
+
+            val response =
+                try {
+                    apiService.updateUser(
+                        userId = userId, body = mapOf(
+                            "old_password" to oldPassword,
+                            "password" to newPassword,
+                            "confirm_password" to confirmPassword,
+                        )
+                    )
+                } catch (e: HttpException) {
+                    e.printStackTrace()
+                    // Handle HTTP-specific exceptions
+                    return@flow emit(Response.Error(e.message()))
+                } catch (e: IOException) {
+                    // Handle network/IO-related exceptions
+                    e.printStackTrace()
+                    return@flow emit(Response.Error(e.message ?: "Could not load data"))
+                } catch (e: Exception) {
+                    // Handle any other unexpected exceptions
+                    e.printStackTrace()
+                    return@flow emit(Response.Error(e.message ?: "Unknown Error"))
+                }
+            val myInfoDetails = response.toBasicUserProfileUpdateDetails()
+
+            emit(Response.Success(data = myInfoDetails))
+
+        }
+    }
+
 
     fun getFormDataPartMap(data: Map<String, String>): Map<String, RequestBody> {
         return data.mapValues {

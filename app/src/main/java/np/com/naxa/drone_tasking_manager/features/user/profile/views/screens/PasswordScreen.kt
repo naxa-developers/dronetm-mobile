@@ -16,21 +16,39 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.events.UserProfileEvents
+import np.com.naxa.drone_tasking_manager.local_providers.LocalUserProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasswordScreen() {
+
+    val viewModel = LocalUserProfileViewModel.current
+    val state by viewModel.userProfileState.collectAsState()
+
+    val profileUpdateState by viewModel.userProfileUpdateState.collectAsState()
+
     var oldPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+
+    var userId by rememberSaveable { mutableStateOf("") }
+    LaunchedEffect(state.userProfile) {
+        state.userProfile?.let {
+            userId = "${it.user_id ?: ""}"
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -79,7 +97,16 @@ fun PasswordScreen() {
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { /* Handle save */ },
+            enabled = !profileUpdateState.isUserProfileUpdateLoading,
+            onClick = { /* Handle save */
+                viewModel.onEvent(
+                    UserProfileEvents.UpdateUserPassword(
+                        userId = userId,
+                        oldPassword = oldPassword,
+                        newPassword = newPassword,
+                        confirmPassword = confirmPassword,
+                    )
+                )},
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)

@@ -26,4 +26,11 @@ sealed class UserProfileEvents {
     ) : UserProfileEvents()
 
 
+    data class UpdateUserPassword(
+        val userId: String,
+        val oldPassword: String,
+        val newPassword: String,
+        val confirmPassword: String,
+    ) : UserProfileEvents()
+
 }
