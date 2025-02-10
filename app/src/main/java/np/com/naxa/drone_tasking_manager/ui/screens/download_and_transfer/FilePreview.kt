@@ -32,10 +32,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import np.com.naxa.drone_tasking_manager.ui.components.ImageFilePreview
-import np.com.naxa.drone_tasking_manager.ui.components.KmzFilePreview
-import np.com.naxa.drone_tasking_manager.ui.components.PdfFilePreview
-import np.com.naxa.drone_tasking_manager.ui.components.VideoFilePreview
+import np.com.naxa.drone_tasking_manager.core.widgets.ImageFilePreview
+import np.com.naxa.drone_tasking_manager.core.widgets.KmzFilePreview
+import np.com.naxa.drone_tasking_manager.core.widgets.PdfFilePreview
+import np.com.naxa.drone_tasking_manager.core.widgets.VideoFilePreview
 import java.io.File
 
 /**

@@ -1,4 +1,4 @@
-package np.com.naxa.drone_tasking_manager.ui.screens.download_and_transfer
+package np.com.naxa.drone_tasking_manager.core.widgets
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
@@ -8,7 +8,7 @@ import androidx.compose.ui.window.DialogProperties
 import java.io.File
 
 @Composable
-fun SafDirectoryAccessDialog(
+fun SafDirectoryAccessRequestDialog(
     onDismissRequest: () -> Unit,
     onRequest: (File?) -> Unit,
     onCancel: (File?) -> Unit,

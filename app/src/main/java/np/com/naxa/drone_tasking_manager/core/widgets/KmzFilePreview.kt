@@ -1,6 +1,7 @@
-package np.com.naxa.drone_tasking_manager.ui.components
+package np.com.naxa.drone_tasking_manager.core.widgets
 
 import androidx.compose.foundation.Image
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -8,26 +9,26 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import np.com.naxa.drone_tasking_manager.utils.asImageBitmap
+import np.com.naxa.drone_tasking_manager.utils.folderTreeBitmapIfKmzFile
 import java.io.File
 
 @Composable
-fun ImageFilePreview(
+fun KmzFilePreview(
     file: File?,
     modifier: Modifier = Modifier,
-    onImageLoadFailedUi: @Composable (() -> Unit)? = null
+    onKmzPreviewLoadFailedUi: @Composable (() -> Unit)? = null
 ) {
+    val primaryColor = MaterialTheme.colorScheme.primary
     var bitmap by remember { mutableStateOf<ImageBitmap?>(null) }
 
     LaunchedEffect(file) {
-        val preview = withContext(Dispatchers.IO) {
-            file?.asImageBitmap()
-        }
-
+        val preview = file?.folderTreeBitmapIfKmzFile(
+            textColor = primaryColor,
+            backgroundColor = Color.Transparent
+        )
         bitmap = preview
     }
 
@@ -40,6 +41,6 @@ fun ImageFilePreview(
         )
 
     } else {
-        onImageLoadFailedUi?.invoke()
+        onKmzPreviewLoadFailedUi?.invoke()
     }
 }

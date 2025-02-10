@@ -98,4 +98,13 @@ enum class Routes(
         label = "Task Details",
         path = "task-details/{id}/{project}"
     ),
+
+    /**
+     * Route for displaying the File Transfer Screen.
+     * Path: /file-transfer/{filePath}
+     */
+    FileTransfer(
+        label = "File Transfer",
+        path = "file-transfer/{filePath}"
+    ),
 }

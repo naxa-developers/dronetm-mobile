@@ -1,5 +1,6 @@
 package np.com.naxa.drone_tasking_manager.navigation
 
+import android.net.Uri
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
@@ -13,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import np.com.naxa.drone_tasking_manager.features.file_transfer.views.screens.FileTransferScreen
 import np.com.naxa.drone_tasking_manager.navigation.routes.Routes
 import np.com.naxa.drone_tasking_manager.features.login.views.screens.LoginScreen
 import np.com.naxa.drone_tasking_manager.features.user.profile.views.screens.UserProfileScreen
@@ -154,5 +156,27 @@ fun DroneTMAppNavHost(
             )
         }
 
+        // Route for the Transfer File Screen
+        composable(
+            Routes.FileTransfer.path,
+            enterTransition = {
+                slideIn(
+                    animationSpec = tween(),
+                    initialOffset = { IntOffset(it.width, 0) }
+                )
+            },
+            exitTransition = {
+                slideOut(
+                    animationSpec = tween(),
+                    targetOffset = { IntOffset(0, 0) },
+                )
+            },
+        ) { backStackEntry ->
+            val filePath = backStackEntry.arguments?.getString("filePath")
+            FileTransferScreen(
+                modifier = modifier,
+                filePath = Uri.decode(filePath),
+            )
+        }
     }
 }

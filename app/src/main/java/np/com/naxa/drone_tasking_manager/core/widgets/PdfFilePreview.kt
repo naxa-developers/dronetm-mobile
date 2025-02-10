@@ -1,4 +1,4 @@
-package np.com.naxa.drone_tasking_manager.ui.components
+package np.com.naxa.drone_tasking_manager.core.widgets
 
 import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer

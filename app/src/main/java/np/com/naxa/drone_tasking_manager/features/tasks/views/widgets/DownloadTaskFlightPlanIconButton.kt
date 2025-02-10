@@ -1,5 +1,14 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.views.widgets
 
+import android.Manifest
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.Settings
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,6 +43,7 @@ import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskFl
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
+import np.com.naxa.drone_tasking_manager.utils.PermissionUtils
 import java.io.File
 
 @Composable
@@ -41,6 +52,7 @@ fun DownloadTaskFlightPlanIconButton(
     task: ProjectTask,
 ) {
 
+    val context = LocalContext.current
     val tasksViewModel = LocalTasksViewModel.current
     val navigationEventsViewModel = LocalNavigationEventsViewModel.current
     val downloadState by tasksViewModel.taskFlightPlanDownloadState.collectAsState()
@@ -49,22 +61,111 @@ fun DownloadTaskFlightPlanIconButton(
     var file: File? by remember { mutableStateOf(null) }
 
 
+    val initiateDownload = remember(context) {
+        {
+            if (task.id != null && task.projectId != null && !downloading) {
+                file = null
+                progress = 0f
+                tasksViewModel.triggerEvent(
+                    TasksEvent.DownloadTaskFlightPlan(
+                        taskId = task.id,
+                        projectId = task.projectId,
+                        null
+                    )
+                )
+            }
+        }
+    }
+
+    val allFilesStoragePermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { _ ->
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (Environment.isExternalStorageManager()) {
+                initiateDownload()
+            } else {
+                Toast.makeText(
+                    context,
+                    "You have denied all file access permission",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+
+    val mediaFilesStoragePermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val hasReadPermission = permissions[Manifest.permission.READ_EXTERNAL_STORAGE] == true
+        val hasWritePermission = permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] == true
+
+        when {
+            hasReadPermission && hasWritePermission -> {
+                initiateDownload()
+            }
+
+            else -> {
+                Toast.makeText(
+                    context,
+                    "You have denied write permission",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    val checkAndRequestStorageRelatedPermissions = remember(context) {
+        {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (!PermissionUtils.hasAllFileAccessPermission()) {
+                    val intent =
+                        Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
+                            data = Uri.parse("package:${context.packageName}")
+                        }
+                    allFilesStoragePermissionLauncher.launch(intent)
+                } else {
+                    initiateDownload()
+                }
+            } else {
+                if (!PermissionUtils.hasMediaFileAccessPermissions(context)) {
+                    mediaFilesStoragePermissionLauncher.launch(
+                        arrayOf(
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        )
+                    )
+                } else {
+                    initiateDownload()
+                }
+            }
+        }
+    }
+
     // Listen event in launch effect
     LaunchedEffect(downloadState) {
         when (downloadState) {
             is TaskFlightPlanDownloadState.DownloadCompleted -> {
+                if (file == null) {
+                    navigationEventsViewModel.sendEvent(
+                        DroneTMAppNavigationEvent.OnSnackBarShow(
+                            "File downloaded successfully",
+                            actionLabel = "Transfer",
+                            onActionPerformed = {
+                                if (file == null) return@OnSnackBarShow
+                                navigationEventsViewModel.sendEvent(
+                                    DroneTMAppNavigationEvent.OnNavigateToFileTransfer(
+                                        file!!.path
+                                    )
+                                )
+                            }
+                        )
+                    )
+                }
+
+                file = (downloadState as TaskFlightPlanDownloadState.DownloadCompleted).file
                 downloading = false
                 progress = 1f
-                file = (downloadState as TaskFlightPlanDownloadState.DownloadCompleted).file
-                navigationEventsViewModel.sendEvent(
-                    DroneTMAppNavigationEvent.OnSnackBarShow(
-                        "File downloaded successfully",
-                        actionLabel = "Transfer",
-                        onActionPerformed = {
-
-                        }
-                    )
-                )
             }
 
             is TaskFlightPlanDownloadState.DownloadError -> {
@@ -88,24 +189,19 @@ fun DownloadTaskFlightPlanIconButton(
         }
     }
 
-
     IconButton(
         modifier = modifier,
         onClick = {
-            if (task.id == null || task.projectId == null) return@IconButton
+            if (file == null) {
+                checkAndRequestStorageRelatedPermissions()
+                return@IconButton
+            }
 
-            if (downloading) return@IconButton
-
-            file = null
-            progress = 0f
-            tasksViewModel.triggerEvent(
-                TasksEvent.DownloadTaskFlightPlan(
-                    taskId = task.id,
-                    projectId = task.projectId,
-                    null
+            navigationEventsViewModel.sendEvent(
+                DroneTMAppNavigationEvent.OnNavigateToFileTransfer(
+                    file!!.path
                 )
             )
-
         }
     ) {
         Box(
