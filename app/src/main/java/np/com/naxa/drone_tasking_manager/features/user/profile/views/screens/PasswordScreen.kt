@@ -11,9 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,12 +23,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.events.UserProfileEvents
+import np.com.naxa.drone_tasking_manager.features.user.profile.views.widgets.PasswordTextInputWidget
 import np.com.naxa.drone_tasking_manager.local_providers.LocalUserProfileViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasswordScreen() {
 
@@ -50,6 +47,14 @@ fun PasswordScreen() {
         }
     }
 
+    LaunchedEffect(profileUpdateState) {
+        if (profileUpdateState.isUserProfileUpdateSuccess) {
+            oldPassword = ""
+            newPassword = ""
+            confirmPassword = ""
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -66,38 +71,62 @@ fun PasswordScreen() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = oldPassword,
-            onValueChange = { oldPassword = it },
-            label = { Text("Old password") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+//        OutlinedTextField(
+//            value = oldPassword,
+//            onValueChange = { oldPassword = it },
+//            label = { Text("Old password") },
+//            visualTransformation = PasswordVisualTransformation(),
+//            modifier = Modifier.fillMaxWidth()
+//        )
+
+        PasswordTextInputWidget(
+            password = oldPassword,
+            onPasswordChange = { oldPassword = it },
+            label = "Old password",
+            placeholder = "Old password"
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = newPassword,
-            onValueChange = { newPassword = it },
-            label = { Text("New password") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+//        OutlinedTextField(
+//            value = newPassword,
+//            onValueChange = { newPassword = it },
+//            label = { Text("New password") },
+//            visualTransformation = PasswordVisualTransformation(),
+//            modifier = Modifier.fillMaxWidth()
+//        )
+        PasswordTextInputWidget(
+            password = newPassword,
+            onPasswordChange = { newPassword = it },
+            label = "Old password",
+            placeholder = "Old password"
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            label = { Text("Confirm password") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+//        OutlinedTextField(
+//            value = confirmPassword,
+//            onValueChange = { confirmPassword = it },
+//            label = { Text("Confirm password") },
+//            visualTransformation = PasswordVisualTransformation(),
+//            modifier = Modifier.fillMaxWidth()
+//        )
+
+        PasswordTextInputWidget(
+            password = confirmPassword,
+            onPasswordChange = { confirmPassword = it },
+            label = "Old password",
+            placeholder = "Old password"
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            enabled = !profileUpdateState.isUserProfileUpdateLoading,
+            enabled = enableButton(
+                profileUpdateState.isUserProfileUpdateLoading,
+                newPassword,
+                confirmPassword
+            ),
             onClick = { /* Handle save */
                 viewModel.onEvent(
                     UserProfileEvents.UpdateUserPassword(
@@ -106,7 +135,8 @@ fun PasswordScreen() {
                         newPassword = newPassword,
                         confirmPassword = confirmPassword,
                     )
-                )},
+                )
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
@@ -119,7 +149,30 @@ fun PasswordScreen() {
 
             shape = RoundedCornerShape(16)
         ) {
-            Text("Save")
+            Text(
+                if (profileUpdateState.isUserProfileUpdateLoading) {
+                    "Updating"
+                } else {
+                    "Save"
+                }
+            )
         }
+    }
+
+}
+
+fun enableButton(
+    userProfileUpdateLoading: Boolean,
+    newPassword: String,
+    confirmPassword: String
+): Boolean {
+    return if (userProfileUpdateLoading) {
+        false
+    } else if (newPassword.trim().isEmpty() || confirmPassword.trim().isEmpty()) {
+        false
+    } else if (newPassword != confirmPassword) {
+        false
+    } else {
+        true
     }
 }
