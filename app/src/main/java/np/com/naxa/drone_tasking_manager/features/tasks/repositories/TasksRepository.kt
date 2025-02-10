@@ -1,6 +1,8 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.repositories
 
+import android.content.Context
 import kotlinx.coroutines.flow.Flow
+import np.com.naxa.drone_tasking_manager.core.utils.DownloadResponse
 import np.com.naxa.drone_tasking_manager.core.utils.Response
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.models.TaskLockUnlockResponse
@@ -177,4 +179,27 @@ interface TasksRepository {
         latitude: Double,
         longitude: Double
     ): Flow<Response<FeatureCollection>>
+
+    /**
+     * Downloads a flight plan file associated with a specific task and project.
+     *
+     * This function retrieves the flight plan data based on the provided task ID and project ID.
+     * It offers options to customize the download, such as specifying a rotation angle and
+     * controlling whether to download the file or just retrieve the data. The user can also specify
+     * the mode of the flight plan (e.g., "waypoints").
+     *
+     * @param taskId The unique identifier of the task. This is used to locate the specific
+     *               flight plan associated with the task. Must not be empty.
+     * @param projectId The unique identifier of the project. This helps in organizing and
+     *                  retrieving flight plans within a specific project. Must not be empty.
+     * @param mode A string representing the mode of the flight plan. Common values include "waypoints,"
+     *             "survey," or others. The specific mode can affect the structure and content of the
+     *             flight plan. Defaults to "waypoints".
+     *
+     */
+    suspend fun downloadFlightPlanFile(
+        taskId: String,
+        projectId: String,
+        mode: String = "waypoints",
+    ): Flow<DownloadResponse>
 }

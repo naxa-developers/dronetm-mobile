@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeGesturesPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -83,6 +82,7 @@ fun TaskDetailsScreen(
     LaunchedEffect(Unit) {
         if (taskId != null) {
             tasksViewModel.triggerEvent(TasksEvent.FetchTaskById(taskId, true))
+            tasksViewModel.triggerEvent(TasksEvent.ResetState(taskFlightPlanDownloadState = true))
         }
     }
 
@@ -161,8 +161,7 @@ fun TaskDetailsScreen(
                         .align(Alignment.TopStart)
                         .wrapContentWidth()
                         .wrapContentHeight()
-                        .safeGesturesPadding()
-                        .padding(top = 8.dp, start = 5.dp),
+                        .padding(top = 32.dp, start = 5.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {

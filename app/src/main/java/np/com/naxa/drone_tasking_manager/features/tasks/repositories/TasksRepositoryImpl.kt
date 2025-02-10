@@ -1,8 +1,12 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.repositories
 
+import android.content.Context
+import android.os.Environment
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import np.com.naxa.drone_tasking_manager.core.services.ApiService
+import np.com.naxa.drone_tasking_manager.core.utils.DownloadResponse
 import np.com.naxa.drone_tasking_manager.core.utils.Response
 import np.com.naxa.drone_tasking_manager.core.utils.responsevalidator.ErrorResponse
 import np.com.naxa.drone_tasking_manager.core.utils.responsevalidator.getErrorMessage
@@ -15,13 +19,19 @@ import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.models.TaskLockUnlockResponse
 import np.com.naxa.drone_tasking_manager.features.tasks.models.TaskUnFlyableResponse
 import np.com.naxa.drone_tasking_manager.utils.DateUtils
+import np.com.naxa.drone_tasking_manager.utils.fileName
 import org.maplibre.geojson.FeatureCollection
 import retrofit2.HttpException
+import java.io.File
+import java.io.FileOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService) :
+class TasksRepositoryImpl @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val apiService: ApiService,
+) :
     TasksRepository {
     override suspend fun fetchTaskById(
         id: String,
@@ -271,6 +281,98 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
             } catch (e: Exception) {
                 emit(
                     Response.Error(
+                        e.cause?.message ?: "Error updating takeoff point of task: $taskId"
+                    )
+                )
+            }
+        }
+    }
+
+    override suspend fun downloadFlightPlanFile(
+        taskId: String,
+        projectId: String,
+        mode: String
+    ): Flow<DownloadResponse> {
+        return flow {
+            emit(DownloadResponse.Downloading(0f))
+
+            try {
+                val response = apiService.downloadFlightPlan(
+                    projectId = projectId,
+                    taskId = taskId,
+                    rotationAngle = 0,
+                    download = true,
+                    mode = mode,
+                    forceRefresh = true,
+                )
+
+                if (response.isSuccessful) {
+                    response.body()?.let { body ->
+                        val fileName = response.fileName() ?: "$taskId.kmz"
+                        val totalBytes = body.contentLength()
+                        val inputStream = body.byteStream()
+                        val bufferSize = 8192
+                        val file = File(
+                            context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
+                            fileName
+                        )
+
+                        var bytesWritten = 0L
+
+                        // Write the downloaded content to the temporary file
+                        FileOutputStream(file).use { output ->
+                            inputStream.use { input ->
+                                val buffer = ByteArray(bufferSize)
+                                var bytes = input.read(buffer)
+
+                                // Read and write the content in chunks
+                                while (bytes >= 0) {
+                                    output.write(buffer, 0, bytes)
+                                    bytesWritten += bytes
+                                    bytes = input.read(buffer)
+
+                                    // Emit progress of the download
+                                    val progress = if (totalBytes > 0) {
+                                        bytesWritten.toFloat() / totalBytes.toFloat()
+                                    } else {
+                                        -1f
+                                    }
+                                    emit(DownloadResponse.Downloading(progress))
+                                }
+                            }
+                        }
+
+
+                        return@flow emit(
+                            DownloadResponse.Completed(file)
+                        )
+                    } ?: return@flow emit(
+                        DownloadResponse.Error(
+                            ErrorResponse.parseErrorBody(
+                                "Response body is null"
+                            ).getErrorMessage()
+                        )
+                    )
+                } else return@flow emit(
+                    DownloadResponse.Error(
+                        ErrorResponse.parseErrorBody(
+                            "Download failed"
+                        ).getErrorMessage()
+                    )
+                )
+
+
+            } catch (e: HttpException) {
+                return@flow emit(
+                    DownloadResponse.Error(
+                        ErrorResponse.parseErrorBody(
+                            e.response()?.errorBody()?.string()
+                        ).getErrorMessage()
+                    )
+                )
+            } catch (e: Exception) {
+                return@flow emit(
+                    DownloadResponse.Error(
                         e.cause?.message ?: "Error updating takeoff point of task: $taskId"
                     )
                 )

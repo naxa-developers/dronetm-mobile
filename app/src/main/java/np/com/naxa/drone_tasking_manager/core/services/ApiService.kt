@@ -13,7 +13,9 @@ import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileDt
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileUpdateDto
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.ResponseBody
 import org.maplibre.geojson.FeatureCollection
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -23,6 +25,7 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.Streaming
 
 interface ApiService {
     // @param force_refresh to control the request and cache
@@ -148,6 +151,22 @@ interface ApiService {
         @Header("Content-Type") contentType: String = "application/json",
         @Body body: TakeOffPointUpdateRequestBody
     ): FeatureCollection
+
+    /**
+     * Interface defining API calls related to downloading flight plan
+     * @param mode: It will be waylines or waypoints
+     */
+    @Streaming
+    @POST("api/waypoint/task/{task_id}/")
+    suspend fun downloadFlightPlan(
+        @Path("task_id") taskId: String,
+        @Query("project_id") projectId: String,
+        @Query("download") download: Boolean = true,
+        @Query("rotation_angle") rotationAngle: Int = 0,
+        @Query("mode") mode: String,
+        @Query("force_refresh") forceRefresh: Boolean = true,
+        @Body body: RequestBody = "".toRequestBody(null)
+    ): Response<ResponseBody>
 
     @GET("api/users/my-info/")
     suspend fun fetchMyInfo(
