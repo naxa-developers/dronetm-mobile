@@ -54,6 +54,7 @@ import np.com.naxa.drone_tasking_manager.R
 import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageService
 import np.com.naxa.drone_tasking_manager.core.theme.DroneTMAppTheme
 import np.com.naxa.drone_tasking_manager.core.utils.clearAllViewModels
+import np.com.naxa.drone_tasking_manager.core.widgets.SimpleAlertDialog
 import np.com.naxa.drone_tasking_manager.features.file_transfer.viewmodels.FileTransferViewModel
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.LoginViewModel
 import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.ProjectDetailViewModel
@@ -449,7 +450,7 @@ fun DroneTMApp(
     }
 }
 
-fun onLogout(
+private fun onLogout(
     navigationEventsViewModel: NavigationEventsViewModel,
     viewModels: ViewModelStoreOwner,
     context: Context

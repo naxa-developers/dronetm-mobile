@@ -207,5 +207,4 @@ fun TaskDetailsScreen(
         }
     }
 
-
 }
