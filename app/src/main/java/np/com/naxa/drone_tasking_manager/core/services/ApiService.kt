@@ -169,7 +169,7 @@ interface ApiService {
 
 
     @Headers("Content-Type: application/json") // ✅ Ensure JSON format
-    @Multipart
+//    @Multipart
     @PATCH("api/users/{id}/profile")
     suspend fun updateUserOtherDetails(
         @Path("id") userId: String,
@@ -178,10 +178,10 @@ interface ApiService {
 //        @Part("drone_you_own") droneYouOwn: RequestBody,
 //        @Part("experience_years") experienceYears: RequestBody,
 //        @Part("notify_for_projects_within_km") notifyForProjectsWithinKm: RequestBody,
-        @Part ("body")body: RequestBody,
-
-        @Part certificateFile: MultipartBody.Part?,
-        @Part registrationFile: MultipartBody.Part?
+//        @Part ("body")body: RequestBody,
+//        @Part certificateFile: MultipartBody.Part?,
+//        @Part registrationFile: MultipartBody.Part?
+        @Body body: RequestBody,
     ): UserProfileUpdateDto
 
 

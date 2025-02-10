@@ -206,7 +206,7 @@ fun OtherDetailsScreen() {
     }
 
 
-    if(state.isUserProfileLoading || profileUpdateState.isUserProfileUpdateLoading){
+    if (state.isUserProfileLoading || profileUpdateState.isUserProfileUpdateLoading) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
@@ -217,7 +217,7 @@ fun OtherDetailsScreen() {
                 ShimmerItemPlaceHolder()
             }
         }
-    }else {
+    } else {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -273,161 +273,174 @@ fun OtherDetailsScreen() {
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            /*
+            * handle this later
+            * file upload needs external api of AWS s3
+            * implement later
+            */
 
-            if (isCertified) {
-                OutlinedCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {
-                        launchToPickFile(isRegistrationFile = false)
-                    }
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        IconButton(onClick = {
-                            launchToPickFile(isRegistrationFile = false)
-                        }) {
-                            Icon(
-                                active = true,
-                                activeContent = { Icons.Filled.CloudUpload },
-                                inactiveContent = null,
-                            )
-                        }
-
-                        Text(
-                            text = "The supported file formats are pdf, jpeg, png",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                if (certificateFileUrl.isNotEmpty() || registrationFile != null) {
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    OutlinedCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = { /* Handle file upload */ }
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-
-
-                            Text(
-                                text = "${
-                                    if (certificateFile != null) certificateFile?.name else certificateFileUrl.getFileNameFromUrl() ?: ""
-                                }",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Center
-                            )
-                            IconButton(onClick = { /* Do something */ }) {
-                                Icon(
-                                    active = true,
-                                    activeContent = { Icons.Filled.Download },
-                                    inactiveContent = null,
-                                )
-                            }
-
-                            IconButton(onClick = { /* Do something */ }) {
-                                Icon(
-                                    active = true,
-                                    activeContent = { Icons.Filled.Delete },
-                                    inactiveContent = null,
-                                )
-                            }
-                        }
-                    }
-
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-            }
-
-            Text(
-                text = "Drone Registration Certificate",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            OutlinedCard(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    launchToPickFile(isRegistrationFile = true)
-                }
-            ) {
-                Column(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    IconButton(onClick = {
-                        launchToPickFile(isRegistrationFile = true)
-                    }) {
-                        Icon(
-                            active = true,
-                            activeContent = { Icons.Filled.CloudUpload },
-                            inactiveContent = null,
-                        )
-                    }
-
-                    Text(
-                        text = "The supported file formats are pdf, jpeg, png",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            if (registrationFileUrl.isNotEmpty() || registrationFile != null) {
-                Spacer(modifier = Modifier.height(8.dp))
-
-                OutlinedCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { /* Handle file upload */ }
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+//            Spacer(modifier = Modifier.height(16.dp))
+//
+//            if (isCertified) {
+//                OutlinedCard(
+//                    modifier = Modifier.fillMaxWidth(),
+//                    onClick = {
+//                        launchToPickFile(isRegistrationFile = false)
+//                    }
+//                ) {
+//                    Column(
+//                        modifier = Modifier
+//                            .padding(16.dp)
+//                            .fillMaxWidth(),
+//                        horizontalAlignment = Alignment.CenterHorizontally
+//                    ) {
+//                        IconButton(onClick = {
+//                            launchToPickFile(isRegistrationFile = false)
+//                        }) {
+//                            Icon(
+//                                active = true,
+//                                activeContent = { Icons.Filled.CloudUpload },
+//                                inactiveContent = null,
+//                            )
+//                        }
+//
+//                        Text(
+//                            text = "The supported file formats are pdf, jpeg, png",
+//                            style = MaterialTheme.typography.bodySmall,
+//                            color = MaterialTheme.colorScheme.onSurfaceVariant
+//                        )
+//                    }
+//                }
+//
+//                if (certificateFileUrl.isNotEmpty() || registrationFile != null) {
+//                    Spacer(modifier = Modifier.height(8.dp))
+//
+//                    OutlinedCard(
+//                        modifier = Modifier.fillMaxWidth(),
+//                        onClick = { /* Handle file upload */ }
+//                    ) {
+//                        Row(
+//                            modifier = Modifier
+//                                .padding(16.dp)
+//                                .fillMaxWidth(),
+//                            verticalAlignment = Alignment.CenterVertically
+//                        ) {
+//
+//
+//                            Text(
+//                                text = "${
+//                                    if (certificateFile != null) certificateFile?.name else certificateFileUrl.getFileNameFromUrl() ?: ""
+//                                }",
+//                                style = MaterialTheme.typography.bodySmall,
+//                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+//                                textAlign = TextAlign.Center
+//                            )
+//                            IconButton(onClick = { /* Do something */ }) {
+//                                Icon(
+//                                    active = true,
+//                                    activeContent = { Icons.Filled.Download },
+//                                    inactiveContent = null,
+//                                )
+//                            }
+//
+//                            IconButton(onClick = { /* Do something */ }) {
+//                                Icon(
+//                                    active = true,
+//                                    activeContent = { Icons.Filled.Delete },
+//                                    inactiveContent = null,
+//                                )
+//                            }
+//                        }
+//                    }
+//
+//                }
+//
+//                Spacer(modifier = Modifier.height(24.dp))
+//            }
 
 
-                        Text(
-                            text = "${
-                                if (registrationFile != null) registrationFile?.name else registrationFileUrl.getFileNameFromUrl() ?: ""
-                            }",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center
-                        )
-                        IconButton(onClick = { /* Do something */ }) {
-                            Icon(
-                                active = true,
-                                activeContent = { Icons.Filled.Download },
-                                inactiveContent = null,
-                            )
-                        }
+            /*
+            * handle this later
+            * file upload needs external api of AWS s3
+            * implement later
+             */
 
-                        IconButton(onClick = { /* Do something */ }) {
-                            Icon(
-                                active = true,
-                                activeContent = { Icons.Filled.Delete },
-                                inactiveContent = null,
-                            )
-                        }
-                    }
-                }
+//            Text(
+//                text = "Drone Registration Certificate",
+//                style = MaterialTheme.typography.bodyMedium
+//            )
+//            OutlinedCard(
+//                modifier = Modifier.fillMaxWidth(),
+//                onClick = {
+//                    launchToPickFile(isRegistrationFile = true)
+//                }
+//            ) {
+//                Column(
+//                    modifier = Modifier
+//                        .padding(16.dp)
+//                        .fillMaxWidth(),
+//                    horizontalAlignment = Alignment.CenterHorizontally
+//                ) {
+//                    IconButton(onClick = {
+//                        launchToPickFile(isRegistrationFile = true)
+//                    }) {
+//                        Icon(
+//                            active = true,
+//                            activeContent = { Icons.Filled.CloudUpload },
+//                            inactiveContent = null,
+//                        )
+//                    }
+//
+//                    Text(
+//                        text = "The supported file formats are pdf, jpeg, png",
+//                        style = MaterialTheme.typography.bodySmall,
+//                        color = MaterialTheme.colorScheme.onSurfaceVariant
+//                    )
+//                }
+//            }
 
-            }
+//            if (registrationFileUrl.isNotEmpty() || registrationFile != null) {
+//                Spacer(modifier = Modifier.height(8.dp))
+//
+//                OutlinedCard(
+//                    modifier = Modifier.fillMaxWidth(),
+//                    onClick = { /* Handle file upload */ }
+//                ) {
+//                    Row(
+//                        modifier = Modifier
+//                            .padding(16.dp)
+//                            .fillMaxWidth(),
+//                        verticalAlignment = Alignment.CenterVertically
+//                    ) {
+//
+//
+//                        Text(
+//                            text = "${
+//                                if (registrationFile != null) registrationFile?.name else registrationFileUrl.getFileNameFromUrl() ?: ""
+//                            }",
+//                            style = MaterialTheme.typography.bodySmall,
+//                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+//                            textAlign = TextAlign.Center
+//                        )
+//                        IconButton(onClick = { /* Do something */ }) {
+//                            Icon(
+//                                active = true,
+//                                activeContent = { Icons.Filled.Download },
+//                                inactiveContent = null,
+//                            )
+//                        }
+//
+//                        IconButton(onClick = { /* Do something */ }) {
+//                            Icon(
+//                                active = true,
+//                                activeContent = { Icons.Filled.Delete },
+//                                inactiveContent = null,
+//                            )
+//                        }
+//                    }
+//                }
+//
+//            }
 
             Spacer(modifier = Modifier.height(24.dp))
 

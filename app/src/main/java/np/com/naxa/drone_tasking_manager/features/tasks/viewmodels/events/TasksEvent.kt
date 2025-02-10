@@ -112,8 +112,6 @@ sealed class TasksEvent {
     ) : TasksEvent()
 
     /**
-<<<<<<< HEAD
-=======
      * Represents the point where a drag operation starts, along with an action to be performed
      * when the underlying FeatureCollection is updated.
      *
@@ -210,7 +208,6 @@ sealed class TasksEvent {
     ) : TasksEvent()
 
     /**
->>>>>>> 6bec20dbf7626b10e70a817aa9bba0306e443106
      * Represents the state of various reset actions within the application.
      *
      * This data class encapsulates the state of three distinct reset actions:

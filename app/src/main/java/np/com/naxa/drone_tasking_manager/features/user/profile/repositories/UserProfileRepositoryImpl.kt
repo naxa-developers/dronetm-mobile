@@ -8,6 +8,7 @@ import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageServic
 import np.com.naxa.drone_tasking_manager.core.services.storage.StorageKeys
 import np.com.naxa.drone_tasking_manager.core.utils.Response
 import np.com.naxa.drone_tasking_manager.features.user.profile.mapper.toBasicUserProfileUpdateDetails
+import np.com.naxa.drone_tasking_manager.features.user.profile.mapper.toOtherUserProfileUpdateDetails
 import np.com.naxa.drone_tasking_manager.features.user.profile.mapper.toUserProfile
 import np.com.naxa.drone_tasking_manager.features.user.profile.models.UserProfile
 import np.com.naxa.drone_tasking_manager.features.user.profile.models.UserProfileUpdateDetails
@@ -114,6 +115,9 @@ class UserProfileRepositoryImpl @Inject constructor(private val apiService: ApiS
                         put("drone_you_own", droneYouOwn)
                         put("experience_years", experienceYears)
                         put("notify_for_projects_within_km", notifyForProjectsWithinKm)
+                       if(certificateFile != null) put("certificate_file", certificateFile.name)
+                        if(registrationFile != null) put("registration_file", registrationFile.name)
+                        put("notify_for_projects_within_km", notifyForProjectsWithinKm)
                     }.toString()
 
                     val otherDetailsRequestBody = otherDetailsJson.toRequestBody("application/json".toMediaTypeOrNull())
@@ -135,8 +139,8 @@ class UserProfileRepositoryImpl @Inject constructor(private val apiService: ApiS
 //                            "notify_for_projects_within_km" to MultipartFileUtils.createPartFromInt(notifyForProjectsWithinKm)
 //                        ),
                         body = otherDetailsRequestBody,
-                        certificateFile =  MultipartFileUtils.getMultipartBodyPart(file = certificateFile, "certificate_file"),
-                        registrationFile = MultipartFileUtils.getMultipartBodyPart(file = registrationFile, "registration_file")
+//                        certificateFile =  MultipartFileUtils.getMultipartBodyPart(file = certificateFile, "certificate_file"),
+//                        registrationFile = MultipartFileUtils.getMultipartBodyPart(file = registrationFile, "registration_file")
                     )
                 } catch (e: HttpException) {
                     e.printStackTrace()
@@ -151,7 +155,7 @@ class UserProfileRepositoryImpl @Inject constructor(private val apiService: ApiS
                     e.printStackTrace()
                     return@flow emit(Response.Error(e.message ?: "Unknown Error"))
                 }
-            val myInfoDetails = response.toBasicUserProfileUpdateDetails()
+            val myInfoDetails = response.toOtherUserProfileUpdateDetails()
 
             emit(Response.Success(data = myInfoDetails))
 
