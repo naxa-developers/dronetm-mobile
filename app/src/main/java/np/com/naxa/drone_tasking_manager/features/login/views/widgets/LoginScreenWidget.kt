@@ -64,7 +64,7 @@ fun LoginScreenWidget(
     val state by viewModel.state.collectAsState()
 
     var email by remember { mutableStateOf("testnaxa@gmail.com") }
-    var password by remember { mutableStateOf("Naxa@123") }
+    var password by remember { mutableStateOf("Naxa@1234") }
     var isPasswordVisible by remember { mutableStateOf(false) }
     var rememberMe by remember { mutableStateOf(false) }
 

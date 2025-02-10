@@ -18,13 +18,16 @@ import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.states
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.usecases.FetchUserProfileUseCase
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.usecases.UpdateBasicUserDetailsUseCase
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.usecases.UpdateOtherUserDetailsUseCase
+import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.usecases.UpdatePasswordUseCase
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
 class UserProfileViewModel @Inject constructor(
     private val fetchUserProfileUseCase: FetchUserProfileUseCase,
     private val updateBasicUserDetailsUseCase: UpdateBasicUserDetailsUseCase,
-    private val updateOtherUserDetailsUseCase: UpdateOtherUserDetailsUseCase
+    private val updateOtherUserDetailsUseCase: UpdateOtherUserDetailsUseCase,
+    private val updatePasswordUseCase: UpdatePasswordUseCase
 ) : ViewModel() {
 
     private val _userProfileState = MutableStateFlow(UserProfileStates())
@@ -45,7 +48,12 @@ class UserProfileViewModel @Inject constructor(
             }
 
             is UserProfileEvents.UpdateOtherDetails -> {
-                TODO()
+                updateOtherDetails(event.userId, event.certifiedDroneOperator, event.droneYouOwn,
+                    event.experienceYears, event.notifyForProjectsWithinKm, event.certificateFile, event.registrationFile)
+            }
+
+            is UserProfileEvents.UpdateUserPassword -> {
+                updatePassword(event.userId, event.oldPassword, event.newPassword, event.confirmPassword)
             }
         }
     }
@@ -60,6 +68,59 @@ class UserProfileViewModel @Inject constructor(
 
         viewModelScope.launch {
             updateBasicUserDetailsUseCase.invoke(userId, name, country, city, phone)
+                .collect { result ->
+                    when (result) {
+                        is Response.Loading -> {
+                            _userProfileUpdateState.value = _userProfileUpdateState.value.copy(
+                                isUserProfileUpdateLoading = true,
+                                isUserProfileUpdateSuccess = false,
+                            )
+                        }
+
+                        is Response.Success -> {
+                            _userProfileUpdateState.value = _userProfileUpdateState.value.copy(
+                                isUserProfileUpdateLoading = false,
+                                isUserProfileUpdateSuccess = true,
+                                userProfileUpdateError = "",
+                                userProfileUpdate = result.data
+                            )
+
+                            fetchUserProfile(forceRefresh = true)
+                        }
+
+                        is Response.Error -> {
+                            _userProfileUpdateState.value = _userProfileUpdateState.value.copy(
+                                isUserProfileUpdateLoading = false,
+                                isUserProfileUpdateSuccess = false,
+                                userProfileUpdateError = result.message
+                            )
+                        }
+                    }
+                }
+        }
+    }
+
+
+    private fun updateOtherDetails(
+        userId: String,
+        certifiedDroneOperator: Boolean,
+        droneYouOwn: String,
+        experienceYears: Int,
+        notifyForProjectsWithinKm: Int,
+        certificateFile: File?,
+        registrationFile: File?
+    ) {
+
+        viewModelScope.launch {
+            updateOtherUserDetailsUseCase.invoke(
+                userId,
+                certifiedDroneOperator,
+                droneYouOwn,
+                experienceYears,
+                notifyForProjectsWithinKm,
+                certificateFile,
+                registrationFile
+            )
                 .collect { result ->
                     when (result) {
                         is Response.Loading -> {
@@ -125,6 +186,48 @@ class UserProfileViewModel @Inject constructor(
 
                 }
             }
+        }
+    }
+
+
+    private fun updatePassword(
+        userId: String,
+        oldPassword: String,
+        newPassword: String,
+        confirmPassword: String,
+    ) {
+
+        viewModelScope.launch {
+            updatePasswordUseCase.invoke(userId, oldPassword, newPassword, confirmPassword)
+                .collect { result ->
+                    when (result) {
+                        is Response.Loading -> {
+                            _userProfileUpdateState.value = _userProfileUpdateState.value.copy(
+                                isUserProfileUpdateLoading = true,
+                                isUserProfileUpdateSuccess = false,
+                            )
+                        }
+
+                        is Response.Success -> {
+                            _userProfileUpdateState.value = _userProfileUpdateState.value.copy(
+                                isUserProfileUpdateLoading = false,
+                                isUserProfileUpdateSuccess = true,
+                                userProfileUpdateError = "",
+                                userProfileUpdate = result.data
+                            )
+
+                            fetchUserProfile(forceRefresh = true)
+                        }
+
+                        is Response.Error -> {
+                            _userProfileUpdateState.value = _userProfileUpdateState.value.copy(
+                                isUserProfileUpdateLoading = false,
+                                isUserProfileUpdateSuccess = false,
+                                userProfileUpdateError = result.message
+                            )
+                        }
+                    }
+                }
         }
     }
 

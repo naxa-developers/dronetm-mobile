@@ -1,5 +1,7 @@
 package np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.events
 
+import java.io.File
+
 sealed class UserProfileEvents {
     //fetch my info
     data class FetchUserProfile(val forceRefresh: Boolean) : UserProfileEvents()
@@ -19,8 +21,16 @@ sealed class UserProfileEvents {
         val droneYouOwn: String,
         val experienceYears: Int,
         val notifyForProjectsWithinKm: Int,
-        val registrationFile: String,
+        val certificateFile: File?,
+        val registrationFile: File?,
     ) : UserProfileEvents()
 
+
+    data class UpdateUserPassword(
+        val userId: String,
+        val oldPassword: String,
+        val newPassword: String,
+        val confirmPassword: String,
+    ) : UserProfileEvents()
 
 }

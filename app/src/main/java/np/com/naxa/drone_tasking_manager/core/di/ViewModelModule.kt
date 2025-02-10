@@ -11,6 +11,7 @@ import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.UserPr
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.usecases.FetchUserProfileUseCase
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.usecases.UpdateBasicUserDetailsUseCase
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.usecases.UpdateOtherUserDetailsUseCase
+import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.usecases.UpdatePasswordUseCase
 
 @Module
 @InstallIn(ViewModelComponent::class, SingletonComponent::class)
@@ -20,9 +21,10 @@ object ViewModelModule {
     fun provideUserProfileViewModel(
         fetchUserProfileUseCase: FetchUserProfileUseCase,
         updateBasicUserDetailsUseCase: UpdateBasicUserDetailsUseCase,
-        updateOtherUserDetailsUseCase: UpdateOtherUserDetailsUseCase
+        updateOtherUserDetailsUseCase: UpdateOtherUserDetailsUseCase,
+        updatePasswordUseCase: UpdatePasswordUseCase
     ): UserProfileViewModel {
-        return UserProfileViewModel(fetchUserProfileUseCase, updateBasicUserDetailsUseCase, updateOtherUserDetailsUseCase )
+        return UserProfileViewModel(fetchUserProfileUseCase, updateBasicUserDetailsUseCase, updateOtherUserDetailsUseCase, updatePasswordUseCase)
     }
 
     @Provides
