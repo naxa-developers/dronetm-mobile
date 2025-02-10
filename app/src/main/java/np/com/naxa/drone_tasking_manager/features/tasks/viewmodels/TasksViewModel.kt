@@ -1,5 +1,6 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -8,8 +9,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import np.com.naxa.drone_tasking_manager.core.utils.DownloadResponse
 import np.com.naxa.drone_tasking_manager.core.utils.Response
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects_centroid.Centroid
+import np.com.naxa.drone_tasking_manager.features.tasks.usecases.DownloadTaskFlightPlanUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.FetchTaskDetailUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.LockTaskUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.TaskWayPointsOrWayLinesUseCase
@@ -18,6 +21,7 @@ import np.com.naxa.drone_tasking_manager.features.tasks.usecases.UnlockTaskUseCa
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.UpdateTakeOffPointUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskDetailState
+import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskFlightPlanDownloadState
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskLockOrUnlockState
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskUnFlyableRequestState
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskWayPointsOrWayLinesState
@@ -35,7 +39,8 @@ class TasksViewModel @Inject constructor(
     private val unlockTaskUseCase: UnlockTaskUseCase,
     private val unFlyableTaskUseCase: UnFlyableTaskUseCase,
     private val wayPointsOrWayLinesUseCase: TaskWayPointsOrWayLinesUseCase,
-    private val updateTakeOffPointUseCase: UpdateTakeOffPointUseCase
+    private val updateTakeOffPointUseCase: UpdateTakeOffPointUseCase,
+    private val downloadTaskFlightPlanUseCase: DownloadTaskFlightPlanUseCase,
 ) : ViewModel() {
 
     /**
@@ -75,6 +80,29 @@ class TasksViewModel @Inject constructor(
 
 
     /**
+     * Represents the current state of a flight plan download task.
+     *
+     * This property holds a [MutableStateFlow] that emits [TaskFlightPlanDownloadState] objects.
+     * It tracks the progression and outcome of downloading a flight plan.
+     *
+     * Possible states include:
+     * - [TaskFlightPlanDownloadState.Idle]: The download task has not yet started.
+     * - [TaskFlightPlanDownloadState.Downloading]: The download task is currently in progress.
+     * - [TaskFlightPlanDownloadState.DownloadCompleted]: The download task completed successfully.
+     * - [TaskFlightPlanDownloadState.DownloadError]: An error occurred during the download task.
+     *
+     * This state flow allows observers to react to changes in the download process,
+     * such as updating a UI progress indicator or displaying error messages.
+     *
+     * The state flow is private, it should only be updated within the class. Public access to the state
+     * should be provided through a read-only [kotlinx.coroutines.flow.StateFlow].
+     */
+    private val _taskFlightPlanDownloadState =
+        MutableStateFlow<TaskFlightPlanDownloadState>(TaskFlightPlanDownloadState.Idle)
+    val taskFlightPlanDownloadState = _taskFlightPlanDownloadState.asStateFlow()
+
+
+    /**
      * The collection of features to be displayed on the map.
      *
      * This property holds the GeoJSON FeatureCollection that defines the features
@@ -85,6 +113,7 @@ class TasksViewModel @Inject constructor(
      */
     private var _featureCollection: FeatureCollection? = null
     private var _changeableFeatureCollection: FeatureCollection? = null
+    private var _isWayPoints: Boolean? = null
 
 
     /**
@@ -141,6 +170,10 @@ class TasksViewModel @Inject constructor(
                     if (event.taskWayPointsOrWayLinesState) {
                         _taskWayPointsOrWayLinesState.emit(TaskWayPointsOrWayLinesState.Idle)
                     }
+
+                    if (event.taskFlightPlanDownloadState) {
+                        _taskFlightPlanDownloadState.emit(TaskFlightPlanDownloadState.Idle)
+                    }
                 }
             }
 
@@ -194,6 +227,14 @@ class TasksViewModel @Inject constructor(
                 restoreFeatureCollection {
                     event.onRestored.invoke(it)
                 }
+            }
+
+            is TasksEvent.DownloadTaskFlightPlan -> {
+                downloadTaskFlightPlan(
+                    taskId = event.taskId,
+                    projectId = event.projectId,
+                    isWayPoints = event.isWayPoints ?: _isWayPoints ?: true
+                )
             }
         }
     }
@@ -403,6 +444,7 @@ class TasksViewModel @Inject constructor(
                 when (result) {
                     is Response.Loading -> {
                         _featureCollection = null
+                        _isWayPoints = null
                         _changeableFeatureCollection = null
                         _taskWayPointsOrWayLinesState.emit(TaskWayPointsOrWayLinesState.Loading)
                     }
@@ -413,6 +455,7 @@ class TasksViewModel @Inject constructor(
 
                     is Response.Success -> {
                         _featureCollection = result.data
+                        _isWayPoints = isWayPoints
 
                         if (result.data != null) {
                             _taskWayPointsOrWayLinesState.emit(
@@ -629,6 +672,7 @@ class TasksViewModel @Inject constructor(
 
                     is Response.Success -> {
                         _featureCollection = result.data
+                        _isWayPoints = isWayPoints
 
                         if (result.data != null) {
                             _taskWayPointsOrWayLinesState.emit(
@@ -643,6 +687,61 @@ class TasksViewModel @Inject constructor(
 
                         _taskWayPointsOrWayLinesState.emit(
                             TaskWayPointsOrWayLinesState.Error("No task ${if (isWayPoints) "waypoints" else "waylines"} found with the given id")
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Downloads the flight plan associated with a specific task.
+     *
+     * This function retrieves the flight plan data for a given task and project.
+     * It supports downloading either waypoints or waylines data, based on the `isWayPoints` flag.
+     * The download process is handled asynchronously on the IO dispatcher.
+     * The results are then collected and handled through a `DownloadResponse` sealed class.
+     *
+     * @param taskId The ID of the task for which to download the flight plan.
+     * @param projectId The ID of the project to which the task belongs.
+     * @param isWayPoints A boolean flag indicating whether to download waypoints (true) or waylines (false).
+     *                    Defaults to true (waypoints).
+     *
+     * @see DownloadResponse
+     */
+    private fun downloadTaskFlightPlan(
+        taskId: String,
+        projectId: String,
+        isWayPoints: Boolean = true,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            downloadTaskFlightPlanUseCase.invoke(
+                taskId = taskId,
+                projectId = projectId,
+                mode = if (isWayPoints) "waypoints" else "waylines",
+            ).collect { result ->
+                when (result) {
+                    is DownloadResponse.Completed -> {
+                        _taskFlightPlanDownloadState.emit(
+                            TaskFlightPlanDownloadState.DownloadCompleted(
+                                result.file
+                            )
+                        )
+                    }
+
+                    is DownloadResponse.Downloading -> {
+                        _taskFlightPlanDownloadState.emit(
+                            TaskFlightPlanDownloadState.Downloading(
+                                result.progress
+                            )
+                        )
+                    }
+
+                    is DownloadResponse.Error -> {
+                        _taskFlightPlanDownloadState.emit(
+                            TaskFlightPlanDownloadState.DownloadError(
+                                result.message
+                            )
                         )
                     }
                 }

@@ -177,6 +177,29 @@ sealed class TasksEvent {
         val isWayPoints: Boolean = true,
     ) : TasksEvent()
 
+    /**
+     * Represents a flight plan for a download task.
+     *
+     * This data class encapsulates the necessary information to define a download task,
+     * specifically related to downloading data related to a flight plan. It includes:
+     *
+     * @property taskId The unique identifier for the download task. This ID is used to
+     *                  track and manage the specific download operation.
+     * @property projectId The identifier of the project to which this download task belongs.
+     *                    This is used for organization and to group related downloads.
+     * @property isWayPoints Indicates whether the task involves downloading waypoints.
+     *                       Defaults to `true`, meaning the task is for waypoints by default.
+     *                       Set to `false` if the task is for downloading other data
+     *                       associated with the flight plan (e.g., flight path, telemetry).
+     *
+     * This class extends [TasksEvent], suggesting that it's part of a larger system
+     * that manages events related to various tasks.
+     */
+    data class DownloadTaskFlightPlan(
+        val taskId: String,
+        val projectId: String,
+        val isWayPoints: Boolean? = null,
+    ) : TasksEvent()
 
     /**
      * Represents an event indicating that a FeatureCollection has been restored.
@@ -226,6 +249,7 @@ sealed class TasksEvent {
      * @property unFlyableState `true` if the task un-flyable request state should be reset, `false` otherwise. Defaults to `false`.
      * @property taskDetailState `true` if the task detail view's state should be reset, `false` otherwise. Defaults to `false`.
      * @property taskWayPointsOrWayLinesState `true` if the task waypoints state should be reset, `false` otherwise. Defaults to `false`.
+     * @property taskFlightPlanDownloadState `true` if the task flight plan download state should be reset, `false` otherwise. Defaults to `false`.
      * @constructor Creates a [ResetState] instance with optional initial values for each state.
      */
     data class ResetState(
@@ -233,6 +257,7 @@ sealed class TasksEvent {
         val unlockState: Boolean = false,
         val unFlyableState: Boolean = false,
         val taskDetailState: Boolean = false,
-        val taskWayPointsOrWayLinesState: Boolean = false
+        val taskWayPointsOrWayLinesState: Boolean = false,
+        val taskFlightPlanDownloadState: Boolean = false,
     ) : TasksEvent()
 }

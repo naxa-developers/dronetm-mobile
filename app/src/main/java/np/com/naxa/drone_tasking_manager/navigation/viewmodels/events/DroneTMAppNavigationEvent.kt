@@ -84,5 +84,20 @@ sealed class DroneTMAppNavigationEvent {
      * @property project The id of the project
      * @constructor Creates an instance of OnNavigateToTaskDetail with the specified task ID.
      */
-    data class OnNavigateToTaskDetail(val id: String, val project: String? = null) : DroneTMAppNavigationEvent()
+    data class OnNavigateToTaskDetail(val id: String, val project: String? = null) :
+        DroneTMAppNavigationEvent()
+
+    /**
+     * Represents a navigation event to the file transfer screen.
+     *
+     * This event is dispatched when the application should navigate to a screen
+     * that allows the user to transfer a file. It carries the path of the file
+     * that should be transferred.
+     *
+     * @property filePath The path to the file that will be transferred.
+     *                    This path should be a valid path accessible by the application.
+     *
+     * @see DroneTMAppNavigationEvent
+     */
+    data class OnNavigateToFileTransfer(val filePath: String) : DroneTMAppNavigationEvent()
 }

@@ -53,6 +53,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import np.com.naxa.drone_tasking_manager.core.widgets.SafDirectoryAccessRequestDialog
 import np.com.naxa.drone_tasking_manager.events.DroneTMAppEvent
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 import np.com.naxa.drone_tasking_manager.states.DownloadAndTransferState
@@ -127,7 +128,7 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
 
     // Show SAF request dialog
     if (showDialog) {
-        SafDirectoryAccessDialog(
+        SafDirectoryAccessRequestDialog(
             onDismissRequest = { showDialog = false },
             onRequest = {
                 showDialog = false

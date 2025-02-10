@@ -269,8 +269,7 @@ fun ProjectDetailsScreen(
                         .align(Alignment.TopStart)
                         .wrapContentWidth()
                         .wrapContentHeight()
-                        .safeGesturesPadding()
-                        .padding(top = 8.dp, start = 5.dp),
+                        .padding(top = 32.dp, start = 5.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {

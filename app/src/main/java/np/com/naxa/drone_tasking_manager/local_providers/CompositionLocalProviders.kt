@@ -1,6 +1,7 @@
 package np.com.naxa.drone_tasking_manager.local_providers
 
 import androidx.compose.runtime.compositionLocalOf
+import np.com.naxa.drone_tasking_manager.features.file_transfer.viewmodels.FileTransferViewModel
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.LoginViewModel
 import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.ProjectDetailViewModel
 import np.com.naxa.drone_tasking_manager.features.projects.viewmodels.ProjectsViewModel
@@ -48,5 +49,8 @@ val LocalUserProfileViewModel = compositionLocalOf<UserProfileViewModel> {
     error("No ViewModel provided")
 }
 val LocalRefreshTokenViewModel = compositionLocalOf<RefreshTokenViewModel> {
+    error("No ViewModel provided")
+}
+val LocalFileTransferViewModel = compositionLocalOf<FileTransferViewModel> {
     error("No ViewModel provided")
 }

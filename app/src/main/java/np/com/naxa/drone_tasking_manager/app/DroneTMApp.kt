@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -54,6 +55,7 @@ import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageServic
 import np.com.naxa.drone_tasking_manager.core.theme.DroneTMAppTheme
 import np.com.naxa.drone_tasking_manager.core.utils.clearAllViewModels
 import np.com.naxa.drone_tasking_manager.core.widgets.SimpleAlertDialog
+import np.com.naxa.drone_tasking_manager.features.file_transfer.viewmodels.FileTransferViewModel
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.LoginViewModel
 import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.ProjectDetailViewModel
 import np.com.naxa.drone_tasking_manager.features.projects.viewmodels.ProjectsViewModel
@@ -62,6 +64,7 @@ import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.viewmod
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.UserProfileViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalDownloadAndTransferFileViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalEventsViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalFileTransferViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalLoginViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalProjectDetailViewModel
@@ -118,6 +121,7 @@ fun DroneTMApp(
     val tasksViewModel = hiltViewModel<TasksViewModel>()
     val userProfileViewModel = hiltViewModel<UserProfileViewModel>()
     val refreshTokenViewModel = hiltViewModel<RefreshTokenViewModel>()
+    val fileTransferViewModel = hiltViewModel<FileTransferViewModel>()
 
 
     val topBarTitle by remember {
@@ -232,6 +236,15 @@ fun DroneTMApp(
                     }
                 }
 
+                is DroneTMAppNavigationEvent.OnNavigateToFileTransfer -> {
+                    navController.navigate(
+                        Routes.FileTransfer.path.replace(
+                            "{filePath}",
+                            Uri.encode(event.filePath)
+                        )
+                    )
+                }
+
                 DroneTMAppNavigationEvent.OnNavigateToProfileScreen -> {
 
                     navController.navigate(Routes.ProfileScreen.path)
@@ -250,7 +263,8 @@ fun DroneTMApp(
         LocalProjectDetailViewModel provides projectDetailViewModel,
         LocalTasksViewModel provides tasksViewModel,
         LocalUserProfileViewModel provides userProfileViewModel,
-        LocalRefreshTokenViewModel provides refreshTokenViewModel
+        LocalRefreshTokenViewModel provides refreshTokenViewModel,
+        LocalFileTransferViewModel provides fileTransferViewModel
     ) {
         DroneTMAppTheme {
             Scaffold(
@@ -365,7 +379,6 @@ fun DroneTMApp(
                                         text = { Text("Logout") },
                                         onClick = {
                                             showDialog = true
-
                                         }
                                     )
                                 }
@@ -437,7 +450,7 @@ fun DroneTMApp(
     }
 }
 
-fun onLogout(
+private fun onLogout(
     navigationEventsViewModel: NavigationEventsViewModel,
     viewModels: ViewModelStoreOwner,
     context: Context
