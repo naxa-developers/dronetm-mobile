@@ -6,7 +6,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -46,6 +49,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import np.com.naxa.drone_tasking_manager.core.widgets.ShimmerItemPlaceHolder
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.events.UserProfileEvents
 import np.com.naxa.drone_tasking_manager.local_providers.LocalUserProfileViewModel
 import np.com.naxa.drone_tasking_manager.utils.PermissionUtils
@@ -202,68 +206,160 @@ fun OtherDetailsScreen() {
     }
 
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState())
-    ) {
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = "Other Details",
-            style = MaterialTheme.typography.headlineSmall
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = notifyDistance,
-            onValueChange = { notifyDistance = it },
-            label = { Text("Notify for projects within Distance (in km)") },
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = experience,
-            onValueChange = { experience = it },
-            label = { Text("Experience") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = droneOwned,
-            onValueChange = { droneOwned = it },
-            label = { Text("Drone you own") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically
+    if(state.isUserProfileLoading || profileUpdateState.isUserProfileUpdateLoading){
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text("Certified Drone Operator?")
-            Spacer(modifier = Modifier.width(16.dp))
-            Switch(
-                checked = isCertified,
-                onCheckedChange = { isCertified = it }
-            )
+
+            items(5) {
+                ShimmerItemPlaceHolder()
+            }
         }
+    }else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        if (isCertified) {
+            Text(
+                text = "Other Details",
+                style = MaterialTheme.typography.headlineSmall
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = notifyDistance,
+                onValueChange = { notifyDistance = it },
+                label = { Text("Notify for projects within Distance (in km)") },
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = experience,
+                onValueChange = { experience = it },
+                label = { Text("Experience") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = droneOwned,
+                onValueChange = { droneOwned = it },
+                label = { Text("Drone you own") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Certified Drone Operator?")
+                Spacer(modifier = Modifier.width(16.dp))
+                Switch(
+                    checked = isCertified,
+                    onCheckedChange = { isCertified = it }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (isCertified) {
+                OutlinedCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        launchToPickFile(isRegistrationFile = false)
+                    }
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        IconButton(onClick = {
+                            launchToPickFile(isRegistrationFile = false)
+                        }) {
+                            Icon(
+                                active = true,
+                                activeContent = { Icons.Filled.CloudUpload },
+                                inactiveContent = null,
+                            )
+                        }
+
+                        Text(
+                            text = "The supported file formats are pdf, jpeg, png",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                if (certificateFileUrl.isNotEmpty() || registrationFile != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { /* Handle file upload */ }
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+
+                            Text(
+                                text = "${
+                                    if (certificateFile != null) certificateFile?.name else certificateFileUrl.getFileNameFromUrl() ?: ""
+                                }",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center
+                            )
+                            IconButton(onClick = { /* Do something */ }) {
+                                Icon(
+                                    active = true,
+                                    activeContent = { Icons.Filled.Download },
+                                    inactiveContent = null,
+                                )
+                            }
+
+                            IconButton(onClick = { /* Do something */ }) {
+                                Icon(
+                                    active = true,
+                                    activeContent = { Icons.Filled.Delete },
+                                    inactiveContent = null,
+                                )
+                            }
+                        }
+                    }
+
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
+            Text(
+                text = "Drone Registration Certificate",
+                style = MaterialTheme.typography.bodyMedium
+            )
             OutlinedCard(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
-                    launchToPickFile(isRegistrationFile = false)
+                    launchToPickFile(isRegistrationFile = true)
                 }
             ) {
                 Column(
@@ -273,7 +369,7 @@ fun OtherDetailsScreen() {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     IconButton(onClick = {
-                        launchToPickFile(isRegistrationFile = false)
+                        launchToPickFile(isRegistrationFile = true)
                     }) {
                         Icon(
                             active = true,
@@ -290,7 +386,7 @@ fun OtherDetailsScreen() {
                 }
             }
 
-            if (certificateFileUrl.isNotEmpty() || registrationFile != null) {
+            if (registrationFileUrl.isNotEmpty() || registrationFile != null) {
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedCard(
@@ -307,7 +403,7 @@ fun OtherDetailsScreen() {
 
                         Text(
                             text = "${
-                                if (certificateFile != null) certificateFile?.name else certificateFileUrl.getFileNameFromUrl() ?: ""
+                                if (registrationFile != null) registrationFile?.name else registrationFileUrl.getFileNameFromUrl() ?: ""
                             }",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -334,116 +430,37 @@ fun OtherDetailsScreen() {
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-        }
 
-        Text(
-            text = "Drone Registration Certificate",
-            style = MaterialTheme.typography.bodyMedium
-        )
-        OutlinedCard(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = {
-                launchToPickFile(isRegistrationFile = true)
-            }
-        ) {
-            Column(
+
+            Button(
+                enabled = !profileUpdateState.isUserProfileUpdateLoading,
+                onClick = {
+                    viewModel.onEvent(
+                        UserProfileEvents.UpdateOtherDetails(
+                            userId = userId,
+                            certifiedDroneOperator = isCertified,
+                            experienceYears = Integer.parseInt(experience),
+                            droneYouOwn = droneOwned,
+                            notifyForProjectsWithinKm = Integer.parseInt(notifyDistance),
+                            certificateFile = certificateFile,
+                            registrationFile = registrationFile,
+                        )
+                    )
+                },
                 modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .padding(0.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Red,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ),
+
+                shape = RoundedCornerShape(16)
             ) {
-                IconButton(onClick = {
-                    launchToPickFile(isRegistrationFile = true)
-                }) {
-                    Icon(
-                        active = true,
-                        activeContent = { Icons.Filled.CloudUpload },
-                        inactiveContent = null,
-                    )
-                }
-
-                Text(
-                    text = "The supported file formats are pdf, jpeg, png",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-
-        if (registrationFileUrl.isNotEmpty() || registrationFile != null) {
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedCard(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = { /* Handle file upload */ }
-            ) {
-                Row(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-
-                    Text(
-                        text = "${
-                            if (registrationFile != null) registrationFile?.name else registrationFileUrl.getFileNameFromUrl() ?: ""
-                        }",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
-                    IconButton(onClick = { /* Do something */ }) {
-                        Icon(
-                            active = true,
-                            activeContent = { Icons.Filled.Download },
-                            inactiveContent = null,
-                        )
-                    }
-
-                    IconButton(onClick = { /* Do something */ }) {
-                        Icon(
-                            active = true,
-                            activeContent = { Icons.Filled.Delete },
-                            inactiveContent = null,
-                        )
-                    }
-                }
+                Text("Save")
             }
 
         }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-
-        Button(
-            enabled = !profileUpdateState.isUserProfileUpdateLoading,
-            onClick = {
-                viewModel.onEvent(
-                    UserProfileEvents.UpdateOtherDetails(
-                        userId = userId,
-                        certifiedDroneOperator = isCertified,
-                        experienceYears = Integer.parseInt(experience),
-                        droneYouOwn = droneOwned,
-                        notifyForProjectsWithinKm = Integer.parseInt(notifyDistance),
-                        certificateFile = certificateFile,
-                        registrationFile = registrationFile,
-                    )
-                )
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .padding(0.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Red,
-                contentColor = MaterialTheme.colorScheme.onSurface
-            ),
-
-            shape = RoundedCornerShape(16)
-        ) {
-            Text("Save")
-        }
-
     }
 }
