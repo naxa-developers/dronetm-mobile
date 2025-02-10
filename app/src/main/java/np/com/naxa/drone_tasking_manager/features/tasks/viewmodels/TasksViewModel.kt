@@ -499,6 +499,7 @@ class TasksViewModel @Inject constructor(
     ) {
         if (angle == 0f) {
             _featureCollection?.let {
+
                 _changeableFeatureCollection = it
                 viewModelScope.launch(Dispatchers.Main) {
                     onRotatedSuccess.invoke(it)

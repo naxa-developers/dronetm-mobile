@@ -11,6 +11,7 @@ import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskEventResponseDto
 import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.dto.RefreshTokenDto
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileDto
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileUpdateDto
+import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
@@ -21,8 +22,12 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Headers
+import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
+import retrofit2.http.Part
+import retrofit2.http.PartMap
 import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.Streaming
@@ -177,7 +182,25 @@ interface ApiService {
     @PATCH("api/users/{id}/profile")
     suspend fun updateUser(
         @Path("id") userId: String,
+        @Query("force_refresh") forceRefresh: Boolean = true,
         @Body body: Map<String, String>
+    ): UserProfileUpdateDto
+
+
+    @Headers("Content-Type: application/json") // ✅ Ensure JSON format
+//    @Multipart
+    @PATCH("api/users/{id}/profile")
+    suspend fun updateUserOtherDetails(
+        @Path("id") userId: String,
+
+//        @Part("certificate_drone_operator") certifiedDroneOperator: RequestBody,
+//        @Part("drone_you_own") droneYouOwn: RequestBody,
+//        @Part("experience_years") experienceYears: RequestBody,
+//        @Part("notify_for_projects_within_km") notifyForProjectsWithinKm: RequestBody,
+//        @Part ("body")body: RequestBody,
+//        @Part certificateFile: MultipartBody.Part?,
+//        @Part registrationFile: MultipartBody.Part?
+        @Body body: RequestBody,
     ): UserProfileUpdateDto
 
 

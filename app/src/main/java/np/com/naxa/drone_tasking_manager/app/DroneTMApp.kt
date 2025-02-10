@@ -99,6 +99,9 @@ fun DroneTMApp(
 
     val scope = rememberCoroutineScope()
 
+    var showDialog by remember { mutableStateOf(false) }
+
+
     val backStackEntry by navController.currentBackStackEntryFlow.collectAsState(initial = null)
     val downloadAndTransferState by downloadAndTransferViewModel.downloadAndTransferState.collectAsState()
 
@@ -374,9 +377,7 @@ fun DroneTMApp(
                                     DropdownMenuItem(
                                         text = { Text("Logout") },
                                         onClick = {
-
-                                            onLogout(navigationEventsViewModel, viewModels, context)
-                                            menuExpanded = false
+                                            showDialog = true
                                         }
                                     )
                                 }
@@ -413,7 +414,8 @@ fun DroneTMApp(
                             }
                         }
                     }
-                }
+                },
+
             ) { innerPadding ->
                 DroneTMAppNavHost(
                     modifier = Modifier.padding(
@@ -426,6 +428,20 @@ fun DroneTMApp(
                         )
                     ),
                     navHostController = navController,
+                )
+
+                SimpleAlertDialog(
+                    showDialog = showDialog,
+                    onDismiss = { showDialog = false },
+                    onConfirm = {
+                        showDialog = false
+                        // Handle confirm action here
+                        onLogout(navigationEventsViewModel, viewModels, context)
+                        menuExpanded = false
+                    },
+                    alertTitle = "Logout",
+                    alertMessage = "Are you sure you want to logout?",
+                    positiveButtonText = "Logout"
                 )
             }
         }

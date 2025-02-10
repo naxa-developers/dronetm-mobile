@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import np.com.naxa.drone_tasking_manager.core.utils.Response
 import np.com.naxa.drone_tasking_manager.features.user.profile.models.UserProfile
 import np.com.naxa.drone_tasking_manager.features.user.profile.models.UserProfileUpdateDetails
+import java.io.File
 
 interface UserProfileRepository {
     suspend fun fetchMyInfo(forceRefresh: Boolean = true): Flow<Response<UserProfile>>
@@ -18,11 +19,20 @@ interface UserProfileRepository {
 
 
     suspend fun updateOtherDetails(
+        userId: String,
         certifiedDroneOperator: Boolean,
         droneYouOwn: String,
         experienceYears: Int,
         notifyForProjectsWithinKm: Int,
-        registrationCertificateUrl: String,
-        registrationFile: String
-    ): Flow<Response<UserProfile>>
+        certificateFile: File?,
+        registrationFile: File?
+    ): Flow<Response<UserProfileUpdateDetails>>
+
+
+    suspend fun updateUserPassword(
+        userId: String,
+        oldPassword: String,
+        newPassword: String,
+        confirmPassword: String,
+    ): Flow<Response<UserProfileUpdateDetails>>
 }
