@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -12,16 +13,19 @@ import np.com.naxa.drone_tasking_manager.features.projects.dto.projects_centroid
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.FetchTaskDetailUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.LockTaskUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.TaskWayPointsOrWayLinesUseCase
+import np.com.naxa.drone_tasking_manager.features.tasks.usecases.UnFlyableTaskUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.UnlockTaskUseCase
+import np.com.naxa.drone_tasking_manager.features.tasks.usecases.UpdateTakeOffPointUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskDetailState
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskLockOrUnlockState
+import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskUnFlyableRequestState
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskWayPointsOrWayLinesState
 import np.com.naxa.drone_tasking_manager.utils.rotate
+import org.maplibre.android.geometry.LatLng
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.Point
-import org.maplibre.geojson.Point.fromLngLat
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,7 +33,9 @@ class TasksViewModel @Inject constructor(
     private val fetchTaskDetailUseCase: FetchTaskDetailUseCase,
     private val lockTaskUseCase: LockTaskUseCase,
     private val unlockTaskUseCase: UnlockTaskUseCase,
+    private val unFlyableTaskUseCase: UnFlyableTaskUseCase,
     private val wayPointsOrWayLinesUseCase: TaskWayPointsOrWayLinesUseCase,
+    private val updateTakeOffPointUseCase: UpdateTakeOffPointUseCase
 ) : ViewModel() {
 
     /**
@@ -54,6 +60,13 @@ class TasksViewModel @Inject constructor(
     val taskUnlockState = _taskUnlockState.asStateFlow()
 
     /**
+     * Represents the different states of task un flyable request
+     */
+    private val _taskUnFlyableRequestState =
+        MutableStateFlow<TaskUnFlyableRequestState>(TaskUnFlyableRequestState.Idle)
+    val taskUnFlyableRequestState = _taskUnFlyableRequestState.asStateFlow()
+
+    /**
      * Represents the different states of task way points or way lines.
      */
     private val _taskWayPointsOrWayLinesState =
@@ -71,7 +84,7 @@ class TasksViewModel @Inject constructor(
      * If `null`, no features will be displayed.
      */
     private var _featureCollection: FeatureCollection? = null
-    private var _rotatedFeatureCollection: FeatureCollection? = null
+    private var _changeableFeatureCollection: FeatureCollection? = null
 
 
     /**
@@ -117,6 +130,10 @@ class TasksViewModel @Inject constructor(
                         _taskUnlockState.emit(TaskLockOrUnlockState.Idle)
                     }
 
+                    if (event.unFlyableState) {
+                        _taskUnFlyableRequestState.emit(TaskUnFlyableRequestState.Idle)
+                    }
+
                     if (event.taskDetailState) {
                         _taskDetailState.emit(TaskDetailState.Idle)
                     }
@@ -144,6 +161,39 @@ class TasksViewModel @Inject constructor(
                     centroid = event.centroid,
                     onRotatedSuccess = event.onRotatedSuccess
                 )
+            }
+
+            is TasksEvent.FlagTaskAsUnFlyable -> {
+                unFlyableTask(
+                    taskId = event.taskId,
+                    projectId = event.projectId,
+                    comment = event.comment
+                )
+            }
+
+            is TasksEvent.DragTakeOffPoint -> {
+                handleDragTakeOffPoint(
+                    latLng = event.latLng,
+                    onFeatureCollectionUpdated = event.onFeatureCollectionUpdated
+                )
+            }
+
+            is TasksEvent.UpdateTakeOffPoint -> {
+                updateTakeOffPoint(
+                    taskId = event.taskId,
+                    projectId = event.projectId,
+                    rotationAngle = event.rotationAngle,
+                    download = event.download,
+                    isWayPoints = event.isWayPoints,
+                    latitude = event.latitude,
+                    longitude = event.longitude
+                )
+            }
+
+            is TasksEvent.RestoreFeatureCollection -> {
+                restoreFeatureCollection {
+                    event.onRestored.invoke(it)
+                }
             }
         }
     }
@@ -231,6 +281,28 @@ class TasksViewModel @Inject constructor(
 
                     is Response.Error -> {
                         _taskUnlockState.emit(TaskLockOrUnlockState.Error(result.message))
+                    }
+                }
+            }
+        }
+    }
+
+    private fun unFlyableTask(taskId: String, projectId: String, comment: String? = null) {
+        viewModelScope.launch(Dispatchers.IO) {
+            unFlyableTaskUseCase.invoke(taskId, projectId, comment).collect { result ->
+                when (result) {
+                    is Response.Loading -> {
+                        _taskUnFlyableRequestState.emit(TaskUnFlyableRequestState.Requesting)
+                    }
+
+                    is Response.Success -> {
+                        _taskUnFlyableRequestState.emit(
+                            TaskUnFlyableRequestState.Success(result.data!!)
+                        )
+                    }
+
+                    is Response.Error -> {
+                        _taskUnFlyableRequestState.emit(TaskUnFlyableRequestState.Error(result.message))
                     }
                 }
             }
@@ -331,7 +403,7 @@ class TasksViewModel @Inject constructor(
                 when (result) {
                     is Response.Loading -> {
                         _featureCollection = null
-                        _rotatedFeatureCollection = null
+                        _changeableFeatureCollection = null
                         _taskWayPointsOrWayLinesState.emit(TaskWayPointsOrWayLinesState.Loading)
                     }
 
@@ -384,6 +456,8 @@ class TasksViewModel @Inject constructor(
     ) {
         if (angle == 0f) {
             _featureCollection?.let {
+
+                _changeableFeatureCollection = it
                 viewModelScope.launch(Dispatchers.Main) {
                     onRotatedSuccess.invoke(it)
                 }
@@ -392,16 +466,16 @@ class TasksViewModel @Inject constructor(
             return
         }
 
-        if (_rotatedFeatureCollection == null) _rotatedFeatureCollection = _featureCollection
+        if (_changeableFeatureCollection == null) _changeableFeatureCollection = _featureCollection
 
         viewModelScope.launch(Dispatchers.IO) {
             val rotated = centroid?.let {
                 FeatureCollection.fromFeatures(
-                    _rotatedFeatureCollection?.features()?.map { feature ->
+                    _changeableFeatureCollection?.features()?.map { feature ->
                         Feature.fromGeometry(
                             when (val geometry = feature.geometry()) {
                                 is Point -> geometry.rotate(
-                                    fromLngLat(
+                                    Point.fromLngLat(
                                         it.coordinates.first(),
                                         it.coordinates.last()
                                     ), angle.toDouble()
@@ -418,9 +492,186 @@ class TasksViewModel @Inject constructor(
             }
 
             rotated?.let {
-                _rotatedFeatureCollection = it
+                _changeableFeatureCollection = it
                 launch(Dispatchers.Main) {
                     onRotatedSuccess.invoke(it)
+                }
+            }
+        }
+    }
+
+    /**
+     * Handles the "take-off point" drag operation, updating the feature collection with the new location.
+     *
+     * This function is responsible for updating the location of a specific point feature (presumably the "take-off point")
+     * within a `FeatureCollection` when it's dragged to a new location on the map. It modifies the `Point` geometry of
+     * the corresponding feature in the collection and notifies the caller of the updated `FeatureCollection`.
+     *
+     * @param latLng The new latitude and longitude representing the dragged location of the take-off point.
+     * @param onFeatureCollectionUpdated The callback function to be invoked with the updated `FeatureCollection`
+     *
+     */
+    private fun handleDragTakeOffPoint(
+        latLng: LatLng,
+        onFeatureCollectionUpdated: (FeatureCollection) -> Unit
+    ) {
+
+        if (_changeableFeatureCollection == null) _changeableFeatureCollection = _featureCollection
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val updated = _changeableFeatureCollection?.features()?.map { feature ->
+                val index = if (feature.properties()
+                        ?.get("index")?.isJsonPrimitive == true
+                ) feature.properties()?.get("index")?.asJsonPrimitive else null
+
+                if (index != null && index.isNumber && index.asNumber.toDouble() == 0.0) {
+                    Feature.fromGeometry(
+                        when (val geometry = feature.geometry()) {
+                            is Point -> Point.fromLngLat(
+                                latLng.longitude,
+                                latLng.latitude,
+                                geometry.altitude()
+                            )
+
+                            else -> geometry
+                        },
+                        feature.properties(),
+                        feature.id(),
+                        feature.bbox()
+                    )
+                } else {
+                    feature
+                }
+            }?.toTypedArray()
+
+
+            updated?.let {
+                val collection = FeatureCollection.fromFeatures(it)
+                _changeableFeatureCollection = collection
+                launch(Dispatchers.Main) {
+                    onFeatureCollectionUpdated.invoke(collection)
+                }
+            }
+        }
+    }
+
+    /**
+     * Updates the take-off point for a given task.
+     *
+     * This function communicates with the `updateTakeOffPointUseCase` to update the
+     * take-off point (and potentially related data like waypoints or waylines)
+     * associated with a specific task and project. It handles the different
+     * states of the network request (Loading, Error, Success) and updates the
+     * internal state accordingly.
+     *
+     * @param taskId The ID of the task to update.
+     * @param projectId The ID of the project the task belongs to.
+     * @param latitude The latitude of the new take-off point.
+     * @param longitude The longitude of the new take-off point.
+     * @param rotationAngle The rotation angle associated with the take-off point (default: 0).
+     * @param download Indicates whether to download related data (e.g., waypoints) (default: false).
+     * @param isWayPoints A flag indicating whether to treat the data as waypoints (true) or waylines (false) (default: true).
+     *
+     * The function performs the following actions:
+     * 1. Launches a coroutine on the IO dispatcher to perform network operations.
+     * 2. Invokes the `updateTakeOffPointUseCase` with the provided parameters.
+     * 3. Collects the result of the use case, which is a `Response` object.
+     * 4. Based on the result type:
+     *    - `Response.Loading`: Emits a `TaskWayPointsOrWayLinesState.Loading` state, clears the `_featureCollection` and `_changableFeatureCollection`
+     *    - `Response.Error`: Emits a `TaskWayPointsOrWayLinesState.Error` state with the error message.
+     *    - `Response.Success`:
+     *      - If the data is not null, it emits a `TaskWayPointsOrWayLinesState.Success` state with the received data and the `isWayPoints` flag.
+     *      - If the data is null, it emits a `TaskWayPointsOrWayLinesState.Error` state with a message indicating that no waypoints or waylines were found.
+     *
+     *  It updates the following private properties:
+     *      _featureCollection: updated with data */
+    private fun updateTakeOffPoint(
+        taskId: String,
+        projectId: String,
+        latitude: Double,
+        longitude: Double,
+        rotationAngle: Int = 0,
+        download: Boolean = false,
+        isWayPoints: Boolean = true,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            updateTakeOffPointUseCase.invoke(
+                taskId,
+                projectId,
+                rotationAngle,
+                download,
+                if (isWayPoints) "waypoints" else "waylines",
+                true,
+                latitude,
+                longitude
+            ).collect { result ->
+                when (result) {
+                    is Response.Loading -> {
+                        _changeableFeatureCollection = null
+                        _taskWayPointsOrWayLinesState.emit(TaskWayPointsOrWayLinesState.Loading)
+                    }
+
+                    is Response.Error -> {
+                        _taskWayPointsOrWayLinesState.emit(TaskWayPointsOrWayLinesState.Error(result.message))
+
+                        delay(500)
+
+                        if (_featureCollection != null) {
+                            _taskWayPointsOrWayLinesState.emit(
+                                TaskWayPointsOrWayLinesState.Success(
+                                    _featureCollection!!,
+                                    isWayPoints
+                                )
+                            )
+                        }
+
+                    }
+
+                    is Response.Success -> {
+                        _featureCollection = result.data
+
+                        if (result.data != null) {
+                            _taskWayPointsOrWayLinesState.emit(
+                                TaskWayPointsOrWayLinesState.Success(
+                                    result.data!!,
+                                    isWayPoints
+                                )
+                            )
+
+                            return@collect
+                        }
+
+                        _taskWayPointsOrWayLinesState.emit(
+                            TaskWayPointsOrWayLinesState.Error("No task ${if (isWayPoints) "waypoints" else "waylines"} found with the given id")
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Restores the previously cached FeatureCollection.
+     *
+     * This function attempts to restore a cached `FeatureCollection` (if available) and
+     * provides it to the caller via the `onRestored` callback. If a FeatureCollection
+     * was previously stored in `_featureCollection`, it will be copied to
+     * `_changableFeatureCollection` and then delivered to the `onRestored` callback.
+     * The callback is invoked on the Main (UI) thread.
+     *
+     * @param onRestored A callback function that receives the restored `FeatureCollection`.
+     *                     This callback will be executed on the main thread. It will be
+     *                     invoked if and only if `_featureCollection` is not null.
+     *
+     * @see _featureCollection
+     * @see _changeableFeatureCollection
+     */
+    private fun restoreFeatureCollection(onRestored: (FeatureCollection) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _featureCollection?.let {
+                _changeableFeatureCollection = it
+                viewModelScope.launch(Dispatchers.Main) {
+                    onRestored.invoke(it)
                 }
             }
         }

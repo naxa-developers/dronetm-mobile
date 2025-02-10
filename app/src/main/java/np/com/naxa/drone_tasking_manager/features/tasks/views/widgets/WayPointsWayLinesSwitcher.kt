@@ -1,8 +1,6 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.views.widgets
 
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -44,7 +42,8 @@ fun WayPointsWayLinesSwitcher(
         Text(
             if (toggled) "Waylines" else "Waypoints",
             style = MaterialTheme.typography.labelSmall.copy(
-                fontSize = 9.sp
+                fontSize = 10.sp,
+                letterSpacing = 0.5.sp
             )
         )
     }

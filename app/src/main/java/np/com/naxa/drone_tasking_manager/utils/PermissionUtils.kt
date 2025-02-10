@@ -52,4 +52,42 @@ object PermissionUtils {
         }
         return false
     }
+
+    /**
+     * Method to check if the application has coarse location permission.
+     *
+     * @param context The context of the application or activity.
+     * @return True if the application has coarse location permission, false otherwise.
+     */
+    fun hasCoarseLocationPermission(context: Context): Boolean {
+        val coarseLocationPermission = Manifest.permission.ACCESS_COARSE_LOCATION
+        return ContextCompat.checkSelfPermission(
+            context,
+            coarseLocationPermission
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    /**
+     * Method to check if the application has fine location permission.
+     *
+     * @param context The context of the application or activity.
+     * @return True if the application has fine location permission, false otherwise.
+     */
+    fun hasFineLocationPermission(context: Context): Boolean {
+        val fineLocationPermission = Manifest.permission.ACCESS_FINE_LOCATION
+        return ContextCompat.checkSelfPermission(
+            context,
+            fineLocationPermission
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    /**
+     * Method to check if the application has either coarse or fine location permission.
+     *
+     * @param context The context of the application or activity.
+     * @return True if the application has either coarse or fine location permission, false otherwise.
+     */
+    fun hasLocationPermissions(context: Context): Boolean {
+        return hasCoarseLocationPermission(context) || hasFineLocationPermission(context)
+    }
 }

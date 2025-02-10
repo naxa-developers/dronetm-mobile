@@ -4,13 +4,19 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import np.com.naxa.drone_tasking_manager.core.services.ApiService
 import np.com.naxa.drone_tasking_manager.core.utils.Response
-import np.com.naxa.drone_tasking_manager.features.tasks.dto.LockOrUnlockEventRequestBody
+import np.com.naxa.drone_tasking_manager.core.utils.responsevalidator.ErrorResponse
+import np.com.naxa.drone_tasking_manager.core.utils.responsevalidator.getErrorMessage
+import np.com.naxa.drone_tasking_manager.features.tasks.dto.TakeOffPointUpdateRequestBody
+import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskEventRequestBody
 import np.com.naxa.drone_tasking_manager.features.tasks.mapper.toProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.mapper.toTaskLockUnlockResponse
+import np.com.naxa.drone_tasking_manager.features.tasks.mapper.toTaskUnFlyableResponse
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.models.TaskLockUnlockResponse
+import np.com.naxa.drone_tasking_manager.features.tasks.models.TaskUnFlyableResponse
 import np.com.naxa.drone_tasking_manager.utils.DateUtils
 import org.maplibre.geojson.FeatureCollection
+import retrofit2.HttpException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -38,6 +44,14 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
                     )
                 )
 
+            } catch (e: HttpException) {
+                return@flow emit(
+                    Response.Error(
+                        ErrorResponse.parseErrorBody(
+                            e.response()?.errorBody()?.string()
+                        ).getErrorMessage()
+                    )
+                )
             } catch (e: Exception) {
                 emit(Response.Error(e.message ?: "Error fetching task"))
             }
@@ -56,7 +70,7 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
                 val response = apiService.lockOrUnlockTask(
                     projectId = projectId,
                     taskId = taskId,
-                    body = LockOrUnlockEventRequestBody(
+                    body = TaskEventRequestBody(
                         event = "request",
                         updatedAt = DateUtils.currentDateAsStr(),
                     ),
@@ -64,6 +78,14 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
 
                 emit(Response.Success(response.toTaskLockUnlockResponse()))
 
+            } catch (e: HttpException) {
+                return@flow emit(
+                    Response.Error(
+                        ErrorResponse.parseErrorBody(
+                            e.response()?.errorBody()?.string()
+                        ).getErrorMessage()
+                    )
+                )
             } catch (e: Exception) {
                 emit(Response.Error(e.cause?.message ?: "Error locking task $taskId"))
             }
@@ -81,7 +103,7 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
                 val response = apiService.lockOrUnlockTask(
                     projectId = projectId,
                     taskId = taskId,
-                    body = LockOrUnlockEventRequestBody(
+                    body = TaskEventRequestBody(
                         event = "unlock",
                         updatedAt = DateUtils.currentDateAsStr(),
                     ),
@@ -89,8 +111,51 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
 
                 emit(Response.Success(response.toTaskLockUnlockResponse()))
 
+            } catch (e: HttpException) {
+                return@flow emit(
+                    Response.Error(
+                        ErrorResponse.parseErrorBody(
+                            e.response()?.errorBody()?.string()
+                        ).getErrorMessage()
+                    )
+                )
             } catch (e: Exception) {
                 emit(Response.Error(e.cause?.message ?: "Error unlocking task $taskId"))
+            }
+        }
+    }
+
+    override suspend fun taskUnFlyable(
+        taskId: String,
+        projectId: String,
+        comment: String?
+    ): Flow<Response<TaskUnFlyableResponse>> {
+        return flow {
+            emit(Response.Loading())
+
+            try {
+                val response = apiService.unFlyableTask(
+                    projectId = projectId,
+                    taskId = taskId,
+                    body = TaskEventRequestBody(
+                        event = "comment",
+                        comment = comment,
+                        updatedAt = DateUtils.currentDateAsStr(),
+                    ),
+                )
+
+                emit(Response.Success(response.toTaskUnFlyableResponse()))
+
+            } catch (e: HttpException) {
+                return@flow emit(
+                    Response.Error(
+                        ErrorResponse.parseErrorBody(
+                            e.response()?.errorBody()?.string()
+                        ).getErrorMessage()
+                    )
+                )
+            } catch (e: Exception) {
+                emit(Response.Error(e.cause?.message ?: "Error requesting task $taskId un-flyable"))
             }
         }
     }
@@ -116,8 +181,16 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
 
                 emit(Response.Success(response))
 
+            } catch (e: HttpException) {
+                return@flow emit(
+                    Response.Error(
+                        ErrorResponse.parseErrorBody(
+                            e.response()?.errorBody()?.string()
+                        ).getErrorMessage()
+                    )
+                )
             } catch (e: Exception) {
-                emit(Response.Error(e.cause?.message ?: "Error fetching task: $taskId waypoints"))
+                emit(Response.Error(e.cause?.message ?: "Error fetching task: $taskId"))
             }
         }
     }
@@ -144,11 +217,64 @@ class TasksRepositoryImpl @Inject constructor(private val apiService: ApiService
 
                 emit(Response.Success(response))
 
+            } catch (e: HttpException) {
+                return@flow emit(
+                    Response.Error(
+                        ErrorResponse.parseErrorBody(
+                            e.response()?.errorBody()?.string()
+                        ).getErrorMessage()
+                    )
+                )
             } catch (e: Exception) {
-                emit(Response.Error(e.cause?.message ?: "Error fetching task: $taskId waylines"))
+                emit(Response.Error(e.cause?.message ?: "Error fetching task: $taskId"))
             }
         }
     }
 
+    override suspend fun updateTakeOffPoint(
+        taskId: String,
+        projectId: String,
+        rotationAngle: Int,
+        download: Boolean,
+        mode: String,
+        forceRefresh: Boolean,
+        latitude: Double,
+        longitude: Double
+    ): Flow<Response<FeatureCollection>> {
+        return flow {
+            emit(Response.Loading())
 
+            try {
+                val response = apiService.updateTakeOffPoint(
+                    projectId = projectId,
+                    taskId = taskId,
+                    rotationAngle = rotationAngle,
+                    download = download,
+                    mode = mode,
+                    forceRefresh = forceRefresh,
+                    body = TakeOffPointUpdateRequestBody(
+                        latitude = latitude,
+                        longitude = longitude,
+                    )
+                )
+
+                emit(Response.Success(response))
+
+            } catch (e: HttpException) {
+                return@flow emit(
+                    Response.Error(
+                        ErrorResponse.parseErrorBody(
+                            e.response()?.errorBody()?.string()
+                        ).getErrorMessage()
+                    )
+                )
+            } catch (e: Exception) {
+                emit(
+                    Response.Error(
+                        e.cause?.message ?: "Error updating takeoff point of task: $taskId"
+                    )
+                )
+            }
+        }
+    }
 }

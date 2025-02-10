@@ -2,10 +2,11 @@ package np.com.naxa.drone_tasking_manager.features.tasks.mapper
 
 import np.com.naxa.drone_tasking_manager.features.projects.mapper.toProjectGeometry
 import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskDto
-import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskLockUnlockResponseDto
+import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskEventResponseDto
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTaskState
 import np.com.naxa.drone_tasking_manager.features.tasks.models.TaskLockUnlockResponse
+import np.com.naxa.drone_tasking_manager.features.tasks.models.TaskUnFlyableResponse
 
 fun TaskDto.toProjectTask() = ProjectTask(
     id = id,
@@ -31,7 +32,13 @@ fun TaskDto.toProjectTask() = ProjectTask(
     updatedAt = updatedAt,
 )
 
-fun TaskLockUnlockResponseDto.toTaskLockUnlockResponse() = TaskLockUnlockResponse(
+fun TaskEventResponseDto.toTaskLockUnlockResponse() = TaskLockUnlockResponse(
+    projectId = projectId,
+    taskId = taskId,
+    comment = comment
+)
+
+fun TaskEventResponseDto.toTaskUnFlyableResponse() = TaskUnFlyableResponse(
     projectId = projectId,
     taskId = taskId,
     comment = comment

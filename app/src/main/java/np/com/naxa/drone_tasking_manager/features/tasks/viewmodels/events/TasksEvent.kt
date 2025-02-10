@@ -1,6 +1,7 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events
 
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects_centroid.Centroid
+import org.maplibre.android.geometry.LatLng
 import org.maplibre.geojson.FeatureCollection
 
 
@@ -111,6 +112,105 @@ sealed class TasksEvent {
     ) : TasksEvent()
 
     /**
+<<<<<<< HEAD
+=======
+     * Represents the point where a drag operation starts, along with an action to be performed
+     * when the underlying FeatureCollection is updated.
+     *
+     * This data class encapsulates the geographical location (LatLng) where a user initiates a
+     * drag action on a map, such as dragging a marker or a shape. It also includes a callback
+     * function (`onFeatureCollectionUpdated`) that will be invoked whenever the FeatureCollection
+     * associated with the drag operation is modified. This allows for real-time updates and
+     * reactions to changes in the map's data.
+     *
+     * @property latLng The geographical coordinates (latitude and longitude) of the drag take-off point.
+     *           This represents the initial location where the user started dragging.
+     * @property onFeatureCollectionUpdated A callback function that will be executed when the
+     *           FeatureCollection associated with the drag operation is
+     *           updated. This function takes the updated FeatureCollection
+     *           as its parameter, allowing for custom processing of the
+     *           modified data.
+     *
+     */
+    data class DragTakeOffPoint(
+        val latLng: LatLng,
+        val onFeatureCollectionUpdated: (FeatureCollection) -> Unit
+    ) : TasksEvent()
+
+    /**
+     * Represents an event to update the take-off point for a specific task.
+     *
+     * This data class encapsulates the necessary information to update the take-off
+     * location and associated settings for a task within a project. It includes
+     * the task's identifier, project identifier, geographical coordinates (latitude and
+     * longitude), and optional parameters for rotation angle, download behavior, and
+     * whether the location is part of waypoints.
+     *
+     * @property taskId The unique identifier of the task.
+     * @property projectId The unique identifier of the project the task belongs to.
+     * @property latitude The latitude coordinate of the take-off point.
+     * @property longitude The longitude coordinate of the take-off point.
+     * @property rotationAngle The rotation angle (in degrees) associated with the take-off point. Defaults to 0.
+     * @property download A flag indicating whether associated data should be downloaded. Defaults to false.
+     * @property isWayPoints A flag indicating whether this take-off point is part of a sequence of waypoints. Defaults to true.
+     *
+     * @constructor Creates an [UpdateTakeOffPoint] object.
+     *
+     * Example usage:
+     * ```
+     * val updateEvent = UpdateTakeOffPoint(
+     *     taskId = "task123",
+     *     projectId = "project456",
+     *     latitude = 34.0522,
+     *     longitude = -118.2437,
+     *     rotationAngle = 90,
+     *     download = true,
+     *     isWayPoints = false
+     * )
+     * ```
+     */
+    data class UpdateTakeOffPoint(
+        val taskId: String,
+        val projectId: String,
+        val latitude: Double,
+        val longitude: Double,
+        val rotationAngle: Int = 0,
+        val download: Boolean = false,
+        val isWayPoints: Boolean = true,
+    ) : TasksEvent()
+
+
+    /**
+     * Represents an event indicating that a FeatureCollection has been restored.
+     *
+     * This event is used to notify listeners that a previously saved or backed-up
+     * FeatureCollection has been successfully restored and is now available.
+     *
+     * @property onRestored A callback function that is invoked when the FeatureCollection
+     *                     is restored. It receives the restored FeatureCollection as a parameter.
+     */
+    data class RestoreFeatureCollection(val onRestored: (FeatureCollection) -> Unit) : TasksEvent()
+
+    /**
+     * Represents an event indicating that a task has been flagged as un-flyable.
+     *
+     * This event is typically triggered when a task is determined to be impossible
+     * or unsafe to execute, for example, due to resource constraints, environmental
+     * conditions, or unexpected dependencies.
+     *
+     * @property taskId The unique identifier of the task that is flagged as un-flyable.
+     * @property projectId The unique identifier of the project to which the task belongs.
+     * @property comment An optional comment providing further context or explanation
+     *                   for why the task was flagged as un-flyable.
+     */
+    data class FlagTaskAsUnFlyable(
+        val taskId: String,
+        val projectId: String,
+        val comment: String? = null
+    ) : TasksEvent()
+
+    /**
+>>>>>>> 6bec20dbf7626b10e70a817aa9bba0306e443106
      * Represents the state of various reset actions within the application.
      *
      * This data class encapsulates the state of three distinct reset actions:
@@ -126,12 +226,15 @@ sealed class TasksEvent {
      *
      * @property lockState `true` if the lock state should be reset, `false` otherwise. Defaults to `false`.
      * @property unlockState `true` if the unlock state should be reset, `false` otherwise. Defaults to `false`.
+     * @property unFlyableState `true` if the task un-flyable request state should be reset, `false` otherwise. Defaults to `false`.
      * @property taskDetailState `true` if the task detail view's state should be reset, `false` otherwise. Defaults to `false`.
+     * @property taskWayPointsOrWayLinesState `true` if the task waypoints state should be reset, `false` otherwise. Defaults to `false`.
      * @constructor Creates a [ResetState] instance with optional initial values for each state.
      */
     data class ResetState(
         val lockState: Boolean = false,
         val unlockState: Boolean = false,
+        val unFlyableState: Boolean = false,
         val taskDetailState: Boolean = false,
         val taskWayPointsOrWayLinesState: Boolean = false
     ) : TasksEvent()

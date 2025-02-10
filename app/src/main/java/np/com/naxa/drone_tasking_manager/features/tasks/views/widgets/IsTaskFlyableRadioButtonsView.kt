@@ -9,23 +9,16 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 
 @Composable
 fun IsTaskFlyableRadioButtonsView(
     modifier: Modifier = Modifier,
-    task: ProjectTask,
+    flyable: Boolean = true,
     onValueChange: (Boolean) -> Unit = {}
 ) {
-
-    var isTaskFlyable by remember { mutableStateOf(true) }
 
     Column(
         modifier = modifier
@@ -39,9 +32,8 @@ fun IsTaskFlyableRadioButtonsView(
         ) {
             RadioButton(
                 modifier = Modifier.size(24.dp),
-                selected = isTaskFlyable,
+                selected = flyable,
                 onClick = {
-                    isTaskFlyable = true
                     onValueChange(true)
                 }
             )
@@ -53,9 +45,8 @@ fun IsTaskFlyableRadioButtonsView(
         ) {
             RadioButton(
                 modifier = Modifier.size(24.dp),
-                selected = !isTaskFlyable,
+                selected = !flyable,
                 onClick = {
-                    isTaskFlyable = false
                     onValueChange(false)
                 }
             )

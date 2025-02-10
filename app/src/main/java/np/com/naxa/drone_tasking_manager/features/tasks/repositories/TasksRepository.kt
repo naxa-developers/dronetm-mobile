@@ -1,10 +1,10 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.repositories
 
-import com.google.gson.JsonObject
 import kotlinx.coroutines.flow.Flow
 import np.com.naxa.drone_tasking_manager.core.utils.Response
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.models.TaskLockUnlockResponse
+import np.com.naxa.drone_tasking_manager.features.tasks.models.TaskUnFlyableResponse
 import org.maplibre.geojson.FeatureCollection
 
 interface TasksRepository {
@@ -70,6 +70,28 @@ interface TasksRepository {
     ): Flow<Response<TaskLockUnlockResponse>>
 
     /**
+     * Marks a task as un-flyable (unable to be executed).
+     *
+     * This function communicates with the backend to update the status of a specific task,
+     * indicating that it cannot be executed or scheduled for execution.
+     *
+     * @param taskId The unique identifier of the task to be marked as un-flyable.
+     *        Must not be empty.
+     * @param projectId The identifier of the project to which the task belongs.
+     *        Must not be empty.
+     * @param comment The comment text entered by the user while making this task un flyable
+     * @return A Flow emitting a Response object containing the result of the operation.
+     *         - On success, the Response will contain a TaskUnFlyableResponse.
+     *         - On failure, the Response will contain an error status and message.
+     *
+     */
+    suspend fun taskUnFlyable(
+        taskId: String,
+        projectId: String,
+        comment: String? = null
+    ): Flow<Response<TaskUnFlyableResponse>>
+
+    /**
      * Retrieves the waypoints associated with a specific task.
      *
      * This function fetches the waypoints related to a given task ID within a specific project.
@@ -120,5 +142,39 @@ interface TasksRepository {
         rotationAngle: Int = 0,
         download: Boolean = false,
         forceRefresh: Boolean = true
+    ): Flow<Response<FeatureCollection>>
+
+
+    /**
+     * Updates the take-off point for a given task and project.
+     *
+     * This function updates the take-off point's location (latitude, longitude) and optionally its
+     * rotation angle. It also allows specifying whether to download data related to the updated point and whether to force a refresh.
+     *
+     * @param taskId The ID of the task for which to update the take-off point.
+     * @param projectId The ID of the project the task belongs to.
+     * @param rotationAngle The rotation angle of the take-off point in degrees. Defaults to 0.
+     * @param download Whether to download data related to the updated take-off point. Defaults to false.
+     *                 If true, the function will attempt to download relevant data after updating the point.
+     * @param forceRefresh Whether to force a refresh of the take-off point data. Defaults to true.
+     *                     If true, the function will disregard any cached data and fetch fresh data from the server.
+     * @param latitude The latitude of the new take-off point location.
+     * @param longitude The longitude of the new take-off point location.
+     * @return A Flow emitting a Response object containing a FeatureCollection.
+     *         The Response will represent the result of the update operation, and the FeatureCollection may contain relevant data
+     *         related to the updated take-off point.
+     *         The Flow can emit multiple Responses, representing different states of the update and data retrieval process.
+     *         It can contain errors if any network or other issues happen.
+     * @throws Exception if there is an error during the update process.
+     */
+    suspend fun updateTakeOffPoint(
+        taskId: String,
+        projectId: String,
+        rotationAngle: Int = 0,
+        download: Boolean = false,
+        mode: String = "waypoints",
+        forceRefresh: Boolean = true,
+        latitude: Double,
+        longitude: Double
     ): Flow<Response<FeatureCollection>>
 }
