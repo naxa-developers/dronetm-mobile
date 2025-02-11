@@ -83,7 +83,7 @@ fun NavigateToTransferFileWidget(
                     painter = painterResource(id = R.drawable.ic_file_move_outline_24), // Your drawable
                     contentDescription = "Transfer file to device",
                     modifier = Modifier
-                        .fillMaxSize()
+                        .size(24.dp)
                 )
             }
         }
@@ -132,7 +132,7 @@ fun NavigateToTransferFileWidget(
                         painter = painterResource(id = R.drawable.ic_file_move_outline_24), // Your drawable
                         contentDescription = "Transfer file to device",
                         modifier = Modifier
-                            .fillMaxSize()
+                            .size(24.dp)
                     )
                 }
             }
