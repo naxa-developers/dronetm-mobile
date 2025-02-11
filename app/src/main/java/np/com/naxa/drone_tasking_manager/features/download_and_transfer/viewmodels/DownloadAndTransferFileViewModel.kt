@@ -1,4 +1,4 @@
-package np.com.naxa.drone_tasking_manager.viewmodel
+package np.com.naxa.drone_tasking_manager.features.download_and_transfer.viewmodels
 
 import android.net.Uri
 import androidx.core.net.toFile
@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import np.com.naxa.drone_tasking_manager.states.DownloadAndTransferState
+import np.com.naxa.drone_tasking_manager.features.download_and_transfer.viewmodels.states.DownloadAndTransferState
 import np.com.naxa.drone_tasking_manager.utils.FileDownloadHandler
 import np.com.naxa.drone_tasking_manager.utils.FileTransferHandler
 import np.com.naxa.drone_tasking_manager.utils.TransferResult

@@ -1,4 +1,4 @@
-package np.com.naxa.drone_tasking_manager.states
+package np.com.naxa.drone_tasking_manager.features.download_and_transfer.viewmodels.states
 
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile

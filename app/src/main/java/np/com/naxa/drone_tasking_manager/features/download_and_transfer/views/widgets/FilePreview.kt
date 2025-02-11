@@ -1,4 +1,4 @@
-package np.com.naxa.drone_tasking_manager.ui.screens.download_and_transfer
+package np.com.naxa.drone_tasking_manager.features.download_and_transfer.views.widgets
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

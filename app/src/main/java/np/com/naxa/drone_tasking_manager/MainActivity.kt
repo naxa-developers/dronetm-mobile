@@ -35,16 +35,16 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.events.DroneTMAppEvent
-import np.com.naxa.drone_tasking_manager.states.DownloadAndTransferState
-import np.com.naxa.drone_tasking_manager.states.UsbDeviceState
+import np.com.naxa.drone_tasking_manager.features.download_and_transfer.viewmodels.states.DownloadAndTransferState
+import np.com.naxa.drone_tasking_manager.features.device_connection.viewmodels.states.UsbDeviceState
 import np.com.naxa.drone_tasking_manager.app.DroneTMApp
 import np.com.naxa.drone_tasking_manager.utils.FileTransferHandler
 import np.com.naxa.drone_tasking_manager.utils.PermissionUtils
 import np.com.naxa.drone_tasking_manager.utils.toFile
-import np.com.naxa.drone_tasking_manager.viewmodel.DownloadAndTransferFileViewModel
+import np.com.naxa.drone_tasking_manager.features.download_and_transfer.viewmodels.DownloadAndTransferFileViewModel
 import np.com.naxa.drone_tasking_manager.viewmodel.EventsViewModel
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.NavigationEventsViewModel
-import np.com.naxa.drone_tasking_manager.viewmodel.UsbDeviceViewModel
+import np.com.naxa.drone_tasking_manager.features.device_connection.viewmodels.UsbDeviceViewModel
 import java.io.File
 
 

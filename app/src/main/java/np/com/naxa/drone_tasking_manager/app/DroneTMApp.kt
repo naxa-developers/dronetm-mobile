@@ -7,7 +7,6 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -41,7 +40,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -79,12 +77,12 @@ import np.com.naxa.drone_tasking_manager.navigation.DroneTMAppNavHost
 import np.com.naxa.drone_tasking_manager.navigation.routes.Routes
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.NavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
-import np.com.naxa.drone_tasking_manager.states.DownloadAndTransferState
+import np.com.naxa.drone_tasking_manager.features.download_and_transfer.viewmodels.states.DownloadAndTransferState
 import np.com.naxa.drone_tasking_manager.utils.route
 import np.com.naxa.drone_tasking_manager.utils.widgets.NavigateToTransferFileWidget
-import np.com.naxa.drone_tasking_manager.viewmodel.DownloadAndTransferFileViewModel
+import np.com.naxa.drone_tasking_manager.features.download_and_transfer.viewmodels.DownloadAndTransferFileViewModel
 import np.com.naxa.drone_tasking_manager.viewmodel.EventsViewModel
-import np.com.naxa.drone_tasking_manager.viewmodel.UsbDeviceViewModel
+import np.com.naxa.drone_tasking_manager.features.device_connection.viewmodels.UsbDeviceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -157,15 +155,6 @@ fun DroneTMApp(
                             event.device?.deviceId.toString()
                         )
                     )
-                }
-
-                DroneTMAppNavigationEvent.OnNavigateToHome -> {
-                    navController.navigate(Routes.Home.path) {
-//                        popUpTo(Routes.Splash.path) {
-//                            inclusive = true
-//                        }
-                        launchSingleTop = true
-                    }
                 }
 
                 is DroneTMAppNavigationEvent.OnSnackBarShow -> {
@@ -241,16 +230,26 @@ fun DroneTMApp(
 
                 is DroneTMAppNavigationEvent.OnNavigateToFileTransfer -> {
                     navController.navigate(
-                        Routes.FileTransfer.path.replace(
-                            "{filePath}",
-                            Uri.encode(event.filePath ?: tasksViewModel.taskPlanFile?.path)
-                        )
+                        Routes.FileTransfer.path
+                            .replace("{deviceId}", event.deviceId ?: "")
+                            .replace(
+                                "{filePath}",
+                                Uri.encode(event.filePath ?: tasksViewModel.taskPlanFile?.path)
+                            )
                     )
                 }
 
                 DroneTMAppNavigationEvent.OnNavigateToProfileScreen -> {
-
                     navController.navigate(Routes.ProfileScreen.path)
+                }
+
+                is DroneTMAppNavigationEvent.OnNavigateToDeviceConnection -> {
+                    navController.navigate(
+                        Routes.DeviceConnection.path.replace(
+                            "{routeIndex}",
+                            event.route.ordinal.toString()
+                        )
+                    )
                 }
             }
         }
@@ -283,11 +282,11 @@ fun DroneTMApp(
                 },
                 topBar = {
                     if (currentRoute != Routes.Splash
-                        && currentRoute != Routes.Home
                         && currentRoute != Routes.Login
                         && currentRoute != Routes.ProjectsMap
                         && currentRoute != Routes.ProjectDetails
                         && currentRoute != Routes.TaskDetails
+                        && currentRoute != Routes.DeviceConnection
                     ) {
                         TopAppBar(
                             title = {
@@ -347,7 +346,7 @@ fun DroneTMApp(
                                 if (currentRoute == Routes.ProjectsList) {
 
                                     NavigateToTransferFileWidget(
-                                        boxModifier =  Modifier
+                                        boxModifier = Modifier
                                             .padding(end = 8.dp),
                                         toolTipModifier = Modifier,
                                         isFromToolbar = true,
@@ -430,13 +429,14 @@ fun DroneTMApp(
                     }
                 },
 
-            ) { innerPadding ->
+                ) { innerPadding ->
                 DroneTMAppNavHost(
                     modifier = Modifier.padding(
                         if (currentRoute != Routes.Splash &&
                             currentRoute != Routes.ProjectsMap &&
                             currentRoute != Routes.ProjectDetails &&
-                            currentRoute != Routes.TaskDetails
+                            currentRoute != Routes.TaskDetails &&
+                            currentRoute != Routes.DeviceConnection
                         ) innerPadding else PaddingValues(
                             0.dp
                         )

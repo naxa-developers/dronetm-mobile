@@ -3,11 +3,13 @@ package np.com.naxa.drone_tasking_manager.features.file_transfer.views.screens
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.content.Intent
+import android.hardware.usb.UsbDevice
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,6 +29,7 @@ import np.com.naxa.drone_tasking_manager.features.file_transfer.views.widgets.Fi
 import np.com.naxa.drone_tasking_manager.features.file_transfer.views.widgets.FileTransferringStateView
 import np.com.naxa.drone_tasking_manager.features.file_transfer.views.widgets.SafDirectorySelectedStateView
 import np.com.naxa.drone_tasking_manager.local_providers.LocalFileTransferViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalUsbDeviceViewModel
 import np.com.naxa.drone_tasking_manager.utils.FileTransferHandler
 import java.io.File
 
@@ -34,11 +37,17 @@ import java.io.File
 fun FileTransferScreen(
     modifier: Modifier = Modifier,
     filePath: String? = null,
+    deviceId: Int? = null
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val transferViewModel = LocalFileTransferViewModel.current
     var showSafAccessRequestDialog by remember { mutableStateOf(false) }
+
+    val usbDeviceViewModel = LocalUsbDeviceViewModel.current
+    var device: UsbDevice? by remember {
+        mutableStateOf(null)
+    }
 
     val file: File? by remember(filePath) {
         mutableStateOf(
@@ -56,6 +65,11 @@ fun FileTransferScreen(
 
     val transferState by transferViewModel.transferState.collectAsState()
 
+    LaunchedEffect(deviceId) {
+        scope.launch {
+            device = deviceId?.let { usbDeviceViewModel.deviceWithId(it) }
+        }
+    }
 
     val directoryAccessLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -126,6 +140,7 @@ fun FileTransferScreen(
             FileTransferIdleStateView(
                 modifier = modifier.fillMaxSize(),
                 file = file,
+                device = device,
                 onSwipeToTransfer = {
                     showSafAccessRequestDialog = true
                 }
@@ -142,7 +157,10 @@ fun FileTransferScreen(
                 transferViewModel.triggerEvent(
                     FileTransferEvents.TransferInitiated(
                         file!!,
-                        it.uri
+                        destinationUri = FileTransferHandler.djiWaypointUri(
+                            context,
+                            it.uri
+                        ) ?: it.uri,
                     )
                 )
             }

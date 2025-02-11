@@ -1,4 +1,4 @@
-package np.com.naxa.drone_tasking_manager.features.file_transfer.views.widgets
+package np.com.naxa.drone_tasking_manager.features.download_and_transfer.views.widgets
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,9 +14,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.documentfile.provider.DocumentFile
+import np.com.naxa.drone_tasking_manager.features.file_transfer.views.widgets.DirectoryItem
 
 @Composable
-fun SafDirectorySelectedStateView(
+fun DownloadAndTransferSafDirectorySelectedStateView(
     modifier: Modifier = Modifier,
     directory: DocumentFile,
     onDirectorySelected: (DocumentFile) -> Unit
@@ -43,9 +44,7 @@ fun SafDirectorySelectedStateView(
                 .padding(16.dp),
         ) {
             items(directory.listFiles().filter { it.isDirectory }) { directory ->
-                DirectoryItem(
-                    directory
-                ) {
+                DirectoryItem(directory) {
                     onDirectorySelected.invoke(it)
                 }
             }

@@ -1,4 +1,4 @@
-package np.com.naxa.drone_tasking_manager.states
+package np.com.naxa.drone_tasking_manager.features.device_connection.viewmodels.states
 
 import android.hardware.usb.UsbDevice
 

@@ -1,11 +1,11 @@
-package np.com.naxa.drone_tasking_manager.viewmodel
+package np.com.naxa.drone_tasking_manager.features.device_connection.viewmodels
 
 import android.hardware.usb.UsbDevice
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import np.com.naxa.drone_tasking_manager.states.UsbDeviceState
+import np.com.naxa.drone_tasking_manager.features.device_connection.viewmodels.states.UsbDeviceState
 
 class UsbDeviceViewModel : ViewModel() {
     private val _deviceState = MutableStateFlow<UsbDeviceState>(UsbDeviceState.WaitingToConnect)

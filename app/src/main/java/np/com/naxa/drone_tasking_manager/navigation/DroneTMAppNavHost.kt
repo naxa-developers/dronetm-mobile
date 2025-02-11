@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import np.com.naxa.drone_tasking_manager.features.device_connection.views.screens.DeviceConnectionScreen
 import np.com.naxa.drone_tasking_manager.features.file_transfer.views.screens.FileTransferScreen
 import np.com.naxa.drone_tasking_manager.navigation.routes.Routes
 import np.com.naxa.drone_tasking_manager.features.login.views.screens.LoginScreen
@@ -22,8 +23,7 @@ import np.com.naxa.drone_tasking_manager.features.project_details.views.screens.
 import np.com.naxa.drone_tasking_manager.features.projects.views.screens.ProjectsListScreen
 import np.com.naxa.drone_tasking_manager.features.projects.views.screens.ProjectsMapScreen
 import np.com.naxa.drone_tasking_manager.features.tasks.views.screens.TaskDetailsScreen
-import np.com.naxa.drone_tasking_manager.ui.screens.download_and_transfer.DownloadAndTransferFileScreen
-import np.com.naxa.drone_tasking_manager.ui.screens.home.HomeScreen
+import np.com.naxa.drone_tasking_manager.features.download_and_transfer.views.screens.DownloadAndTransferFileScreen
 import np.com.naxa.drone_tasking_manager.ui.screens.splash.SplashScreen
 
 /**
@@ -49,13 +49,6 @@ fun DroneTMAppNavHost(
         // Route for the Splash Screen
         composable(Routes.Splash.path) {
             SplashScreen(
-                modifier = modifier,
-            )
-        }
-
-        // Route for the Home screen
-        composable(Routes.Home.path) {
-            HomeScreen(
                 modifier = modifier,
             )
         }
@@ -172,10 +165,39 @@ fun DroneTMAppNavHost(
                 )
             },
         ) { backStackEntry ->
+            val deviceId = backStackEntry.arguments?.getString("deviceId")
             val filePath = backStackEntry.arguments?.getString("filePath")
             FileTransferScreen(
                 modifier = modifier,
                 filePath = Uri.decode(filePath),
+                deviceId = deviceId?.toIntOrNull()
+            )
+        }
+
+        // Route for the Transfer File Screen
+        composable(
+            Routes.DeviceConnection.path,
+            enterTransition = {
+                slideIn(
+                    animationSpec = tween(),
+                    initialOffset = { IntOffset(it.width, 0) }
+                )
+            },
+            exitTransition = {
+                slideOut(
+                    animationSpec = tween(),
+                    targetOffset = { IntOffset(0, 0) },
+                )
+            },
+        ) { backStackEntry ->
+            val routeIndex = backStackEntry.arguments?.getString("routeIndex")?.toIntOrNull()
+            DeviceConnectionScreen(
+                modifier = modifier,
+                route = routeIndex?.let {
+                    Routes.entries.getOrElse(
+                        it
+                    ) { Routes.DownloadAndTransfer }
+                } ?: Routes.DownloadAndTransfer
             )
         }
     }
