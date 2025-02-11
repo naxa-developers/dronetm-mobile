@@ -20,15 +20,6 @@ enum class Routes(
     ),
 
     /**
-     * Route for displaying the home screen.
-     * Path: /home
-     */
-    Home(
-        label = "Home",
-        path = "home"
-    ),
-
-    /**
      * Route for displaying the download and transfer contents of a specific device.
      * Path: /download-and-transfer/{deviceId}
      * @param {deviceId} The unique identifier of the device
@@ -101,10 +92,19 @@ enum class Routes(
 
     /**
      * Route for displaying the File Transfer Screen.
-     * Path: /file-transfer/{filePath}
+     * Path: /file-transfer/{deviceId}/{filePath}
      */
     FileTransfer(
         label = "File Transfer",
-        path = "file-transfer/{filePath}"
+        path = "file-transfer/{deviceId}/{filePath}"
+    ),
+
+    /**
+     * Route for displaying the Usb Device Connection Screen.
+     * Path: /device-connection/{routeIndex}
+     */
+    DeviceConnection(
+        label = "Device Connection",
+        path = "device-connection?route={routeIndex}"
     ),
 }

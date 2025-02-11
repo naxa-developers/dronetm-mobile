@@ -1,4 +1,4 @@
-package np.com.naxa.drone_tasking_manager.ui.screens.home
+package np.com.naxa.drone_tasking_manager.features.device_connection.views.widgets
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize

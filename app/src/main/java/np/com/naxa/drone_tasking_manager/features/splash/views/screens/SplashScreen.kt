@@ -1,4 +1,4 @@
-package np.com.naxa.drone_tasking_manager.ui.screens.splash
+package np.com.naxa.drone_tasking_manager.features.splash.views.screens
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing

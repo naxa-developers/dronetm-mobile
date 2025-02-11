@@ -42,6 +42,7 @@ import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksE
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskFlightPlanDownloadState
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
+import np.com.naxa.drone_tasking_manager.navigation.routes.Routes
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 import np.com.naxa.drone_tasking_manager.utils.PermissionUtils
 import java.io.File
@@ -154,8 +155,8 @@ fun DownloadTaskFlightPlanIconButton(
                             onActionPerformed = {
                                 if (file == null) return@OnSnackBarShow
                                 navigationEventsViewModel.sendEvent(
-                                    DroneTMAppNavigationEvent.OnNavigateToFileTransfer(
-                                        file!!.path
+                                    DroneTMAppNavigationEvent.OnNavigateToDeviceConnection(
+                                        route = Routes.FileTransfer
                                     )
                                 )
                             }
@@ -198,8 +199,8 @@ fun DownloadTaskFlightPlanIconButton(
             }
 
             navigationEventsViewModel.sendEvent(
-                DroneTMAppNavigationEvent.OnNavigateToFileTransfer(
-                    file!!.path
+                DroneTMAppNavigationEvent.OnNavigateToDeviceConnection(
+                    route = Routes.FileTransfer
                 )
             )
         }

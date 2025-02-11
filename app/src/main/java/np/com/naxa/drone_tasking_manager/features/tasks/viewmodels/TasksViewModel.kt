@@ -1,6 +1,5 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,6 +29,7 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.Point
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -113,7 +113,28 @@ class TasksViewModel @Inject constructor(
      */
     private var _featureCollection: FeatureCollection? = null
     private var _changeableFeatureCollection: FeatureCollection? = null
+
+
+    /**
+     * Indicates whether the current data represents waypoints.
+     *
+     * This property is nullable.
+     * - `true` if the data represents waypoints.
+     * - `false` if the data does not represent waypoints.
+     * - `null` if it's unknown whether the data represents waypoints.
+     */
     private var _isWayPoints: Boolean? = null
+
+
+    /**
+     * The file that contains the task plan.
+     *
+     * This file is used to persist the task plan data, such as the list of tasks, their dependencies, and their status.
+     * It will be null if no task plan has been loaded or saved yet.
+     */
+    private var _taskPlanFile: File? = null
+    val taskPlanFile: File?
+        get() = _taskPlanFile
 
 
     /**
@@ -375,6 +396,9 @@ class TasksViewModel @Inject constructor(
         forceRefresh: Boolean = false
     ) {
         viewModelScope.launch(Dispatchers.IO) {
+
+            _taskPlanFile = null
+
             fetchTaskDetailUseCase.invoke(
                 taskId = id,
                 forceRefresh = forceRefresh,
@@ -715,24 +739,28 @@ class TasksViewModel @Inject constructor(
         isWayPoints: Boolean = true,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
+
+            _taskPlanFile = null
+
             downloadTaskFlightPlanUseCase.invoke(
                 taskId = taskId,
                 projectId = projectId,
                 mode = if (isWayPoints) "waypoints" else "waylines",
             ).collect { result ->
                 when (result) {
-                    is DownloadResponse.Completed -> {
-                        _taskFlightPlanDownloadState.emit(
-                            TaskFlightPlanDownloadState.DownloadCompleted(
-                                result.file
-                            )
-                        )
-                    }
-
                     is DownloadResponse.Downloading -> {
                         _taskFlightPlanDownloadState.emit(
                             TaskFlightPlanDownloadState.Downloading(
                                 result.progress
+                            )
+                        )
+                    }
+
+                    is DownloadResponse.Completed -> {
+                        _taskPlanFile = result.file
+                        _taskFlightPlanDownloadState.emit(
+                            TaskFlightPlanDownloadState.DownloadCompleted(
+                                result.file
                             )
                         )
                     }

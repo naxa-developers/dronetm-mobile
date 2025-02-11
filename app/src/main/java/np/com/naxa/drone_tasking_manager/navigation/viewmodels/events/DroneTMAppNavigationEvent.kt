@@ -2,12 +2,9 @@ package np.com.naxa.drone_tasking_manager.navigation.viewmodels.events
 
 import android.hardware.usb.UsbDevice
 import androidx.compose.material3.SnackbarDuration
+import np.com.naxa.drone_tasking_manager.navigation.routes.Routes
 
 sealed class DroneTMAppNavigationEvent {
-    /**
-     * Event triggered when the user tries to navigate to home screen.
-     */
-    data object OnNavigateToHome : DroneTMAppNavigationEvent()
 
     /**
      * Event triggered when the user tries to navigate to download and transfer screen.
@@ -96,8 +93,29 @@ sealed class DroneTMAppNavigationEvent {
      *
      * @property filePath The path to the file that will be transferred.
      *                    This path should be a valid path accessible by the application.
+     * @property deviceId The unique identifier of the device to which the file will be transferred.
      *
      * @see DroneTMAppNavigationEvent
      */
-    data class OnNavigateToFileTransfer(val filePath: String) : DroneTMAppNavigationEvent()
+    data class OnNavigateToFileTransfer(
+        val filePath: String? = null,
+        val deviceId: String? = null
+    ) : DroneTMAppNavigationEvent()
+
+    /**
+     * Represents a navigation event that triggers a transition to a specific device connection screen.
+     *
+     * This event is used to signal that the application should navigate to a screen related to
+     * connecting to a device, such as a drone or remote control. The specific target screen is
+     * determined by the [route] property.
+     *
+     * @property route The route to navigate when the user clicks the "Initiate Transfer"
+     *                  or "Download & Transfer" button on DeviceConnectionScreen.
+     *
+     * @see Routes
+     * @see DroneTMAppNavigationEvent
+     */
+    data class OnNavigateToDeviceConnection(
+        val route: Routes
+    ) : DroneTMAppNavigationEvent()
 }

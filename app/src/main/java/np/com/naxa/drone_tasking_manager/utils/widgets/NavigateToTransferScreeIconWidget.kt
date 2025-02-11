@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.R
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
+import np.com.naxa.drone_tasking_manager.navigation.routes.Routes
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,7 +33,8 @@ fun NavigateToTransferFileWidget(
     boxModifier: Modifier = Modifier,
     toolTipModifier: Modifier = Modifier,
     isFromToolbar: Boolean = false,
-    iconSize: Dp = 48.dp){
+    iconSize: Dp = 48.dp
+) {
 
     val navigationEventsViewModel = LocalNavigationEventsViewModel.current
 
@@ -41,7 +43,7 @@ fun NavigateToTransferFileWidget(
     val scope = rememberCoroutineScope()
 
 
-    if(isFromToolbar){
+    if (isFromToolbar) {
         TooltipBox(
             modifier = toolTipModifier,
             positionProvider = tooltipPosition,
@@ -67,7 +69,11 @@ fun NavigateToTransferFileWidget(
         ) {
             IconButton(
                 onClick = {
-                    navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToHome)
+                    navigationEventsViewModel.sendEvent(
+                        DroneTMAppNavigationEvent.OnNavigateToDeviceConnection(
+                            route = Routes.DownloadAndTransfer
+                        )
+                    )
                 },
                 modifier = Modifier
                     .size(iconSize)
@@ -77,11 +83,11 @@ fun NavigateToTransferFileWidget(
                     painter = painterResource(id = R.drawable.ic_file_move_outline_24), // Your drawable
                     contentDescription = "Transfer file to device",
                     modifier = Modifier
-                        .fillMaxSize()
+                        .size(24.dp)
                 )
             }
         }
-    }else {
+    } else {
         Box(
             modifier = boxModifier,
             contentAlignment = Alignment.TopEnd
@@ -111,7 +117,11 @@ fun NavigateToTransferFileWidget(
             ) {
                 IconButton(
                     onClick = {
-                        navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToHome)
+                        navigationEventsViewModel.sendEvent(
+                            DroneTMAppNavigationEvent.OnNavigateToDeviceConnection(
+                                route = Routes.DownloadAndTransfer
+                            )
+                        )
                     },
                     modifier = Modifier
                         .align(Alignment.TopEnd)
@@ -122,7 +132,7 @@ fun NavigateToTransferFileWidget(
                         painter = painterResource(id = R.drawable.ic_file_move_outline_24), // Your drawable
                         contentDescription = "Transfer file to device",
                         modifier = Modifier
-                            .fillMaxSize()
+                            .size(24.dp)
                     )
                 }
             }
