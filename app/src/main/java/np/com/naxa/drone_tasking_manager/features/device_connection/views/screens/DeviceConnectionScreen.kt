@@ -36,7 +36,9 @@ import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.events.DroneTMAppEvent
 import np.com.naxa.drone_tasking_manager.features.device_connection.viewmodels.states.UsbDeviceState
 import np.com.naxa.drone_tasking_manager.features.device_connection.views.widgets.WaitingToConnectAnimation
+import np.com.naxa.drone_tasking_manager.features.file_transfer.viewmodels.states.FileTransferState
 import np.com.naxa.drone_tasking_manager.local_providers.LocalEventsViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalFileTransferViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalUsbDeviceViewModel
 import np.com.naxa.drone_tasking_manager.navigation.routes.Routes
@@ -67,6 +69,7 @@ fun DeviceConnectionScreen(
     val eventsViewModel = LocalEventsViewModel.current
     val navigationEventsViewModel = LocalNavigationEventsViewModel.current
     val usbDeviceViewModel = LocalUsbDeviceViewModel.current
+    val fileTransferViewModel = LocalFileTransferViewModel.current
 
     val deviceState by usbDeviceViewModel.deviceState.collectAsState()
 
@@ -146,6 +149,7 @@ fun DeviceConnectionScreen(
                                     return@launch
                                 }
 
+                                fileTransferViewModel.updateTransferState(FileTransferState.Idle)
                                 navigationEventsViewModel.sendEvent(
                                     DroneTMAppNavigationEvent.OnNavigateToFileTransfer(
                                         deviceId = device.deviceId.toString()
