@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.core.utils.Response
+import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectsResponse
 import np.com.naxa.drone_tasking_manager.features.projects.usecases.FetchProjectsCentroidUseCase
 import np.com.naxa.drone_tasking_manager.features.projects.usecases.FetchProjectsUseCase
 import np.com.naxa.drone_tasking_manager.features.projects.viewmodels.events.ProjectsEvent
@@ -24,7 +25,7 @@ class ProjectsViewModel @Inject constructor(
     /**
      * Represents the different states of fetching projects.
      */
-    private val _projectsState = MutableStateFlow<ProjectsListState>(ProjectsListState.Idle)
+    private val _projectsState = MutableStateFlow(ProjectsListState())
     val projectsState = _projectsState.asStateFlow()
 
     /**
@@ -33,6 +34,13 @@ class ProjectsViewModel @Inject constructor(
     private val _projectsCentroidState =
         MutableStateFlow<ProjectsCentroidState>(ProjectsCentroidState.Idle)
     val projectsCentroidState = _projectsCentroidState.asStateFlow()
+
+    /**
+     * The response object containing the list of projects and paginated data.
+     *
+     * @see ProjectsResponse
+     */
+    private var _projectsResponse: ProjectsResponse? = null
 
 
     /**
@@ -49,10 +57,10 @@ class ProjectsViewModel @Inject constructor(
         when (event) {
             is ProjectsEvent.FetchProjects -> {
                 fetchProjects(
-                    page = event.page,
                     size = event.size,
                     query = event.query,
-                    onlyMine = event.onlyMine
+                    onlyMine = event.onlyMine,
+                    refresh = event.refresh
                 )
             }
 
@@ -76,11 +84,17 @@ class ProjectsViewModel @Inject constructor(
      * @param onlyMine A boolean flag indicating whether to fetch only the current user's projects. Defaults to false.
      */
     private fun fetchProjects(
-        page: Int = 1,
         size: Int = 20,
         query: String?,
-        onlyMine: Boolean = false
+        onlyMine: Boolean = false,
+        refresh: Boolean = false
     ) {
+
+        if (refresh) _projectsResponse = null
+        if (_projectsResponse != null && _projectsResponse?.hasNext == false) return
+
+        val page = (_projectsResponse?.page ?: 0) + 1
+
         viewModelScope.launch(Dispatchers.IO) {
             fetchProjectsUseCase.invoke(
                 page = page,
@@ -90,17 +104,38 @@ class ProjectsViewModel @Inject constructor(
             ).collect { result ->
                 when (result) {
                     is Response.Loading -> {
-                        _projectsState.emit(ProjectsListState.Loading)
+                        _projectsState.emit(
+                            ProjectsListState(
+                                refresh = refresh,
+                                fetching = true,
+                                projects = if (page == 1) emptyList() else projectsState.value.projects,
+                                error = null
+                            )
+                        )
                     }
 
                     is Response.Error -> {
-                        _projectsState.emit(ProjectsListState.Error(result.message))
+                        _projectsState.emit(
+                            ProjectsListState(
+                                fetching = false,
+                                projects = if (page == 1) emptyList() else projectsState.value.projects,
+                                error = if (page == 1) result.message else null
+                            )
+                        )
                     }
 
                     is Response.Success -> {
+                        _projectsResponse = result.data
+
                         _projectsState.emit(
-                            ProjectsListState.Success(
-                                result.data?.projects ?: emptyList(),
+                            ProjectsListState(
+                                fetching = false,
+                                projects = if (page == 1) result.data?.projects
+                                    ?: emptyList() else listOf(
+                                    *(projectsState.value.projects.toTypedArray()),
+                                    *(result.data?.projects?.toTypedArray() ?: emptyArray())
+                                ),
+                                error = null
                             )
                         )
                     }
