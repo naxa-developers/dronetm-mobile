@@ -99,5 +99,5 @@ sealed class DroneTMAppNavigationEvent {
      *
      * @see DroneTMAppNavigationEvent
      */
-    data class OnNavigateToFileTransfer(val filePath: String) : DroneTMAppNavigationEvent()
+    data class OnNavigateToFileTransfer(val filePath: String? = null) : DroneTMAppNavigationEvent()
 }

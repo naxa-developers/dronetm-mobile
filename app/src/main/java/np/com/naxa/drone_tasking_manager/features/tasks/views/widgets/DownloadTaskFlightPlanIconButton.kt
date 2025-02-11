@@ -155,7 +155,7 @@ fun DownloadTaskFlightPlanIconButton(
                                 if (file == null) return@OnSnackBarShow
                                 navigationEventsViewModel.sendEvent(
                                     DroneTMAppNavigationEvent.OnNavigateToFileTransfer(
-                                        file!!.path
+                                        file?.path
                                     )
                                 )
                             }
@@ -199,7 +199,7 @@ fun DownloadTaskFlightPlanIconButton(
 
             navigationEventsViewModel.sendEvent(
                 DroneTMAppNavigationEvent.OnNavigateToFileTransfer(
-                    file!!.path
+                    file?.path
                 )
             )
         }

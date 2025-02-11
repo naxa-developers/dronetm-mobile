@@ -240,7 +240,7 @@ fun DroneTMApp(
                     navController.navigate(
                         Routes.FileTransfer.path.replace(
                             "{filePath}",
-                            Uri.encode(event.filePath)
+                            Uri.encode(event.filePath ?: tasksViewModel.taskPlanFile?.path)
                         )
                     )
                 }
