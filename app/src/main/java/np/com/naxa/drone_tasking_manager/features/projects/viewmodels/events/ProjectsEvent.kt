@@ -9,12 +9,12 @@ sealed class ProjectsEvent {
      * This data class encapsulates the parameters required to request a paginated list of projects,
      * optionally filtered by a search query and whether to include only the user's own projects.
      *
-     * @property page The page number of the project list to fetch. Defaults to 1 (the first page).
      * @property size The number of projects to include per page. Defaults to 20.
      * @property query An optional search query string. If provided, the server will filter the projects
      *                 based on this query. Can be `null` if no filtering is required.
      * @property onlyMine A boolean indicating whether to only fetch projects belonging to the current user.
      *                    Defaults to `false`.
+     * @property refresh Whether to force a refresh of the project list.
      *
      * This class is a subclass of [ProjectsEvent], suggesting that it's used within an event-driven
      * architecture for managing project-related actions.
@@ -38,10 +38,10 @@ sealed class ProjectsEvent {
      * ```
      */
     data class FetchProjects(
-        val page: Int = 1,
         val size: Int = 20,
         val query: String? = null,
-        val onlyMine: Boolean = false
+        val onlyMine: Boolean = false,
+        val refresh: Boolean = false
     ) : ProjectsEvent()
 
     /**
