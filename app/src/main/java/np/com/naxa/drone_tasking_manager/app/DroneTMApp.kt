@@ -161,9 +161,9 @@ fun DroneTMApp(
 
                 DroneTMAppNavigationEvent.OnNavigateToHome -> {
                     navController.navigate(Routes.Home.path) {
-                        popUpTo(Routes.Splash.path) {
-                            inclusive = true
-                        }
+//                        popUpTo(Routes.Splash.path) {
+//                            inclusive = true
+//                        }
                         launchSingleTop = true
                     }
                 }
