@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -40,6 +41,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -79,6 +81,7 @@ import np.com.naxa.drone_tasking_manager.navigation.viewmodels.NavigationEventsV
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 import np.com.naxa.drone_tasking_manager.states.DownloadAndTransferState
 import np.com.naxa.drone_tasking_manager.utils.route
+import np.com.naxa.drone_tasking_manager.utils.widgets.NavigateToTransferFileWidget
 import np.com.naxa.drone_tasking_manager.viewmodel.DownloadAndTransferFileViewModel
 import np.com.naxa.drone_tasking_manager.viewmodel.EventsViewModel
 import np.com.naxa.drone_tasking_manager.viewmodel.UsbDeviceViewModel
@@ -342,12 +345,22 @@ fun DroneTMApp(
 
                             actions = {
                                 if (currentRoute == Routes.ProjectsList) {
+
+                                    NavigateToTransferFileWidget(
+                                        boxModifier =  Modifier
+                                            .padding(end = 8.dp),
+                                        toolTipModifier = Modifier,
+                                        isFromToolbar = true,
+                                        iconSize = 48.dp
+                                    )
+
                                     IconButton(onClick = {
                                         menuExpanded = !menuExpanded
                                     }) {
                                         Surface(
                                             shape = CircleShape,
                                             modifier = Modifier
+                                                .padding(end = 16.dp)
                                                 .size(24.dp)
                                                 .padding(bottom = 0.dp),
                                             color = Color.Red
