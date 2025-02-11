@@ -30,6 +30,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -286,7 +287,7 @@ fun DroneTMApp(
                         && currentRoute != Routes.ProjectDetails
                         && currentRoute != Routes.TaskDetails
                     ) {
-                        CenterAlignedTopAppBar(
+                        TopAppBar(
                             title = {
                                 Text(topBarTitle)
                             },
