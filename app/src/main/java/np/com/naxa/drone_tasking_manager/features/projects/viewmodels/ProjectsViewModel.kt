@@ -78,7 +78,7 @@ class ProjectsViewModel @Inject constructor(
      * It handles different response states (Loading, Error, Success) and updates the `_projectsState`
      * accordingly. The function operates in the IO dispatcher to perform the network/database operation.
      *
-     * @param page The page number of the project list to fetch. Defaults to 1.
+     * @param refresh A boolean flag indicating whether to refresh the project list. Defaults to false.
      * @param size The number of projects to fetch per page. Defaults to 20.
      * @param query An optional search query to filter projects by. If null, no filtering is applied.
      * @param onlyMine A boolean flag indicating whether to fetch only the current user's projects. Defaults to false.
