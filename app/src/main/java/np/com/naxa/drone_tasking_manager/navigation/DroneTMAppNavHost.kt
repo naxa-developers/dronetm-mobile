@@ -24,7 +24,7 @@ import np.com.naxa.drone_tasking_manager.features.projects.views.screens.Project
 import np.com.naxa.drone_tasking_manager.features.projects.views.screens.ProjectsMapScreen
 import np.com.naxa.drone_tasking_manager.features.tasks.views.screens.TaskDetailsScreen
 import np.com.naxa.drone_tasking_manager.features.download_and_transfer.views.screens.DownloadAndTransferFileScreen
-import np.com.naxa.drone_tasking_manager.ui.screens.splash.SplashScreen
+import np.com.naxa.drone_tasking_manager.features.splash.views.screens.SplashScreen
 
 /**
  * Composable function that sets up the navigation host for the DJI MTP Controller.
