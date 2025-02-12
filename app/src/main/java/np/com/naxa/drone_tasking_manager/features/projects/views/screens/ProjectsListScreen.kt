@@ -16,14 +16,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.features.projects.viewmodels.events.ProjectsEvent
-import np.com.naxa.drone_tasking_manager.features.projects.views.widgets.ProjectItem
+import np.com.naxa.drone_tasking_manager.features.projects.views.widgets.*
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalProjectsViewModel
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
@@ -38,9 +41,15 @@ fun ProjectsListScreen(modifier: Modifier = Modifier) {
     val state by viewModel.projectsState.collectAsState()
     val listState = rememberLazyListState()
 
+    var selectedFilter by remember { mutableStateOf(ProjectFilterItem.All) }
+
     LaunchedEffect(Unit) {
         if (state.error != null || state.projects.isEmpty()) {
-            viewModel.triggerEvent(ProjectsEvent.FetchProjects())
+            viewModel.triggerEvent(
+                ProjectsEvent.FetchProjects(
+                    onlyMine = selectedFilter == ProjectFilterItem.OnlyMine
+                )
+            )
         }
     }
 
@@ -48,8 +57,12 @@ fun ProjectsListScreen(modifier: Modifier = Modifier) {
     LaunchedEffect(listState) {
         snapshotFlow { listState.layoutInfo.visibleItemsInfo }
             .collect { visibleItems ->
-                if (visibleItems.isNotEmpty() && visibleItems.last().index >= state.projects.size - 1) {
-                    viewModel.triggerEvent(ProjectsEvent.FetchProjects())
+                if (visibleItems.isNotEmpty() && visibleItems.last().index >= state.projects.size - 1 && !state.fetching) {
+                    viewModel.triggerEvent(
+                        ProjectsEvent.FetchProjects(
+                            onlyMine = selectedFilter == ProjectFilterItem.OnlyMine
+                        )
+                    )
                 }
             }
     }
@@ -59,7 +72,12 @@ fun ProjectsListScreen(modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxSize(),
         isRefreshing = state.refresh,
         onRefresh = {
-            viewModel.triggerEvent(ProjectsEvent.FetchProjects(refresh = true))
+            viewModel.triggerEvent(
+                ProjectsEvent.FetchProjects(
+                    onlyMine = selectedFilter == ProjectFilterItem.OnlyMine,
+                    refresh = true
+                )
+            )
         },
         contentAlignment = Alignment.Center,
     ) {
@@ -113,5 +131,22 @@ fun ProjectsListScreen(modifier: Modifier = Modifier) {
                 }
             }
         }
+
+        FilterFloatingActionButtonAndSheet(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp),
+            visible = state.projects.isNotEmpty(),
+            selected = selectedFilter,
+            onSelected = {
+                selectedFilter = it
+                viewModel.triggerEvent(
+                    ProjectsEvent.FetchProjects(
+                        onlyMine = it == ProjectFilterItem.OnlyMine,
+                        refresh = true
+                    )
+                )
+            }
+        )
     }
 }
