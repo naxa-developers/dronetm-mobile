@@ -9,6 +9,8 @@ import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskEventRequestBody
 import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskDto
 import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskEventResponseDto
 import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.dto.RefreshTokenDto
+import np.com.naxa.drone_tasking_manager.features.user.dashboard.dto.UsersTaskDto
+import np.com.naxa.drone_tasking_manager.features.user.dashboard.dto.UsersTaskStatDto
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileDto
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileUpdateDto
 import okhttp3.MultipartBody
@@ -208,5 +210,17 @@ interface ApiService {
     suspend fun refreshToken(
         @Query("force_refresh") forceRefresh: Boolean = true
     ): RefreshTokenDto
+
+
+    @GET("/api/tasks/")
+    suspend fun getUsersTask(
+        @Query("force_refresh") forceRefresh: Boolean = true
+    ): UsersTaskDto
+
+    @GET("api/tasks/statistics/")
+    suspend fun getUsersTaskStat(
+        @Query("force_refresh") forceRefresh: Boolean = true
+    ): UsersTaskStatDto
+
 
 }
