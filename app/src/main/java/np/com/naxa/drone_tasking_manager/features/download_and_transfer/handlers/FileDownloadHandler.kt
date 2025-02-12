@@ -1,4 +1,4 @@
-package np.com.naxa.drone_tasking_manager.utils
+package np.com.naxa.drone_tasking_manager.features.download_and_transfer.handlers
 
 import android.app.DownloadManager
 import android.content.Context
@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import np.com.naxa.drone_tasking_manager.utils.randomWord
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -87,7 +88,7 @@ sealed class DownloadError : Exception() {
      *
      * @property message A detailed message about the error.
      */
-    data class UnknownError(override val message: String) : TransferError()
+    data class UnknownError(override val message: String) : DownloadError()
 }
 
 class FileDownloadHandler(private val context: Context) {
@@ -271,10 +272,9 @@ class FileDownloadHandler(private val context: Context) {
         val uri = Uri.parse(url)
         val filename = filenameIfUrlNotContainsIt(url)
         val request = DownloadManager.Request(uri)
-        request.setDestinationInExternalFilesDir(
-            context,
+        request.setDestinationInExternalPublicDir(
             Environment.DIRECTORY_DOWNLOADS,
-            filename
+            "DroneTM/${filename.split(".").first()}/$filename"
         )
 
         CoroutineScope(Dispatchers.IO).launch {

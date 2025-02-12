@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.documentfile.provider.DocumentFile
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.core.widgets.SafDirectoryAccessRequestDialog
+import np.com.naxa.drone_tasking_manager.features.file_transfer.handler.FileTransferHandler
 import np.com.naxa.drone_tasking_manager.features.file_transfer.viewmodels.events.FileTransferEvents
 import np.com.naxa.drone_tasking_manager.features.file_transfer.viewmodels.states.FileTransferState
 import np.com.naxa.drone_tasking_manager.features.file_transfer.views.widgets.FileTransferCompleteStateView
@@ -30,7 +31,6 @@ import np.com.naxa.drone_tasking_manager.features.file_transfer.views.widgets.Fi
 import np.com.naxa.drone_tasking_manager.features.file_transfer.views.widgets.SafDirectorySelectedStateView
 import np.com.naxa.drone_tasking_manager.local_providers.LocalFileTransferViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalUsbDeviceViewModel
-import np.com.naxa.drone_tasking_manager.utils.FileTransferHandler
 import java.io.File
 
 @Composable
