@@ -41,7 +41,7 @@ fun ProjectsListScreen(modifier: Modifier = Modifier) {
     val state by viewModel.projectsState.collectAsState()
     val listState = rememberLazyListState()
 
-    var selectedFilter by remember { mutableStateOf(ProjectFilterItem.All) }
+    var selectedFilter by remember { mutableStateOf(if (state.onlyMine) ProjectFilterItem.OnlyMine else ProjectFilterItem.All) }
 
     LaunchedEffect(Unit) {
         if (state.error != null || state.projects.isEmpty()) {
