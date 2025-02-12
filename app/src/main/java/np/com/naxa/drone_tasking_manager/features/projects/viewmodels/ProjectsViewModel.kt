@@ -119,7 +119,8 @@ class ProjectsViewModel @Inject constructor(
                             ProjectsListState(
                                 fetching = false,
                                 projects = if (page == 1) emptyList() else projectsState.value.projects,
-                                error = if (page == 1) result.message else null
+                                error = if (page == 1) result.message else null,
+                                onlyMine = onlyMine
                             )
                         )
                     }
@@ -135,7 +136,8 @@ class ProjectsViewModel @Inject constructor(
                                     *(projectsState.value.projects.toTypedArray()),
                                     *(result.data?.projects?.toTypedArray() ?: emptyArray())
                                 ),
-                                error = null
+                                error = null,
+                                onlyMine = onlyMine
                             )
                         )
                     }
