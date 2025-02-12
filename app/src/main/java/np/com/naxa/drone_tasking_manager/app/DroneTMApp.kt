@@ -5,6 +5,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -55,6 +60,9 @@ import np.com.naxa.drone_tasking_manager.core.services.storage.MMKVStorageServic
 import np.com.naxa.drone_tasking_manager.core.theme.DroneTMAppTheme
 import np.com.naxa.drone_tasking_manager.core.utils.clearAllViewModels
 import np.com.naxa.drone_tasking_manager.core.widgets.SimpleAlertDialog
+import np.com.naxa.drone_tasking_manager.features.device_connection.viewmodels.UsbDeviceViewModel
+import np.com.naxa.drone_tasking_manager.features.download_and_transfer.viewmodels.DownloadAndTransferFileViewModel
+import np.com.naxa.drone_tasking_manager.features.download_and_transfer.viewmodels.states.DownloadAndTransferState
 import np.com.naxa.drone_tasking_manager.features.file_transfer.viewmodels.FileTransferViewModel
 import np.com.naxa.drone_tasking_manager.features.login.viewmodels.LoginViewModel
 import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.ProjectDetailViewModel
@@ -77,12 +85,9 @@ import np.com.naxa.drone_tasking_manager.navigation.DroneTMAppNavHost
 import np.com.naxa.drone_tasking_manager.navigation.routes.Routes
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.NavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
-import np.com.naxa.drone_tasking_manager.features.download_and_transfer.viewmodels.states.DownloadAndTransferState
 import np.com.naxa.drone_tasking_manager.utils.route
 import np.com.naxa.drone_tasking_manager.utils.widgets.NavigateToTransferFileWidget
-import np.com.naxa.drone_tasking_manager.features.download_and_transfer.viewmodels.DownloadAndTransferFileViewModel
 import np.com.naxa.drone_tasking_manager.viewmodel.EventsViewModel
-import np.com.naxa.drone_tasking_manager.features.device_connection.viewmodels.UsbDeviceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -281,12 +286,19 @@ fun DroneTMApp(
                     }
                 },
                 topBar = {
-                    if (currentRoute != Routes.Splash
-                        && currentRoute != Routes.Login
-                        && currentRoute != Routes.ProjectsMap
-                        && currentRoute != Routes.ProjectDetails
-                        && currentRoute != Routes.TaskDetails
-                        && currentRoute != Routes.DeviceConnection
+                    AnimatedVisibility(
+                        visible = currentRoute != Routes.Splash
+                                && currentRoute != Routes.Login
+                                && currentRoute != Routes.ProjectsMap
+                                && currentRoute != Routes.ProjectDetails
+                                && currentRoute != Routes.TaskDetails
+                                && currentRoute != Routes.DeviceConnection,
+                        enter = fadeIn() + slideInVertically(
+                            initialOffsetY = { (-it * 1.25).toInt() }
+                        ),
+                        exit = fadeOut() + slideOutVertically(
+                            targetOffsetY = { (-it * 1.25).toInt() }
+                        )
                     ) {
                         TopAppBar(
                             title = {
@@ -398,9 +410,19 @@ fun DroneTMApp(
                             },
                         )
                     }
+
+
                 },
                 bottomBar = {
-                    if (currentRoute == Routes.Projects || currentRoute == Routes.ProjectsList || currentRoute == Routes.ProjectsMap) {
+                    AnimatedVisibility(
+                        visible = currentRoute == Routes.Projects || currentRoute == Routes.ProjectsList || currentRoute == Routes.ProjectsMap,
+                        enter = fadeIn() + slideInVertically(
+                            initialOffsetY = { (it * 1.25).toInt() }
+                        ),
+                        exit = fadeOut() + slideOutVertically(
+                            targetOffsetY = { (it * 1.25).toInt() }
+                        )
+                    ) {
                         NavigationBar {
                             listOf(Routes.ProjectsList, Routes.ProjectsMap).forEach { route ->
                                 NavigationBarItem(
@@ -428,8 +450,7 @@ fun DroneTMApp(
                         }
                     }
                 },
-
-                ) { innerPadding ->
+            ) { innerPadding ->
                 DroneTMAppNavHost(
                     modifier = Modifier.padding(
                         if (currentRoute != Routes.Splash &&
