@@ -459,21 +459,21 @@ fun Point.rotate(centroid: Point, angleDegree: Double): Point {
  */
 fun String.getFileNameFromUrl(): String? {
     return this.let {
-        if(it.isNotEmpty()) {
+        if (it.isNotEmpty()) {
             // Parse the URL string into a Uri object
             val uri = Uri.parse(it)
             // Extract the path from the Uri
             val path = uri.path
             // Extract the substring after the last '/' character, which represents the file name
             path?.substringAfterLast('/')
-        }else{
+        } else {
             ""
         }
     }
 }
 
 
-/*
+/**
  * Extracts the file name from the "Content-Disposition" header of an HTTP response.
  *
  * This function is an extension on [Response] of [ResponseBody] and attempts to retrieve the file name
@@ -491,7 +491,6 @@ fun String.getFileNameFromUrl(): String? {
  *  - `inline; filename=report.txt`
  *  - `attachment; filename='image.jpg'`
  *
- * @receiver The [Response] object containing the HTTP response.
  * @return The file name extracted from the "Content-Disposition" header, or `null` if the header is not present or if no filename is specified.
  */
 fun Response<ResponseBody>.fileName(): String? {
@@ -504,4 +503,21 @@ fun Response<ResponseBody>.fileName(): String? {
     } else {
         null
     }
+}
+
+
+/**
+ * Convert MediaStore URI to File
+ */
+fun Uri.getFileFromMediaStorage(context: Context): File? {
+    val inputStream = context.contentResolver.openInputStream(this) ?: return null
+    val fileName = getFileName(context, this)
+    val file = File(context.cacheDir, fileName)
+
+    inputStream.use { input ->
+        FileOutputStream(file).use { output ->
+            input.copyTo(output)
+        }
+    }
+    return file
 }

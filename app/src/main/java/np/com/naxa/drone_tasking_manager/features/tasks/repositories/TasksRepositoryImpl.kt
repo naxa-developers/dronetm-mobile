@@ -1,7 +1,10 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.repositories
 
+import android.content.ContentValues
 import android.content.Context
+import android.os.Build
 import android.os.Environment
+import android.provider.MediaStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -20,6 +23,7 @@ import np.com.naxa.drone_tasking_manager.features.tasks.models.TaskLockUnlockRes
 import np.com.naxa.drone_tasking_manager.features.tasks.models.TaskUnFlyableResponse
 import np.com.naxa.drone_tasking_manager.utils.DateUtils
 import np.com.naxa.drone_tasking_manager.utils.fileName
+import np.com.naxa.drone_tasking_manager.utils.getFileFromMediaStorage
 import org.maplibre.geojson.FeatureCollection
 import retrofit2.HttpException
 import java.io.File
@@ -312,40 +316,108 @@ class TasksRepositoryImpl @Inject constructor(
                         val totalBytes = body.contentLength()
                         val inputStream = body.byteStream()
                         val bufferSize = 8192
-                        val file = File(
-                            context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
-                            fileName
-                        )
-
                         var bytesWritten = 0L
 
-                        // Write the downloaded content to the temporary file
-                        FileOutputStream(file).use { output ->
-                            inputStream.use { input ->
-                                val buffer = ByteArray(bufferSize)
-                                var bytes = input.read(buffer)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            val resolver = context.contentResolver
+                            val contentValues = ContentValues().apply {
+                                put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+                                put(
+                                    MediaStore.Downloads.MIME_TYPE,
+                                    "application/vnd.google-earth.kmz"
+                                ) // MIME type for .kmz
+                                put(
+                                    MediaStore.Downloads.RELATIVE_PATH,
+                                    "Download/DroneTM/$taskId"
+                                )
+                            }
 
-                                // Read and write the content in chunks
-                                while (bytes >= 0) {
-                                    output.write(buffer, 0, bytes)
-                                    bytesWritten += bytes
-                                    bytes = input.read(buffer)
+                            val uri = resolver.insert(
+                                MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                                contentValues
+                            )
 
-                                    // Emit progress of the download
-                                    val progress = if (totalBytes > 0) {
-                                        bytesWritten.toFloat() / totalBytes.toFloat()
-                                    } else {
-                                        -1f
+                            uri?.let {
+                                resolver.openOutputStream(it)?.use { output ->
+                                    inputStream.use { input ->
+                                        val buffer = ByteArray(bufferSize)
+                                        var bytes = input.read(buffer)
+
+                                        // Read and write the content in chunks
+                                        while (bytes >= 0) {
+                                            output.write(buffer, 0, bytes)
+                                            bytesWritten += bytes
+                                            bytes = input.read(buffer)
+
+                                            // Emit progress of the download
+                                            val progress = if (totalBytes > 0) {
+                                                bytesWritten.toFloat() / totalBytes.toFloat()
+                                            } else {
+                                                -1f
+                                            }
+                                            emit(DownloadResponse.Downloading(progress))
+                                        }
                                     }
-                                    emit(DownloadResponse.Downloading(progress))
+                                } ?: return@flow emit(
+                                    DownloadResponse.Error(
+                                        ErrorResponse.parseErrorBody(
+                                            "Download failed"
+                                        ).getErrorMessage()
+                                    )
+                                )
+                            } ?: return@flow emit(
+                                DownloadResponse.Error(
+                                    ErrorResponse.parseErrorBody(
+                                        "Download failed"
+                                    ).getErrorMessage()
+                                )
+                            )
+
+                            uri.getFileFromMediaStorage(context)?.let {
+                                return@flow emit(
+                                    DownloadResponse.Completed(it)
+                                )
+                            } ?: return@flow emit(
+                                DownloadResponse.Error(
+                                    ErrorResponse.parseErrorBody(
+                                        "Download failed"
+                                    ).getErrorMessage()
+                                )
+                            )
+                        } else {
+                            val downloadsDir =
+                                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                            val droneTmDirectory = File(downloadsDir, "DroneTM")
+                            if (!droneTmDirectory.exists()) droneTmDirectory.mkdir()
+                            val file = File(droneTmDirectory, fileName)
+
+                            // Write the downloaded content to the temporary file
+                            FileOutputStream(file).use { output ->
+                                inputStream.use { input ->
+                                    val buffer = ByteArray(bufferSize)
+                                    var bytes = input.read(buffer)
+
+                                    // Read and write the content in chunks
+                                    while (bytes >= 0) {
+                                        output.write(buffer, 0, bytes)
+                                        bytesWritten += bytes
+                                        bytes = input.read(buffer)
+
+                                        // Emit progress of the download
+                                        val progress = if (totalBytes > 0) {
+                                            bytesWritten.toFloat() / totalBytes.toFloat()
+                                        } else {
+                                            -1f
+                                        }
+                                        emit(DownloadResponse.Downloading(progress))
+                                    }
                                 }
                             }
+
+                            return@flow emit(
+                                DownloadResponse.Completed(file)
+                            )
                         }
-
-
-                        return@flow emit(
-                            DownloadResponse.Completed(file)
-                        )
                     } ?: return@flow emit(
                         DownloadResponse.Error(
                             ErrorResponse.parseErrorBody(
@@ -373,7 +445,7 @@ class TasksRepositoryImpl @Inject constructor(
             } catch (e: Exception) {
                 return@flow emit(
                     DownloadResponse.Error(
-                        e.cause?.message ?: "Error updating takeoff point of task: $taskId"
+                        e.message ?: "Error downloading flight plan"
                     )
                 )
             }

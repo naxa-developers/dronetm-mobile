@@ -12,9 +12,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.features.download_and_transfer.viewmodels.states.DownloadAndTransferState
-import np.com.naxa.drone_tasking_manager.utils.FileDownloadHandler
-import np.com.naxa.drone_tasking_manager.utils.FileTransferHandler
-import np.com.naxa.drone_tasking_manager.utils.TransferResult
+import np.com.naxa.drone_tasking_manager.features.download_and_transfer.handlers.FileDownloadHandler
+import np.com.naxa.drone_tasking_manager.features.file_transfer.handler.FileTransferHandler
+import np.com.naxa.drone_tasking_manager.features.file_transfer.handler.TransferResult
 import java.io.File
 
 class DownloadAndTransferFileViewModel(

@@ -31,12 +31,12 @@ import np.com.naxa.drone_tasking_manager.features.download_and_transfer.views.wi
 import np.com.naxa.drone_tasking_manager.features.download_and_transfer.views.widgets.DownloadAndTransferTransferErrorStateView
 import np.com.naxa.drone_tasking_manager.features.download_and_transfer.views.widgets.DownloadAndTransferTransferredStateView
 import np.com.naxa.drone_tasking_manager.features.download_and_transfer.views.widgets.DownloadAndTransferTransferringStateView
+import np.com.naxa.drone_tasking_manager.features.file_transfer.handler.FileTransferHandler
 import np.com.naxa.drone_tasking_manager.local_providers.LocalDownloadAndTransferFileViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalUsbDeviceViewModel
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
-import np.com.naxa.drone_tasking_manager.utils.FileTransferHandler
 import java.io.File
 
 @Composable
