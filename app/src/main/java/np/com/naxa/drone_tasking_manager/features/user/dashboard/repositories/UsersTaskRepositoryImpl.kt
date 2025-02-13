@@ -17,7 +17,7 @@ import javax.inject.Inject
 class UsersTaskRepositoryImpl @Inject constructor(private val apiService: ApiService) :
     UsersTaskRepository {
 
-    override suspend fun getUsersTask(forceRefresh: Boolean): Flow<Response<UsersTask>> {
+    override suspend fun fetchUsersTask(forceRefresh: Boolean): Flow<Response<UsersTask>> {
         return flow {
             emit(Response.Loading())
 
@@ -45,7 +45,7 @@ class UsersTaskRepositoryImpl @Inject constructor(private val apiService: ApiSer
         }
     }
 
-    override suspend fun getUsersTaskStat(forceRefresh: Boolean): Flow<Response<UsersTaskStat>> {
+    override suspend fun fetchUsersTaskStat(forceRefresh: Boolean): Flow<Response<UsersTaskStat>> {
         return flow {
             emit(Response.Loading())
 

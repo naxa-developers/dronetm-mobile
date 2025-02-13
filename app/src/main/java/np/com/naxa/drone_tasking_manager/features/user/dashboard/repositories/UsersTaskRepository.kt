@@ -7,7 +7,7 @@ import np.com.naxa.drone_tasking_manager.features.user.dashboard.models.UsersTas
 
 interface UsersTaskRepository {
 
-    suspend fun getUsersTask(forceRefresh: Boolean = true): Flow<Response<UsersTask>>
+    suspend fun fetchUsersTask(forceRefresh: Boolean = true): Flow<Response<UsersTask>>
 
-    suspend fun getUsersTaskStat(forceRefresh: Boolean = true): Flow<Response<UsersTaskStat>>
+    suspend fun fetchUsersTaskStat(forceRefresh: Boolean = true): Flow<Response<UsersTaskStat>>
 }
