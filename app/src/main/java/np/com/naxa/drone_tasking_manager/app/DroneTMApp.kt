@@ -71,6 +71,7 @@ import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.TasksViewMode
 import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.viewmodels.RefreshTokenViewModel
 import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.viewmodels.UsersTaskViewModel
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.UserProfileViewModel
+import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.viewmodels.events.UsersTaskEvents
 import np.com.naxa.drone_tasking_manager.local_providers.LocalDownloadAndTransferFileViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalFileTransferViewModel
@@ -403,7 +404,7 @@ fun DroneTMApp(
                                     DropdownMenuItem(
                                         text = { Text("My Tasks Dashboard") },
                                         onClick = {
-                                            onMyTaskDashboardClick(navigationEventsViewModel)
+                                            onMyTaskDashboardClick(navigationEventsViewModel, usersTaskViewModel)
                                             menuExpanded = false
                                         }
                                     )
@@ -528,7 +529,13 @@ fun onProfileClick(navigationEventsViewModel: NavigationEventsViewModel) {
         DroneTMAppNavigationEvent.OnNavigateToProfileScreen
     )
 }
-fun onMyTaskDashboardClick(navigationEventsViewModel: NavigationEventsViewModel) {
+fun onMyTaskDashboardClick(
+    navigationEventsViewModel: NavigationEventsViewModel,
+    usersTaskViewModel: UsersTaskViewModel
+) {
+    usersTaskViewModel.onEvent(UsersTaskEvents.fetchUsersTaskStat(forceRefresh = true))
+    usersTaskViewModel.onEvent(UsersTaskEvents.fetchUsersTask(forceRefresh = true))
+
     navigationEventsViewModel.sendEvent(
         DroneTMAppNavigationEvent.OnNavigateToUsersTaskDashboard
     )

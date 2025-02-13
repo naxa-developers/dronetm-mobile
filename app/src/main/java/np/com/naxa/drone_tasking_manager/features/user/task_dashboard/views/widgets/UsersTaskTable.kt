@@ -11,10 +11,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import np.com.naxa.drone_tasking_manager.core.widgets.ShimmerItemPlaceHolder
 import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.models.UsersTask
+import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.models.UsersTaskItem
 
 @Composable
-fun TasksTable(tasks: UsersTask) {
+fun TasksTable(tasks: List<UsersTaskItem>, isLoading: Boolean = false) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shadowElevation = 1.dp
@@ -27,24 +29,47 @@ fun TasksTable(tasks: UsersTask) {
                     .background(Color(0xFFDC2626))
                     .padding(16.dp)
             ) {
-                TableHeaderCell("ID", Modifier.padding(4.dp)
-                    .weight(0.1f))
-                TableHeaderCell("Project Name", Modifier.padding(4.dp)
-                    .weight(0.2f))
-                TableHeaderCell("Total task area in km²", Modifier.padding(4.dp)
-                    .weight(0.3f))
-                TableHeaderCell("Created Date", Modifier.padding(4.dp)
-                    .weight(0.2f))
-                TableHeaderCell("Status", Modifier.padding(4.dp)
-                    .weight(0.2f))
+                TableHeaderCell(
+                    "ID", Modifier
+                        .padding(4.dp)
+                        .weight(0.1f)
+                )
+                TableHeaderCell(
+                    "Project Name", Modifier
+                        .padding(4.dp)
+                        .weight(0.2f)
+                )
+                TableHeaderCell(
+                    "Total task area in km²", Modifier
+                        .padding(4.dp)
+                        .weight(0.3f)
+                )
+                TableHeaderCell(
+                    "Created Date", Modifier
+                        .padding(4.dp)
+                        .weight(0.2f)
+                )
+                TableHeaderCell(
+                    "Status", Modifier
+                        .padding(4.dp)
+                        .weight(0.2f)
+                )
             }
 
             // Table Content
             LazyColumn {
-                items(tasks.size) { index ->
-                    TaskRow(tasks.get(index), index, onTap = {
 
-                    })
+
+                if (isLoading) {
+                    items(10) {
+                        ShimmerItemPlaceHolder()
+                    }
+                } else {
+                    items(tasks.size) { index ->
+                        TaskRow(tasks.get(index), index, onTap = {
+
+                        })
+                    }
                 }
             }
         }
