@@ -3,6 +3,7 @@ package np.com.naxa.drone_tasking_manager.features.project_details.views.widgets
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -116,11 +117,16 @@ fun ProjectDetailContributionsTabBody(
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.bodySmall
                     )
-                    Text(
-                        "-",
+                    Box(
                         modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (task.state == ProjectTaskState.ImageProcessingFinished) {
+                            OrthoPhotoTogglerView {
+
+                            }
+                        }
+                    }
                 }
             }
     }

@@ -26,6 +26,7 @@ import np.com.naxa.drone_tasking_manager.core.widgets.MaplibreCompose
 import np.com.naxa.drone_tasking_manager.core.widgets.rememberCameraPosition
 import np.com.naxa.drone_tasking_manager.features.projects.models.Project
 import np.com.naxa.drone_tasking_manager.features.projects.models.toFeatureJsonStr
+import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTaskState
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
@@ -37,8 +38,10 @@ import org.maplibre.android.style.layers.LayoutPropertyValue
 import org.maplibre.android.style.layers.LineLayer
 import org.maplibre.android.style.layers.PaintPropertyValue
 import org.maplibre.android.style.layers.PropertyValue
+import org.maplibre.android.style.layers.RasterLayer
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonSource
+import org.maplibre.android.style.sources.RasterSource
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
 
@@ -329,6 +332,54 @@ private fun applyLockedIconLayer(context: Context, libreMap: MapLibreMap?, proje
 
                 withProperties(*propertyValues.toTypedArray())
             }
+        )
+    }
+}
+
+/**
+ * Applies an orthophoto layer to the given MapLibre map based on the provided project task.
+ *
+ * This function adds an orthophoto image as a raster layer to the map. It first checks if
+ * the task has completed image processing and if a valid MapLibre map instance is available.
+ * If an orthophoto layer or source with the predefined IDs already exists, it removes them
+ * before adding the new layer. The orthophoto is fetched from a predefined URL.
+ *
+ * @param libreMap The MapLibreMap instance to which the orthophoto layer should be added.
+ *                  Can be null, in which case the function will return without doing anything.
+ * @param task     The ProjectTask instance containing the task details. The task's state must be
+ *                  `ProjectTaskState.ImageProcessingFinished` for the layer to be applied.
+ *
+ */
+private fun applyOrthoPhotoLayer(libreMap: MapLibreMap?, task: ProjectTask) {
+
+    if (task.state != ProjectTaskState.ImageProcessingFinished) return
+    if (libreMap == null) return
+
+    val sourceId = "task-ortho-photo-source-id---"
+    val layerId = "task-ortho-photo-layer-id---"
+
+    if (libreMap.style?.getSource(sourceId) != null) {
+
+        if (libreMap.style?.getLayer(layerId) != null) {
+            libreMap.style?.removeLayer(layerId)
+        }
+
+        libreMap.style?.removeSource(sourceId)
+    }
+
+
+    libreMap.style?.addSource(
+        RasterSource(
+            sourceId,
+            "https://dev-dronetm.s3.ap-south-1.amazonaws.com/dtm-data/projects/${task.projectId}/${task.id}/orthophoto/odm_orthophoto.tif"
+        )
+    ).also {
+
+        libreMap.style?.addLayer(
+            RasterLayer(
+                layerId,
+                sourceId,
+            )
         )
     }
 }
