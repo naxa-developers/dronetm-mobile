@@ -9,6 +9,12 @@ import javax.inject.Inject
 @Module
 @InstallIn(SingletonComponent::class)
 class UsersTaskUseCase @Inject constructor(private val usersTaskRepository: UsersTaskRepository) {
+    /**
+     * Executes the use case to fetch user tasks.
+     *
+     * @param forceRefresh Whether to force refresh the data from the repository. Defaults to `true`.
+     * @return A list of user tasks.
+     */
     suspend operator fun invoke(forceRefresh: Boolean = true) =
         usersTaskRepository.fetchUsersTask(forceRefresh)
 }

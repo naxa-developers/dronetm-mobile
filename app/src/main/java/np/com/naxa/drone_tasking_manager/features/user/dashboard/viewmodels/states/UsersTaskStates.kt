@@ -3,8 +3,20 @@ package np.com.naxa.drone_tasking_manager.features.user.dashboard.viewmodels.sta
 import np.com.naxa.drone_tasking_manager.features.user.dashboard.models.UsersTask
 
 data class UsersTaskStates(
+    /**
+     * Flag indicating if users task data is currently being fetched.
+     */
     val isFetching: Boolean = false,
+    /**
+     * Flag indicating if users task data fetching was successful.
+     */
     val isSuccess: Boolean = false,
+    /**
+     * Error message if users task data fetching failed.
+     */
     val errorMessage: String = "",
-    val usersTask: UsersTask?= null
+    /**
+     * The fetched UsersTask data.
+     */
+    val usersTask: UsersTask? = null
 )
