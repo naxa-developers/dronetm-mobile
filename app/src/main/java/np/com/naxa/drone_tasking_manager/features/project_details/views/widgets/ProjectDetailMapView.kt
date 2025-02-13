@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,9 +22,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.google.gson.JsonObject
+import kotlinx.coroutines.flow.collectLatest
 import np.com.naxa.drone_tasking_manager.R
 import np.com.naxa.drone_tasking_manager.core.widgets.MaplibreCompose
 import np.com.naxa.drone_tasking_manager.core.widgets.rememberCameraPosition
+import np.com.naxa.drone_tasking_manager.features.project_details.views.screens.LocalOrthoPhotoLayerToggleEventDispatcher
+import np.com.naxa.drone_tasking_manager.features.project_details.views.screens.OrthoPhotoToggleEvent
 import np.com.naxa.drone_tasking_manager.features.projects.models.Project
 import np.com.naxa.drone_tasking_manager.features.projects.models.toFeatureJsonStr
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
@@ -85,6 +89,23 @@ fun ProjectDetailMapView(
 
         onDispose {
             libreMap?.removeOnMapClickListener(clickListener)
+        }
+    }
+
+    val orthoPhotoLayerToggleEventDispatcher = LocalOrthoPhotoLayerToggleEventDispatcher.current
+
+    LaunchedEffect(libreMap) {
+        orthoPhotoLayerToggleEventDispatcher.toggleEvent.collectLatest { state ->
+            when (state) {
+                OrthoPhotoToggleEvent.None -> {}
+                is OrthoPhotoToggleEvent.InVisible -> {
+                    removeOrthoPhotoLayer(libreMap, state.task)
+                }
+
+                is OrthoPhotoToggleEvent.Visible -> {
+                    applyOrthoPhotoLayer(libreMap, state.task)
+                }
+            }
         }
     }
 
@@ -381,5 +402,21 @@ private fun applyOrthoPhotoLayer(libreMap: MapLibreMap?, task: ProjectTask) {
                 sourceId,
             )
         )
+    }
+}
+
+private fun removeOrthoPhotoLayer(libreMap: MapLibreMap?, task: ProjectTask) {
+    if (libreMap == null) return
+
+    val sourceId = "task-ortho-photo-source-id---"
+    val layerId = "task-ortho-photo-layer-id---"
+
+    if (libreMap.style?.getSource(sourceId) != null) {
+
+        if (libreMap.style?.getLayer(layerId) != null) {
+            libreMap.style?.removeLayer(layerId)
+        }
+
+        libreMap.style?.removeSource(sourceId)
     }
 }

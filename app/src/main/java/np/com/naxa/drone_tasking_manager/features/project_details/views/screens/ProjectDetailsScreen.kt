@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeGesturesPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,8 +23,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -46,12 +47,18 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.events.ProjectDetailEvent
 import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.states.ProjectDetailState
 import np.com.naxa.drone_tasking_manager.features.project_details.views.widgets.ProjectDetailMapView
 import np.com.naxa.drone_tasking_manager.features.project_details.views.widgets.ProjectDetailTabView
 import np.com.naxa.drone_tasking_manager.features.project_details.views.widgets.ProjectTaskInfoBottomSheet
+import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskLockOrUnlockState
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
@@ -201,102 +208,110 @@ fun ProjectDetailsScreen(
 
         is ProjectDetailState.Success -> {
             val project = (state as ProjectDetailState.Success).project
-            Box(modifier = modifier.fillMaxSize()) {
-                LazyColumn(
-                    state = listState,
-                    contentPadding = PaddingValues(top = with(density) { mapViewMaxHeightPx.toDp() }),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .nestedScroll(nestedScrollConnection),
-                    userScrollEnabled = isScrollable
-                ) {
-                    item {
-                        ProjectDetailTabView(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight(),
-                            project = project,
-                            selected = selectedTab,
-                            onSelected = {
-                                selectedTab = it
-                            },
-                            onTaskClick = { task ->
-                                scope.launch {
-                                    try {
-                                        val properties = mapOf(
-                                            "id" to task.id,
-                                            "projectId" to task.projectId,
-                                            "projectTaskIndex" to task.projectTaskIndex,
-                                            "state" to task.state?.key?.uppercase(),
-                                            "userId" to task.userId,
-                                            "name" to task.userName,
-                                            "imageCount" to task.imageCount,
-                                            "assetsUrl" to task.assetsUrl,
-                                            "totalAreaSqkm" to task.totalAreaSqkm,
-                                            "flightTimeMinutes" to task.flightTimeMinutes,
-                                            "flightDistanceKm" to task.flightDistanceKm,
-                                            "totalImageUploaded" to task.totalImageUploaded,
-                                        )
+            val orthoPhotoLayerToggleEventDispatcher =
+                remember { OrthoPhotoLayerToggleEventDispatcher() }
 
-                                        val jsonObject = Gson().toJsonTree(properties).asJsonObject
+            CompositionLocalProvider(
+                LocalOrthoPhotoLayerToggleEventDispatcher provides orthoPhotoLayerToggleEventDispatcher
+            ) {
+                Box(modifier = modifier.fillMaxSize()) {
+                    LazyColumn(
+                        state = listState,
+                        contentPadding = PaddingValues(top = with(density) { mapViewMaxHeightPx.toDp() }),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .nestedScroll(nestedScrollConnection),
+                        userScrollEnabled = isScrollable
+                    ) {
+                        item {
+                            ProjectDetailTabView(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentHeight(),
+                                project = project,
+                                selected = selectedTab,
+                                onSelected = {
+                                    selectedTab = it
+                                },
+                                onTaskClick = { task ->
+                                    scope.launch {
+                                        try {
+                                            val properties = mapOf(
+                                                "id" to task.id,
+                                                "projectId" to task.projectId,
+                                                "projectTaskIndex" to task.projectTaskIndex,
+                                                "state" to task.state?.key?.uppercase(),
+                                                "userId" to task.userId,
+                                                "name" to task.userName,
+                                                "imageCount" to task.imageCount,
+                                                "assetsUrl" to task.assetsUrl,
+                                                "totalAreaSqkm" to task.totalAreaSqkm,
+                                                "flightTimeMinutes" to task.flightTimeMinutes,
+                                                "flightDistanceKm" to task.flightDistanceKm,
+                                                "totalImageUploaded" to task.totalImageUploaded,
+                                            )
 
-                                        showInfoBottomSheet = true
-                                        infoJsonObject = jsonObject
+                                            val jsonObject =
+                                                Gson().toJsonTree(properties).asJsonObject
 
-                                    } catch (e: Exception) {
-                                        // Do nothing
+                                            showInfoBottomSheet = true
+                                            infoJsonObject = jsonObject
+
+                                        } catch (e: Exception) {
+                                            // Do nothing
+                                        }
                                     }
                                 }
-                            }
-                        )
-                    }
-                }
-
-                ProjectDetailMapView(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(with(density) { mapViewMaxHeightPx.toDp() })
-                        .offset { IntOffset(x = 0, y = mapViewOffset.roundToInt()) },
-                    project = project,
-                    onFeatureClick = {
-                        infoJsonObject = it
-                        showInfoBottomSheet = true
-                    }
-                )
-
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .wrapContentWidth()
-                        .wrapContentHeight()
-                        .padding(top = 32.dp, start = 5.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    IconButton(
-                        onClick = {
-                            scope.launch {
-                                navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnPopBackStack)
-                            }
+                            )
                         }
+                    }
+
+                    ProjectDetailMapView(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(with(density) { mapViewMaxHeightPx.toDp() })
+                            .offset { IntOffset(x = 0, y = mapViewOffset.roundToInt()) },
+                        project = project,
+                        onFeatureClick = {
+                            infoJsonObject = it
+                            showInfoBottomSheet = true
+                        }
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .wrapContentWidth()
+                            .wrapContentHeight()
+                            .padding(top = 32.dp, start = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null
-                        )
+                        IconButton(
+                            onClick = {
+                                scope.launch {
+                                    navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnPopBackStack)
+                                }
+                            }
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = null
+                            )
+                        }
+
+                        Text(project.name ?: "", style = MaterialTheme.typography.titleMedium)
                     }
 
-                    Text(project.name ?: "", style = MaterialTheme.typography.titleMedium)
+                    ProjectTaskInfoBottomSheet(
+                        infoJsonObject = infoJsonObject,
+                        infoSheetState = infoSheetState,
+                        show = showInfoBottomSheet,
+                        onDismiss = {
+                            closeInfoSheet()
+                        }
+                    )
                 }
-
-                ProjectTaskInfoBottomSheet(
-                    infoJsonObject = infoJsonObject,
-                    infoSheetState = infoSheetState,
-                    show = showInfoBottomSheet,
-                    onDismiss = {
-                        closeInfoSheet()
-                    }
-                )
             }
         }
 
@@ -310,6 +325,29 @@ fun ProjectDetailsScreen(
             }
         }
     }
-
-
 }
+
+
+sealed class OrthoPhotoToggleEvent {
+    data object None : OrthoPhotoToggleEvent()
+    data class Visible(val task: ProjectTask) : OrthoPhotoToggleEvent()
+    data class InVisible(val task: ProjectTask) : OrthoPhotoToggleEvent()
+}
+
+class OrthoPhotoLayerToggleEventDispatcher {
+    private val _toggleEvent = MutableStateFlow<OrthoPhotoToggleEvent>(OrthoPhotoToggleEvent.None)
+    val toggleEvent = _toggleEvent.asStateFlow()
+
+    fun triggerEvent(event: OrthoPhotoToggleEvent) {
+        CoroutineScope(Dispatchers.IO).launch {
+            _toggleEvent.emit(event)
+            delay(500)
+            _toggleEvent.emit(OrthoPhotoToggleEvent.None)
+        }
+    }
+}
+
+val LocalOrthoPhotoLayerToggleEventDispatcher =
+    compositionLocalOf<OrthoPhotoLayerToggleEventDispatcher> {
+        error("No dispatcher")
+    }

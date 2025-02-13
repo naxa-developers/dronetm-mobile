@@ -16,6 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import np.com.naxa.drone_tasking_manager.features.project_details.views.screens.LocalOrthoPhotoLayerToggleEventDispatcher
+import np.com.naxa.drone_tasking_manager.features.project_details.views.screens.OrthoPhotoToggleEvent
 import np.com.naxa.drone_tasking_manager.features.projects.models.Project
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTaskState
@@ -26,6 +28,9 @@ fun ProjectDetailContributionsTabBody(
     project: Project,
     onTaskClick: (ProjectTask) -> Unit = {}
 ) {
+
+    val orthoPhotoLayerToggleEventDispatcher = LocalOrthoPhotoLayerToggleEventDispatcher.current
+
     Column(modifier = modifier.padding(12.dp)) {
         // Table Header
         Row(
@@ -122,8 +127,12 @@ fun ProjectDetailContributionsTabBody(
                         contentAlignment = Alignment.Center
                     ) {
                         if (task.state == ProjectTaskState.ImageProcessingFinished) {
-                            OrthoPhotoTogglerView {
-
+                            OrthoPhotoTogglerView { visible ->
+                                orthoPhotoLayerToggleEventDispatcher.triggerEvent(
+                                    if (visible) OrthoPhotoToggleEvent.Visible(task) else OrthoPhotoToggleEvent.InVisible(
+                                        task
+                                    )
+                                )
                             }
                         }
                     }
