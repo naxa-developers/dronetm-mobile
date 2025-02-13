@@ -13,8 +13,8 @@ import np.com.naxa.drone_tasking_manager.features.tasks.repositories.TasksReposi
 import np.com.naxa.drone_tasking_manager.features.tasks.repositories.TasksRepositoryImpl
 import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.repositories.RefreshTokenRepository
 import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.repositories.RefreshTokenRepositoryImpl
-import np.com.naxa.drone_tasking_manager.features.user.dashboard.repositories.UsersTaskRepository
-import np.com.naxa.drone_tasking_manager.features.user.dashboard.repositories.UsersTaskRepositoryImpl
+import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.repositories.UsersTaskRepository
+import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.repositories.UsersTaskRepositoryImpl
 import np.com.naxa.drone_tasking_manager.features.user.profile.repositories.UserProfileRepository
 import np.com.naxa.drone_tasking_manager.features.user.profile.repositories.UserProfileRepositoryImpl
 import javax.inject.Singleton

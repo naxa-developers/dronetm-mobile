@@ -69,7 +69,7 @@ import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.Pro
 import np.com.naxa.drone_tasking_manager.features.projects.viewmodels.ProjectsViewModel
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.TasksViewModel
 import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.viewmodels.RefreshTokenViewModel
-import np.com.naxa.drone_tasking_manager.features.user.dashboard.viewmodels.UsersTaskViewModel
+import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.viewmodels.UsersTaskViewModel
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.UserProfileViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalDownloadAndTransferFileViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalEventsViewModel

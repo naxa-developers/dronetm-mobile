@@ -9,11 +9,10 @@ import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskEventRequestBody
 import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskDto
 import np.com.naxa.drone_tasking_manager.features.tasks.dto.TaskEventResponseDto
 import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.dto.RefreshTokenDto
-import np.com.naxa.drone_tasking_manager.features.user.dashboard.dto.UsersTaskDto
-import np.com.naxa.drone_tasking_manager.features.user.dashboard.dto.UsersTaskStatDto
+import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.dto.UsersTaskDto
+import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.dto.UsersTaskStatDto
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileDto
 import np.com.naxa.drone_tasking_manager.features.user.profile.dto.UserProfileUpdateDto
-import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
@@ -25,11 +24,8 @@ import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Headers
-import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
-import retrofit2.http.Part
-import retrofit2.http.PartMap
 import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.Streaming

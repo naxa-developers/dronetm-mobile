@@ -12,7 +12,7 @@ import np.com.naxa.drone_tasking_manager.navigation.viewmodels.NavigationEventsV
 import np.com.naxa.drone_tasking_manager.features.download_and_transfer.viewmodels.DownloadAndTransferFileViewModel
 import np.com.naxa.drone_tasking_manager.viewmodel.EventsViewModel
 import np.com.naxa.drone_tasking_manager.features.device_connection.viewmodels.UsbDeviceViewModel
-import np.com.naxa.drone_tasking_manager.features.user.dashboard.viewmodels.UsersTaskViewModel
+import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.viewmodels.UsersTaskViewModel
 
 val LocalUsbDeviceViewModel = compositionLocalOf<UsbDeviceViewModel> {
     error("No ViewModel provided")
