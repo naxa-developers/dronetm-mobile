@@ -107,4 +107,14 @@ enum class Routes(
         label = "Device Connection",
         path = "device-connection?route={routeIndex}"
     ),
+
+    /**
+     * Route for displaying the User's Task Dashboard screen.
+     * Path: /users-task-dashboard
+     */
+    UsersTaskDashboard(
+        label = "Task Dashboard",
+        path = "users-task-dashboard"
+    ),
+
 }

@@ -69,6 +69,7 @@ import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.Pro
 import np.com.naxa.drone_tasking_manager.features.projects.viewmodels.ProjectsViewModel
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.TasksViewModel
 import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.viewmodels.RefreshTokenViewModel
+import np.com.naxa.drone_tasking_manager.features.user.dashboard.viewmodels.UsersTaskViewModel
 import np.com.naxa.drone_tasking_manager.features.user.profile.viewmodels.UserProfileViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalDownloadAndTransferFileViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalEventsViewModel
@@ -81,6 +82,7 @@ import np.com.naxa.drone_tasking_manager.local_providers.LocalRefreshTokenViewMo
 import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalUsbDeviceViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalUserProfileViewModel
+import np.com.naxa.drone_tasking_manager.local_providers.LocalUsersTaskViewModel
 import np.com.naxa.drone_tasking_manager.navigation.DroneTMAppNavHost
 import np.com.naxa.drone_tasking_manager.navigation.routes.Routes
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.NavigationEventsViewModel
@@ -128,6 +130,7 @@ fun DroneTMApp(
     val userProfileViewModel = hiltViewModel<UserProfileViewModel>()
     val refreshTokenViewModel = hiltViewModel<RefreshTokenViewModel>()
     val fileTransferViewModel = hiltViewModel<FileTransferViewModel>()
+    val usersTaskViewModel = hiltViewModel<UsersTaskViewModel>()
 
 
     val topBarTitle by remember {
@@ -256,6 +259,10 @@ fun DroneTMApp(
                         )
                     )
                 }
+
+                DroneTMAppNavigationEvent.OnNavigateToUsersTaskDashboard -> {
+                    navController.navigate(Routes.UsersTaskDashboard.path)
+                }
             }
         }
     }
@@ -271,7 +278,8 @@ fun DroneTMApp(
         LocalTasksViewModel provides tasksViewModel,
         LocalUserProfileViewModel provides userProfileViewModel,
         LocalRefreshTokenViewModel provides refreshTokenViewModel,
-        LocalFileTransferViewModel provides fileTransferViewModel
+        LocalFileTransferViewModel provides fileTransferViewModel,
+        LocalUsersTaskViewModel provides usersTaskViewModel
     ) {
         DroneTMAppTheme {
             Scaffold(
@@ -393,6 +401,13 @@ fun DroneTMApp(
                                     onDismissRequest = { menuExpanded = false }
                                 ) {
                                     DropdownMenuItem(
+                                        text = { Text("My Tasks Dashboard") },
+                                        onClick = {
+                                            onMyTaskDashboardClick(navigationEventsViewModel)
+                                            menuExpanded = false
+                                        }
+                                    )
+                                    DropdownMenuItem(
                                         text = { Text("Profile") },
                                         onClick = {
                                             onProfileClick(navigationEventsViewModel)
@@ -511,5 +526,10 @@ private fun onLogout(
 fun onProfileClick(navigationEventsViewModel: NavigationEventsViewModel) {
     navigationEventsViewModel.sendEvent(
         DroneTMAppNavigationEvent.OnNavigateToProfileScreen
+    )
+}
+fun onMyTaskDashboardClick(navigationEventsViewModel: NavigationEventsViewModel) {
+    navigationEventsViewModel.sendEvent(
+        DroneTMAppNavigationEvent.OnNavigateToUsersTaskDashboard
     )
 }
