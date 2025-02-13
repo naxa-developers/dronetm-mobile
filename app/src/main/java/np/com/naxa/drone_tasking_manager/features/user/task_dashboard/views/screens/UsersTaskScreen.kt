@@ -33,8 +33,12 @@ fun UsersTaskScreen() {
     val usersTaskState by viewModel.usersTaskState.collectAsState()
     val usersTaskStatState by viewModel.usersTaskStatState.collectAsState()
 
-    val selectedColor = Color(0xFFFEF2F2)
-    val unselectedColor = Color(0xFFF9FAFB)
+    val selectedColor = Color.Red.copy(
+        alpha = 0.1F
+    )
+    val unselectedColor = Color.LightGray.copy(
+        alpha = 0.35F
+    )
 
     val taskCategoryIndex = remember { mutableIntStateOf(0) }
 
