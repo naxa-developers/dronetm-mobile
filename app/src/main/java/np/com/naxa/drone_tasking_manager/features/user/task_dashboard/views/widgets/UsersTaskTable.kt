@@ -13,9 +13,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import np.com.naxa.drone_tasking_manager.core.widgets.ShimmerItemPlaceHolder
 import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.models.UsersTaskItem
+import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
+import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 
 @Composable
 fun TasksTable(tasks: List<UsersTaskItem>, isLoading: Boolean = false) {
+    val navigationEventsViewModel = LocalNavigationEventsViewModel.current
+
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shadowElevation = 1.dp
@@ -67,6 +72,14 @@ fun TasksTable(tasks: List<UsersTaskItem>, isLoading: Boolean = false) {
                     items(tasks.size) { index ->
                         TaskRow(tasks.get(index), index, onTap = {
 
+                            if (it.taskId != null) {
+                                navigationEventsViewModel.sendEvent(
+                                    DroneTMAppNavigationEvent.OnNavigateToTaskDetail(
+                                        it.taskId,
+                                        it.projectId
+                                    )
+                                )
+                            }
                         })
                     }
                 }

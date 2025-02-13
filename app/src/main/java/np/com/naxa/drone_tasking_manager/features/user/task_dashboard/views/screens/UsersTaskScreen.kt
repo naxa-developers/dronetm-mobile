@@ -27,51 +27,14 @@ import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.views.widg
 import np.com.naxa.drone_tasking_manager.local_providers.LocalUsersTaskViewModel
 
 @Composable
-fun UsersTaskScreen(
-//    ongoingTasks: Int = 81,
-//    unfinableTasks: Int = 4,
-//    completedTasks: Int = 5,
-//    tasks: UsersTask = UsersTask()
-) {
+fun UsersTaskScreen() {
 
     val viewModel = LocalUsersTaskViewModel.current
     val usersTaskState by viewModel.usersTaskState.collectAsState()
     val usersTaskStatState by viewModel.usersTaskStatState.collectAsState()
 
-
-//    LaunchedEffect {
-//        viewModel.onEvent(UsersTaskEvents.fetchUsersTaskStat(forceRefresh = false))
-//        viewModel.onEvent(UsersTaskEvents.fetchUsersTask(forceRefresh = false))
-//
-//    }
-
-
     val selectedColor = Color(0xFFFEF2F2)
     val unselectedColor = Color(0xFFF9FAFB)
-
-//    val taskList = List(50) {
-//        UsersTaskItem(
-//            certificateUrl = "https://example.com/certificate.pdf",
-//            createdAt = "2023-08-01 $it",
-//            flightDistanceKm = 100.0,
-//            flightTimeMinutes = 60,
-//            projectId = "123 $it",
-//            projectName = "Project A $it",
-//            projectTaskIndex = 1,
-//            registrationCertificateUrl = "https://example.com/registration_certificate.pdf",
-//            state = if (it.rem(3) == 0) {
-//                "IMAGE_PROCESSING_FINISHED"
-//            } else if (it.rem(5) == 0) {
-//                "UNFLYABLE_TASK"
-//            } else {
-//                "LOCKED_FOR_MAPPING"
-//            },
-//            taskId = "456 $it",
-//            totalAreaSqkm = 500.0,
-//            updatedAt = "2023-08-01"
-//        )
-//    }
-//    tasks.addAll(taskList)
 
     val taskCategoryIndex = remember { mutableIntStateOf(0) }
 
@@ -79,7 +42,6 @@ fun UsersTaskScreen(
     val unflyableTasksCount = remember { mutableIntStateOf(0) }
     val completedTasksCount = remember { mutableIntStateOf(0) }
 
-    var tasks = remember { mutableStateOf(listOf<UsersTaskItem>()) }
 
     val ongoingTasks = remember { mutableStateOf(listOf<UsersTaskItem>()) }
     val unflyableTasks = remember { mutableStateOf(listOf<UsersTaskItem>()) }
