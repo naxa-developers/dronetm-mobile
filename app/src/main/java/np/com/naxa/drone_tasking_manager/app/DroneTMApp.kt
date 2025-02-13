@@ -88,6 +88,7 @@ import np.com.naxa.drone_tasking_manager.navigation.DroneTMAppNavHost
 import np.com.naxa.drone_tasking_manager.navigation.routes.Routes
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.NavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
+import np.com.naxa.drone_tasking_manager.utils.internetutils.CheckInternetConnectionUtils
 import np.com.naxa.drone_tasking_manager.utils.route
 import np.com.naxa.drone_tasking_manager.utils.widgets.NavigateToTransferFileWidget
 import np.com.naxa.drone_tasking_manager.viewmodel.EventsViewModel
@@ -100,6 +101,7 @@ fun DroneTMApp(
     downloadAndTransferViewModel: DownloadAndTransferFileViewModel,
     navigationEventsViewModel: NavigationEventsViewModel
 ) {
+    val context = LocalContext.current
 
     val navController = rememberNavController()
 
@@ -115,6 +117,9 @@ fun DroneTMApp(
     val backStackEntry by navController.currentBackStackEntryFlow.collectAsState(initial = null)
     val downloadAndTransferState by downloadAndTransferViewModel.downloadAndTransferState.collectAsState()
 
+    var isInternetAvailable by remember { mutableStateOf(CheckInternetConnectionUtils.isInternetAvailable(context)) }
+
+
     val currentRoute by remember {
         derivedStateOf {
             backStackEntry?.destination?.route?.route()
@@ -122,7 +127,6 @@ fun DroneTMApp(
     }
 
     val viewModels = LocalViewModelStoreOwner.current!!
-    val context = LocalContext.current
 
     val loginViewModel = hiltViewModel<LoginViewModel>()
     val projectsViewModel = hiltViewModel<ProjectsViewModel>()
@@ -154,6 +158,8 @@ fun DroneTMApp(
     }
 
     LaunchedEffect(Unit) {
+        isInternetAvailable = CheckInternetConnectionUtils.isInternetAvailable(context)
+
         navigationEventsViewModel.appEvents.collect { event ->
             when (event) {
 
@@ -404,7 +410,7 @@ fun DroneTMApp(
                                     DropdownMenuItem(
                                         text = { Text("My Tasks Dashboard") },
                                         onClick = {
-                                            onMyTaskDashboardClick(navigationEventsViewModel, usersTaskViewModel)
+                                            onMyTaskDashboardClick(navigationEventsViewModel, usersTaskViewModel, isInternetAvailable)
                                             menuExpanded = false
                                         }
                                     )
@@ -531,10 +537,11 @@ fun onProfileClick(navigationEventsViewModel: NavigationEventsViewModel) {
 }
 fun onMyTaskDashboardClick(
     navigationEventsViewModel: NavigationEventsViewModel,
-    usersTaskViewModel: UsersTaskViewModel
+    usersTaskViewModel: UsersTaskViewModel,
+    isInternetAvailable: Boolean
 ) {
-    usersTaskViewModel.onEvent(UsersTaskEvents.fetchUsersTaskStat(forceRefresh = true))
-    usersTaskViewModel.onEvent(UsersTaskEvents.fetchUsersTask(forceRefresh = true))
+    usersTaskViewModel.onEvent(UsersTaskEvents.fetchUsersTaskStat(forceRefresh = isInternetAvailable))
+    usersTaskViewModel.onEvent(UsersTaskEvents.fetchUsersTask(forceRefresh = isInternetAvailable))
 
     navigationEventsViewModel.sendEvent(
         DroneTMAppNavigationEvent.OnNavigateToUsersTaskDashboard

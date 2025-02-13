@@ -16,7 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,6 +37,7 @@ import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.viewmod
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalRefreshTokenViewModel
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
+import np.com.naxa.drone_tasking_manager.utils.internetutils.CheckInternetConnectionUtils
 
 @Composable
 fun SplashScreen(
@@ -48,8 +51,12 @@ fun SplashScreen(
     val refreshTokenViewModel = LocalRefreshTokenViewModel.current
     val refreshTokenState by refreshTokenViewModel.state.collectAsState()
 
+    var isInternetAvailable by remember { mutableStateOf(CheckInternetConnectionUtils.isInternetAvailable(context)) }
+
 
     LaunchedEffect(Unit) {
+        isInternetAvailable = CheckInternetConnectionUtils.isInternetAvailable(context)
+
         alphaAnimation.animateTo(
             targetValue = 1f,
             animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
@@ -61,7 +68,12 @@ fun SplashScreen(
 
             if (storageService.get<String>(StorageKeys.User.ACCESS_TOKEN, "").trim().isNotBlank()) {
 //                    navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToProjects)
-                refreshTokenViewModel.onEvent(RefreshTokenEvents.RefreshToken(forceRefresh = true))
+
+                if(isInternetAvailable){
+                    refreshTokenViewModel.onEvent(RefreshTokenEvents.RefreshToken(forceRefresh = true))
+                }else{
+                    navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToProjects)
+                }
 
                 return@LaunchedEffect
             } else {
@@ -78,11 +90,13 @@ fun SplashScreen(
     }
 
 
-    // check refresh token state and navigate to respective screen
-    if (refreshTokenState.isSuccess && !refreshTokenState.isLoading && refreshTokenState.errorMessage.isEmpty()) {
-        navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToProjects)
-    } else if (!refreshTokenState.isSuccess && !refreshTokenState.isLoading && refreshTokenState.errorMessage.isNotEmpty()) {
-        navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToLogin)
+    if(isInternetAvailable) {
+        // check refresh token state and navigate to respective screen
+        if (refreshTokenState.isSuccess && !refreshTokenState.isLoading && refreshTokenState.errorMessage.isEmpty()) {
+            navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToProjects)
+        } else if (!refreshTokenState.isSuccess && !refreshTokenState.isLoading && refreshTokenState.errorMessage.isNotEmpty()) {
+            navigationEventsViewModel.sendEvent(DroneTMAppNavigationEvent.OnNavigateToLogin)
+        }
     }
 
 
