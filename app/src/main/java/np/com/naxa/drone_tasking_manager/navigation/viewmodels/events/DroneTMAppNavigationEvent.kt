@@ -118,4 +118,7 @@ sealed class DroneTMAppNavigationEvent {
     data class OnNavigateToDeviceConnection(
         val route: Routes
     ) : DroneTMAppNavigationEvent()
+
+
+    data object OnNavigateToUsersTaskDashboard : DroneTMAppNavigationEvent()
 }
