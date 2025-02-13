@@ -1,6 +1,5 @@
 package np.com.naxa.drone_tasking_manager.features.user.task_dashboard.views.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,12 +21,9 @@ import androidx.compose.ui.unit.dp
 import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.mapper.toUsersTaskCompleted
 import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.mapper.toUsersTaskOnGoing
 import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.mapper.toUsersTaskOnUnFlyable
-import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.models.UsersTask
 import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.models.UsersTaskItem
-import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.viewmodels.events.UsersTaskEvents
 import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.views.widgets.StatisticsCard
 import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.views.widgets.TasksTable
-import np.com.naxa.drone_tasking_manager.local_providers.LocalUserProfileViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalUsersTaskViewModel
 
 @Composable
@@ -162,10 +158,12 @@ fun UsersTaskScreen(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        TasksTable(tasks = if (taskCategoryIndex.intValue == 0) ongoingTasks.value
-        else if (taskCategoryIndex.intValue == 1) unflyableTasks.value
-        else completedTasks.value,
+        TasksTable(
+            tasks = if (taskCategoryIndex.intValue == 0) ongoingTasks.value
+            else if (taskCategoryIndex.intValue == 1) unflyableTasks.value
+            else completedTasks.value,
 
-            isLoading = usersTaskState.isFetching)
+            isLoading = usersTaskState.isFetching
+        )
     }
 }

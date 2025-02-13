@@ -4,7 +4,7 @@ data class UsersTaskItem(
     val certificateUrl: String?,
     val createdAt: String?,
     val flightDistanceKm: Double?,
-    val flightTimeMinutes: Int?,
+    val flightTimeMinutes: Double?,
     val projectId: String?,
     val projectName: String?,
     val projectTaskIndex: Int?,

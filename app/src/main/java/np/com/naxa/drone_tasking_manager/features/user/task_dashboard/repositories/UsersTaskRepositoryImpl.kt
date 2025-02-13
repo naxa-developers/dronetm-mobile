@@ -7,7 +7,7 @@ import np.com.naxa.drone_tasking_manager.core.utils.Response
 import np.com.naxa.drone_tasking_manager.core.utils.responsevalidator.validateResponse
 import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.mapper.toUserTaskStat
 import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.mapper.toUsersTask
-import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.models.UsersTask
+import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.models.UsersTaskItem
 import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.models.UsersTaskStat
 import retrofit2.HttpException
 import java.io.IOException
@@ -16,7 +16,7 @@ import javax.inject.Inject
 class UsersTaskRepositoryImpl @Inject constructor(private val apiService: ApiService) :
     UsersTaskRepository {
 
-    override suspend fun fetchUsersTask(forceRefresh: Boolean): Flow<Response<UsersTask>> {
+    override suspend fun fetchUsersTask(forceRefresh: Boolean): Flow<Response<List<UsersTaskItem>>> {
         return flow {
             emit(Response.Loading())
 

@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import np.com.naxa.drone_tasking_manager.core.widgets.ShimmerItemPlaceHolder
-import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.models.UsersTask
 import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.models.UsersTaskItem
 
 @Composable

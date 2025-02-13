@@ -6,7 +6,7 @@ data class UsersTaskDtoItem(
     @SerializedName("certificate_url") val certificateUrl: String?,
     @SerializedName("created_at") val createdAt: String?,
     @SerializedName("flight_distance_km") val flightDistanceKm: Double?,
-    @SerializedName("flight_time_minutes") val flightTimeMinutes: Int?,
+    @SerializedName("flight_time_minutes") val flightTimeMinutes: Double?,
     @SerializedName("project_id") val projectId: String?,
     @SerializedName("project_name") val projectName: String?,
     @SerializedName("project_task_index") val projectTaskIndex: Int?,

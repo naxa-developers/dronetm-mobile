@@ -1,6 +1,6 @@
 package np.com.naxa.drone_tasking_manager.features.user.task_dashboard.viewmodels.states
 
-import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.models.UsersTask
+import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.models.UsersTaskItem
 
 data class UsersTaskStates(
     /**
@@ -18,5 +18,5 @@ data class UsersTaskStates(
     /**
      * The fetched UsersTask data.
      */
-    val usersTask: UsersTask? = null
+    val usersTask: List<UsersTaskItem>? = null
 )

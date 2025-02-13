@@ -40,7 +40,7 @@ fun TaskRow(task: UsersTaskItem, index: Int, onTap: (UsersTaskItem) -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "Task# ${task.taskId}",
+            text = "#${task.projectTaskIndex}",
             modifier = Modifier.weight(0.1f),
             style = MaterialTheme.typography.bodySmall
         )
@@ -50,12 +50,12 @@ fun TaskRow(task: UsersTaskItem, index: Int, onTap: (UsersTaskItem) -> Unit) {
             style = MaterialTheme.typography.bodySmall
         )
         Text(
-            text = "${task.totalAreaSqkm}",
+            text = String.format(" % .2f", task.totalAreaSqkm),
             modifier = Modifier.weight(0.2f),
             style = MaterialTheme.typography.bodySmall
         )
         Text(
-            text = "${task.createdAt}",
+            text = "${task.createdAt?.split("T")?.firstOrNull() ?: task.createdAt}",
             modifier = Modifier.weight(0.2f),
             style = MaterialTheme.typography.bodySmall
         )

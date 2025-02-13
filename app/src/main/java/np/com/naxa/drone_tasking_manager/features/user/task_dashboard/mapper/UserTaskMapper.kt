@@ -1,13 +1,12 @@
 package np.com.naxa.drone_tasking_manager.features.user.task_dashboard.mapper
 
-import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.dto.UsersTaskDto
+import android.util.Log
 import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.dto.UsersTaskDtoItem
 import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.enums.TaskStatus
-import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.models.UsersTask
 import np.com.naxa.drone_tasking_manager.features.user.task_dashboard.models.UsersTaskItem
 
-fun UsersTaskDto.toUsersTask() : UsersTask{
-    return this.map { it.toUsersTaskItem() }.toCollection(ArrayList()) as UsersTask
+fun List<UsersTaskDtoItem>.toUsersTask() : List<UsersTaskItem>{
+    return this.map { it.toUsersTaskItem() }
 }
 
 fun UsersTaskDtoItem.toUsersTaskItem() : UsersTaskItem {
@@ -29,34 +28,34 @@ fun UsersTaskDtoItem.toUsersTaskItem() : UsersTaskItem {
 }
 
 
-fun UsersTask.toUsersTaskCompleted() : UsersTask{
-    return this.map(fun(it: UsersTaskItem): UsersTaskItem? {
-        return  if(it.state == TaskStatus.IMAGE_PROCESSING_FINISHED.name){
-         it
-        }else{
-            return null
-        }
-    }).toCollection(ArrayList()) as UsersTask
+fun List<UsersTaskItem>.toUsersTaskCompleted() : List<UsersTaskItem>{
+    return this.filter { task ->
+        task.state?.let { state ->
+            Log.d("TAG", "UsersTaskItem toUsersTaskOnGoing: $state")
+
+            state == TaskStatus.IMAGE_PROCESSING_FINISHED.name
+        } ?: false
+    }
 }
 
-fun UsersTask.toUsersTaskOnUnFlyable() : UsersTask{
-    return this.map(fun(it: UsersTaskItem): UsersTaskItem? {
-        return  if(it.state == TaskStatus.UNFLYABLE_TASK.name){
-            it
-        }else{
-            return null
-        }
-    }).toCollection(ArrayList()) as UsersTask
+fun List<UsersTaskItem>.toUsersTaskOnUnFlyable() : List<UsersTaskItem>{
+    return this.filter { task ->
+        task.state?.let { state ->
+            Log.d("TAG", "UsersTaskItem toUsersTaskOnGoing: $state")
+
+            state == TaskStatus.UNFLYABLE_TASK.name
+        } ?: false
+    }
 }
 
-fun UsersTask.toUsersTaskOnGoing() : UsersTask{
-    return this.map(fun(it: UsersTaskItem): UsersTaskItem? {
-        return  if(it.state == TaskStatus.IMAGE_PROCESSING_FAILED.name
-            || it.state == TaskStatus.LOCKED_FOR_MAPPING.name){
-            it
-        }else{
-            return null
-        }
-    }).toCollection(ArrayList()) as UsersTask
+fun List<UsersTaskItem>.toUsersTaskOnGoing() : List<UsersTaskItem>{
+    return this.filter { task ->
+        task.state?.let { state ->
+            Log.d("TAG", "UsersTaskItem toUsersTaskOnGoing: $state")
+
+            state == TaskStatus.IMAGE_PROCESSING_FAILED.name ||
+                    state == TaskStatus.LOCKED_FOR_MAPPING.name
+        } ?: false
+    }
 }
 
