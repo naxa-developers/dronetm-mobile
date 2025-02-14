@@ -171,12 +171,8 @@ fun DownloadTaskFlightPlanIconButton(
 
             is TaskFlightPlanDownloadState.DownloadError -> {
                 downloading = false
-
-                navigationEventsViewModel.sendEvent(
-                    DroneTMAppNavigationEvent.OnSnackBarShow(
-                        (downloadState as TaskFlightPlanDownloadState.DownloadError).error
-                    )
-                )
+                val error = (downloadState as TaskFlightPlanDownloadState.DownloadError).error
+                Toast.makeText(context, error, Toast.LENGTH_LONG).show()
             }
 
             is TaskFlightPlanDownloadState.Downloading -> {
