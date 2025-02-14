@@ -39,6 +39,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -202,7 +203,7 @@ fun TaskDetailsScreen(
                 contentAlignment = Alignment.Center
             ) {
                 val error = (state as TaskDetailState.Error).message
-                Text(error)
+                Text(error, modifier = Modifier.padding(20.dp), textAlign = TextAlign.Center)
             }
         }
     }

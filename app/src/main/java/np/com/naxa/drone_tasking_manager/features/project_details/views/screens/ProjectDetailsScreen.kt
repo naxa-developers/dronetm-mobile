@@ -44,6 +44,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextAlign
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import kotlinx.coroutines.launch
@@ -306,7 +307,7 @@ fun ProjectDetailsScreen(
                 contentAlignment = Alignment.Center
             ) {
                 val error = (state as ProjectDetailState.Error).message
-                Text(error)
+                Text(error, modifier = Modifier.padding(20.dp), textAlign = TextAlign.Center)
             }
         }
     }
