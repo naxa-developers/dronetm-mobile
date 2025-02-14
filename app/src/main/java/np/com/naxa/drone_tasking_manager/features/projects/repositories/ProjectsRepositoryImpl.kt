@@ -49,7 +49,7 @@ class ProjectsRepositoryImpl @Inject constructor(private val apiService: ApiServ
                     )
                 )
             } catch (e: Exception) {
-                emit(Response.Error(e.message ?: "Error fetching projects"))
+                emit(Response.Error(e.message ?: e.cause?.message ?: "Error fetching projects"))
             }
         }
     }
@@ -79,7 +79,7 @@ class ProjectsRepositoryImpl @Inject constructor(private val apiService: ApiServ
                     )
                 )
             } catch (e: Exception) {
-                emit(Response.Error(e.message ?: "Error fetching projects"))
+                emit(Response.Error(e.message ?: e.cause?.message ?: "Error fetching projects"))
             }
         }
     }
@@ -106,7 +106,11 @@ class ProjectsRepositoryImpl @Inject constructor(private val apiService: ApiServ
                     )
                 )
             } catch (e: Exception) {
-                emit(Response.Error(e.message ?: "Error fetching projects centroids"))
+                emit(
+                    Response.Error(
+                        e.message ?: e.cause?.message ?: "Error fetching projects centroids"
+                    )
+                )
             }
         }
     }

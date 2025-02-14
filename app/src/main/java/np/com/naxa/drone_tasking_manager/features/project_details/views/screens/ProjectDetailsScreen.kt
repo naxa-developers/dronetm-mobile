@@ -1,5 +1,6 @@
 package np.com.naxa.drone_tasking_manager.features.project_details.views.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -44,6 +45,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.LocalContext
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import kotlinx.coroutines.launch
@@ -67,6 +70,7 @@ fun ProjectDetailsScreen(
     projectId: String?,
 ) {
 
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current
@@ -147,11 +151,7 @@ fun ProjectDetailsScreen(
 
         if (lockTaskState is TaskLockOrUnlockState.Error) {
             val error = (lockTaskState as TaskLockOrUnlockState.Error).message
-            navigationEventsViewModel.sendEvent(
-                DroneTMAppNavigationEvent.OnSnackBarShow(
-                    message = error
-                )
-            )
+            Toast.makeText(context, error, Toast.LENGTH_LONG).show()
         }
 
         tasksViewModel.triggerEvent(
@@ -175,11 +175,7 @@ fun ProjectDetailsScreen(
 
         if (unlockTaskState is TaskLockOrUnlockState.Error) {
             val error = (unlockTaskState as TaskLockOrUnlockState.Error).message
-            navigationEventsViewModel.sendEvent(
-                DroneTMAppNavigationEvent.OnSnackBarShow(
-                    message = error
-                )
-            )
+            Toast.makeText(context, error, Toast.LENGTH_LONG).show()
         }
 
         tasksViewModel.triggerEvent(
@@ -306,7 +302,7 @@ fun ProjectDetailsScreen(
                 contentAlignment = Alignment.Center
             ) {
                 val error = (state as ProjectDetailState.Error).message
-                Text(error)
+                Text(error, modifier = Modifier.padding(20.dp), textAlign = TextAlign.Center)
             }
         }
     }

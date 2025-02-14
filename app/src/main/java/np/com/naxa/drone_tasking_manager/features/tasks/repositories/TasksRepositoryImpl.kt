@@ -67,7 +67,7 @@ class TasksRepositoryImpl @Inject constructor(
                     )
                 )
             } catch (e: Exception) {
-                emit(Response.Error(e.message ?: "Error fetching task"))
+                emit(Response.Error(e.message ?: e.cause?.message ?: "Error fetching task"))
             }
         }
     }
@@ -101,7 +101,7 @@ class TasksRepositoryImpl @Inject constructor(
                     )
                 )
             } catch (e: Exception) {
-                emit(Response.Error(e.cause?.message ?: "Error locking task $taskId"))
+                emit(Response.Error(e.message ?: e.cause?.message ?: "Error locking task $taskId"))
             }
         }
     }
@@ -134,7 +134,11 @@ class TasksRepositoryImpl @Inject constructor(
                     )
                 )
             } catch (e: Exception) {
-                emit(Response.Error(e.cause?.message ?: "Error unlocking task $taskId"))
+                emit(
+                    Response.Error(
+                        e.message ?: e.cause?.message ?: "Error unlocking task $taskId"
+                    )
+                )
             }
         }
     }
@@ -169,7 +173,11 @@ class TasksRepositoryImpl @Inject constructor(
                     )
                 )
             } catch (e: Exception) {
-                emit(Response.Error(e.cause?.message ?: "Error requesting task $taskId un-flyable"))
+                emit(
+                    Response.Error(
+                        e.message ?: e.cause?.message ?: "Error requesting task $taskId un-flyable"
+                    )
+                )
             }
         }
     }
@@ -204,7 +212,11 @@ class TasksRepositoryImpl @Inject constructor(
                     )
                 )
             } catch (e: Exception) {
-                emit(Response.Error(e.cause?.message ?: "Error fetching task: $taskId"))
+                emit(
+                    Response.Error(
+                        e.message ?: e.cause?.message ?: "Error fetching task: $taskId"
+                    )
+                )
             }
         }
     }
@@ -240,7 +252,11 @@ class TasksRepositoryImpl @Inject constructor(
                     )
                 )
             } catch (e: Exception) {
-                emit(Response.Error(e.cause?.message ?: "Error fetching task: $taskId"))
+                emit(
+                    Response.Error(
+                        e.message ?: e.cause?.message ?: "Error fetching task: $taskId"
+                    )
+                )
             }
         }
     }
@@ -285,7 +301,8 @@ class TasksRepositoryImpl @Inject constructor(
             } catch (e: Exception) {
                 emit(
                     Response.Error(
-                        e.cause?.message ?: "Error updating takeoff point of task: $taskId"
+                        e.message ?: e.cause?.message
+                        ?: "Error updating takeoff point of task: $taskId"
                     )
                 )
             }
@@ -445,7 +462,7 @@ class TasksRepositoryImpl @Inject constructor(
             } catch (e: Exception) {
                 return@flow emit(
                     DownloadResponse.Error(
-                        e.message ?: "Error downloading flight plan"
+                        e.message ?: e.cause?.message ?: "Error downloading flight plan"
                     )
                 )
             }
