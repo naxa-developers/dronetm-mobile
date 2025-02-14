@@ -98,7 +98,7 @@ class CacheInterceptor(
             val networkResponse = chain.proceed(modifiedRequest)
 
             // Clone response body for caching and returning
-            val responseBody = networkResponse.body ?: return networkResponse
+            val responseBody = networkResponse.body
             val responseBodyString = responseBody.string()
 
             // Cache response if successful
