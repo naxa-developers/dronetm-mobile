@@ -8,6 +8,8 @@ import okhttp3.Interceptor
 import okhttp3.Protocol
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
+import java.io.IOException
+import java.net.SocketTimeoutException
 import java.util.concurrent.TimeUnit
 
 /**
@@ -91,25 +93,35 @@ class CacheInterceptor(
             if (cachedResponse != null) return cachedResponse
         }
 
-        // Proceed with network request
-        val networkResponse = chain.proceed(modifiedRequest)
+        return try {
+            // Proceed with network request
+            val networkResponse = chain.proceed(modifiedRequest)
 
-        // Clone response body for caching and returning
-        val responseBody = networkResponse.body ?: return networkResponse
-        val responseBodyString = responseBody.string()
+            // Clone response body for caching and returning
+            val responseBody = networkResponse.body ?: return networkResponse
+            val responseBodyString = responseBody.string()
 
-        // Cache response if successful
-        if (networkResponse.isSuccessful) {
-            cacheResponse(responseBodyString, cacheKey, timestampKey)
+            // Cache response if successful
+            if (networkResponse.isSuccessful) {
+                cacheResponse(responseBodyString, cacheKey, timestampKey)
+            }
+
+            networkResponse.newBuilder()
+                .body(responseBodyString.toResponseBody(responseBody.contentType()))
+                .header(
+                    HEADER_CACHE_CONTROL,
+                    "max-age=${TimeUnit.MINUTES.toSeconds(storageService.interceptorCacheAge)}"
+                )
+                .build()
+        } catch (e: IOException) {
+            // Handle network failure due to connectivity issues
+            getCachedResponse(modifiedRequest, cacheKey, timestampKey)
+                ?: throw IOException("No Network Connection", e)
+        } catch (e: SocketTimeoutException) {
+            // Handle network failure due to timeout
+            getCachedResponse(modifiedRequest, cacheKey, timestampKey)
+                ?: throw IOException("Network request timed out", e)
         }
-
-        return networkResponse.newBuilder()
-            .body(responseBodyString.toResponseBody(responseBody.contentType()))
-            .header(
-                HEADER_CACHE_CONTROL,
-                "max-age=${TimeUnit.MINUTES.toSeconds(storageService.interceptorCacheAge)}"
-            )
-            .build()
     }
 
 
