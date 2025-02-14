@@ -82,7 +82,15 @@ class CacheInterceptor(
 
         // Skip caching for non-GET requests
         if (modifiedRequest.method != "GET") {
-            return chain.proceed(modifiedRequest)
+            return try {
+                chain.proceed(modifiedRequest)
+            } catch (e: IOException) {
+                // Handle network failure due to connectivity issues
+                throw IOException("No Network Connection", e)
+            } catch (e: SocketTimeoutException) {
+                // Handle network failure due to timeout
+                throw SocketTimeoutException("Network request timed out")
+            }
         }
 
         val cacheKey = generateCacheKey(sanitizedUrl)
@@ -120,7 +128,7 @@ class CacheInterceptor(
         } catch (e: SocketTimeoutException) {
             // Handle network failure due to timeout
             getCachedResponse(modifiedRequest, cacheKey, timestampKey)
-                ?: throw IOException("Network request timed out", e)
+                ?: throw SocketTimeoutException("Network request timed out")
         }
     }
 
