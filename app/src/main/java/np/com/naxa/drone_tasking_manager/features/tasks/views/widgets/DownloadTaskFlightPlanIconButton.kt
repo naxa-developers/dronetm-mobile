@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
+import np.com.naxa.drone_tasking_manager.features.tasks.utils.TaskActionPlanFileUtils
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskFlightPlanDownloadState
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
@@ -59,7 +60,16 @@ fun DownloadTaskFlightPlanIconButton(
     val downloadState by tasksViewModel.taskFlightPlanDownloadState.collectAsState()
     var downloading by remember { mutableStateOf(false) }
     var progress by remember { mutableFloatStateOf(0f) }
-    var file: File? by remember { mutableStateOf(null) }
+    var file: File? by remember {
+        mutableStateOf(
+            if (task.id != null) TaskActionPlanFileUtils.downloadedFileOf(
+                context,
+                task.id
+            ) else null
+        )
+    }
+
+    var showAlreadyDownloadedAlertDialog by remember { mutableStateOf(false) }
 
 
     val initiateDownload = remember(context) {
@@ -194,11 +204,12 @@ fun DownloadTaskFlightPlanIconButton(
                 return@IconButton
             }
 
-            navigationEventsViewModel.sendEvent(
-                DroneTMAppNavigationEvent.OnNavigateToDeviceConnection(
-                    route = Routes.FileTransfer
-                )
-            )
+            // navigationEventsViewModel.sendEvent(
+            //     DroneTMAppNavigationEvent.OnNavigateToDeviceConnection(
+            //         route = Routes.FileTransfer
+            //     )
+            // )
+            showAlreadyDownloadedAlertDialog = true
         }
     ) {
         Box(
@@ -216,7 +227,7 @@ fun DownloadTaskFlightPlanIconButton(
 
                 Crossfade(
                     modifier = Modifier.align(Alignment.Center),
-                    targetState = progress > 0,
+                    targetState = progress > 0 || file != null,
                     label = "Progress Text and Icon Blink"
                 ) { inProgress ->
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -257,5 +268,24 @@ fun DownloadTaskFlightPlanIconButton(
                 )
             }
         }
+    }
+
+    if (showAlreadyDownloadedAlertDialog) {
+        TaskFlightPlanAlreadyDownloadedAlertDialog(
+            onDismissRequest = {
+                showAlreadyDownloadedAlertDialog = false
+            },
+            onDownload = {
+                checkAndRequestStorageRelatedPermissions()
+            },
+            onTransfer = {
+                if (file == null) return@TaskFlightPlanAlreadyDownloadedAlertDialog
+                navigationEventsViewModel.sendEvent(
+                    DroneTMAppNavigationEvent.OnNavigateToDeviceConnection(
+                        route = Routes.FileTransfer
+                    )
+                )
+            }
+        )
     }
 }

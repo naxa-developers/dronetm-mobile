@@ -509,10 +509,10 @@ fun Response<ResponseBody>.fileName(): String? {
 /**
  * Convert MediaStore URI to File
  */
-fun Uri.getFileFromMediaStorage(context: Context): File? {
+fun Uri.getFileFromMediaStorage(context: Context, fileName: String? = null): File? {
     val inputStream = context.contentResolver.openInputStream(this) ?: return null
-    val fileName = getFileName(context, this)
-    val file = File(context.cacheDir, fileName)
+    val name = fileName ?: getFileName(context, this)
+    val file = File(context.cacheDir, name)
 
     inputStream.use { input ->
         FileOutputStream(file).use { output ->
