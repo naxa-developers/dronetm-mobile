@@ -1,5 +1,6 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.repositories
 
+import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.os.Build
@@ -337,6 +338,41 @@ class TasksRepositoryImpl @Inject constructor(
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                             val resolver = context.contentResolver
+
+                            // First, check and delete existing file
+                            val selection =
+                                "${MediaStore.Downloads.DISPLAY_NAME} = ? AND ${MediaStore.Downloads.RELATIVE_PATH} = ?"
+                            val selectionArgs = arrayOf(fileName, "Download/DroneTM/$taskId/")
+
+                            try {
+                                resolver.query(
+                                    MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                                    arrayOf(MediaStore.Downloads._ID),
+                                    selection,
+                                    selectionArgs,
+                                    null
+                                )?.use { cursor ->
+                                    while (cursor.moveToNext()) {
+                                        val id =
+                                            cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Downloads._ID))
+                                        val deleteUri = ContentUris.withAppendedId(
+                                            MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                                            id
+                                        )
+                                        resolver.delete(deleteUri, null, null)
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                return@flow emit(
+                                    DownloadResponse.Error(
+                                        ErrorResponse.parseErrorBody(
+                                            "Failed to delete existing file: ${e.message}"
+                                        ).getErrorMessage()
+                                    )
+                                )
+                            }
+
+                            // Now proceed with creating the new file
                             val contentValues = ContentValues().apply {
                                 put(MediaStore.Downloads.DISPLAY_NAME, fileName)
                                 put(
@@ -390,7 +426,7 @@ class TasksRepositoryImpl @Inject constructor(
                                 )
                             )
 
-                            uri.getFileFromMediaStorage(context)?.let {
+                            uri.getFileFromMediaStorage(context, fileName)?.let {
                                 return@flow emit(
                                     DownloadResponse.Completed(it)
                                 )
@@ -406,29 +442,65 @@ class TasksRepositoryImpl @Inject constructor(
                                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                             val droneTmDirectory = File(downloadsDir, "DroneTM")
                             if (!droneTmDirectory.exists()) droneTmDirectory.mkdir()
-                            val file = File(droneTmDirectory, fileName)
+                            val droneTmTaskDirectory = File(droneTmDirectory, taskId)
+                            if (!droneTmTaskDirectory.exists()) droneTmTaskDirectory.mkdir()
+                            val file = File(droneTmTaskDirectory, fileName)
 
-                            // Write the downloaded content to the temporary file
-                            FileOutputStream(file).use { output ->
-                                inputStream.use { input ->
-                                    val buffer = ByteArray(bufferSize)
-                                    var bytes = input.read(buffer)
+                            // Delete existing file if it exists
+                            if (file.exists()) {
+                                try {
+                                    val deleted = file.delete()
+                                    if (!deleted) {
+                                        return@flow emit(
+                                            DownloadResponse.Error(
+                                                ErrorResponse.parseErrorBody(
+                                                    "Failed to delete existing file"
+                                                ).getErrorMessage()
+                                            )
+                                        )
+                                    }
+                                } catch (e: Exception) {
+                                    return@flow emit(
+                                        DownloadResponse.Error(
+                                            ErrorResponse.parseErrorBody(
+                                                "Error deleting existing file: ${e.message}"
+                                            ).getErrorMessage()
+                                        )
+                                    )
+                                }
+                            }
 
-                                    // Read and write the content in chunks
-                                    while (bytes >= 0) {
-                                        output.write(buffer, 0, bytes)
-                                        bytesWritten += bytes
-                                        bytes = input.read(buffer)
+                            // Write the downloaded content to the file
+                            try {
+                                FileOutputStream(file).use { output ->
+                                    inputStream.use { input ->
+                                        val buffer = ByteArray(bufferSize)
+                                        var bytes = input.read(buffer)
 
-                                        // Emit progress of the download
-                                        val progress = if (totalBytes > 0) {
-                                            bytesWritten.toFloat() / totalBytes.toFloat()
-                                        } else {
-                                            -1f
+                                        // Read and write the content in chunks
+                                        while (bytes >= 0) {
+                                            output.write(buffer, 0, bytes)
+                                            bytesWritten += bytes
+                                            bytes = input.read(buffer)
+
+                                            // Emit progress of the download
+                                            val progress = if (totalBytes > 0) {
+                                                bytesWritten.toFloat() / totalBytes.toFloat()
+                                            } else {
+                                                -1f
+                                            }
+                                            emit(DownloadResponse.Downloading(progress))
                                         }
-                                        emit(DownloadResponse.Downloading(progress))
                                     }
                                 }
+                            } catch (e: Exception) {
+                                return@flow emit(
+                                    DownloadResponse.Error(
+                                        ErrorResponse.parseErrorBody(
+                                            "Error writing file: ${e.message}"
+                                        ).getErrorMessage()
+                                    )
+                                )
                             }
 
                             return@flow emit(
