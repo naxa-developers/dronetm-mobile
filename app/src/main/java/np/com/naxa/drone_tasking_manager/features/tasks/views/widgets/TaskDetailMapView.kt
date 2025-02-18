@@ -319,7 +319,7 @@ fun TaskDetailMapView(
                 },
             cameraPositionState = cameraPositionState,
             enableRotateGestures = false,
-            onMapReady = { libre, mapview ->
+            onMapReady = { libre, _ ->
                 libreMap = libre
 
                 val bounds = task.geometry?.properties?.bbox
@@ -520,7 +520,6 @@ fun TaskDetailMapView(
                 when (it) {
                     TakeOffPointChangeOptions.Drag -> {
                         draggable = true
-                        Log.d("MapClick", "Map clicked at: Drag ${draggable}")
                     }
 
                     TakeOffPointChangeOptions.CurrentLocation -> {
