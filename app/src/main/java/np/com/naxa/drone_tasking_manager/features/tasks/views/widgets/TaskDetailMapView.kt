@@ -154,6 +154,34 @@ fun TaskDetailMapView(
     // Map Click Listener
     DisposableEffect(libreMap) {
         val clickListener = OnMapClickListener { latLng ->
+
+            if (draggable) {
+                updatedTakeOffPointLatLng = latLng
+                showTakeOffPointUpdateAlertDialog = true
+
+                tasksViewModel.triggerEvent(
+                    TasksEvent.DragTakeOffPoint(
+                        latLng = latLng,
+                        onFeatureCollectionUpdated = { features ->
+                            applyWaypointsLineLayer(
+                                context,
+                                features,
+                                libreMap
+                            )
+                            applyWaypointsCircleLayer(
+                                context,
+                                features,
+                                libreMap
+                            )
+                        }
+                    )
+                )
+
+                showTakeOffPointUpdateAlertDialog = true
+
+                return@OnMapClickListener true
+            }
+
             val point = libreMap?.projection?.toScreenLocation(latLng)
             val queried = point?.let {
                 libreMap?.queryRenderedFeatures(

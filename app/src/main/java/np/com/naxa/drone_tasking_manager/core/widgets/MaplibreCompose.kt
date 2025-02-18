@@ -9,7 +9,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
@@ -55,7 +54,7 @@ fun MaplibreCompose(
     enableCompass: Boolean = false,
     enableAttribution: Boolean = false,
     enableLogo: Boolean = false,
-    enableLocationComponent: Boolean = false,
+    enableLocationComponent: Boolean = false
 ) {
     val scope = rememberCoroutineScope()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
