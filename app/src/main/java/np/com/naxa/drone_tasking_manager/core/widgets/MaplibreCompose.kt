@@ -56,6 +56,8 @@ fun MaplibreCompose(
     enableAttribution: Boolean = false,
     enableLogo: Boolean = false,
     enableLocationComponent: Boolean = false,
+    addOnMapClickListener: (LatLng) -> Unit = {},
+    enableOnMapClickListener : Boolean = false,
 ) {
     val scope = rememberCoroutineScope()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -128,6 +130,13 @@ fun MaplibreCompose(
                         map.addOnCameraIdleListener {
                             scope.launch {
                                 cameraPositionState.value = map.cameraPosition
+                            }
+                        }
+
+                        if(enableOnMapClickListener) {
+                            map.addOnMapClickListener { point ->
+                                addOnMapClickListener(point)
+                                true
                             }
                         }
                     }

@@ -319,7 +319,7 @@ fun TaskDetailMapView(
                 },
             cameraPositionState = cameraPositionState,
             enableRotateGestures = false,
-            onMapReady = { libre, _ ->
+            onMapReady = { libre, mapview ->
                 libreMap = libre
 
                 val bounds = task.geometry?.properties?.bbox
@@ -341,6 +341,42 @@ fun TaskDetailMapView(
                         500
                     )
                 }
+
+            },
+
+            enableOnMapClickListener = true,
+            addOnMapClickListener = {latLng ->
+
+                Log.d("MapClick", "Map clicked at: $latLng")
+
+                if(draggable) {
+                latLng.let {
+                    updatedTakeOffPointLatLng = it
+                    showTakeOffPointUpdateAlertDialog = true
+
+                    tasksViewModel.triggerEvent(
+                        TasksEvent.DragTakeOffPoint(
+                            latLng = it,
+                            onFeatureCollectionUpdated = { features ->
+                                applyWaypointsLineLayer(
+                                    context,
+                                    features,
+                                    libreMap
+                                )
+                                applyWaypointsCircleLayer(
+                                    context,
+                                    features,
+                                    libreMap
+                                )
+                            }
+                        )
+                    )
+
+                    showTakeOffPointUpdateAlertDialog = true
+                }
+
+                }
+
             }
         )
 
@@ -484,6 +520,7 @@ fun TaskDetailMapView(
                 when (it) {
                     TakeOffPointChangeOptions.Drag -> {
                         draggable = true
+                        Log.d("MapClick", "Map clicked at: Drag ${draggable}")
                     }
 
                     TakeOffPointChangeOptions.CurrentLocation -> {
