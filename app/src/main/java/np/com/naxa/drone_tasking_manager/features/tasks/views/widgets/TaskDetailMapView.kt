@@ -2,6 +2,7 @@ package np.com.naxa.drone_tasking_manager.features.tasks.views.widgets
 
 
 import android.Manifest
+import android.R.style
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PointF
@@ -9,6 +10,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.Keep
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +38,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
 import com.google.gson.JsonObject
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.R
 import np.com.naxa.drone_tasking_manager.core.widgets.MaplibreCompose
@@ -44,6 +48,7 @@ import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskWayPointsOrWayLinesState
 import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
+import np.com.naxa.drone_tasking_manager.utils.DebouncedAction
 import np.com.naxa.drone_tasking_manager.utils.LatLngUtils
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
@@ -56,6 +61,7 @@ import org.maplibre.android.style.layers.LineLayer
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.layers.PropertyValue
 import org.maplibre.android.style.layers.SymbolLayer
+import org.maplibre.android.style.layers.TransitionOptions
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
@@ -90,6 +96,9 @@ fun TaskDetailMapView(
     var infoJsonObject: JsonObject? by remember { mutableStateOf(null) }
     var showInfoBottomSheet by remember { mutableStateOf(false) }
     val infoSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+
+
+    var debouncedFeatures by remember { mutableStateOf(FeatureCollection.fromFeatures(emptyList())) }
 
 
     val cameraPositionState = rememberCameraPosition(
@@ -382,13 +391,19 @@ fun TaskDetailMapView(
         ) {
             TaskWaypointAngleSlider(
                 onAngleChanged = {
+
+
                     tasksViewModel.triggerEvent(
                         TasksEvent.RotateWayPointsOrWayLines(
                             angle = it,
                             centroid = task.centroid,
                             onRotatedSuccess = { features ->
-                                applyWaypointsLineLayer(context, features, libreMap)
-                                applyWaypointsCircleLayer(context, features, libreMap)
+
+                                debouncedFeatures = features
+
+//                                applyWaypointsLineLayer(context, features, libreMap)
+//                                applyWaypointsCircleLayer(context, features, libreMap)
+
                             }
                         )
                     )
@@ -522,6 +537,11 @@ fun TaskDetailMapView(
                 }
             }
         )
+
+        DebouncedAction(debouncedFeatures, debounceMillis = 50L) { features ->
+            applyWaypointsLineLayer(context, features, libreMap)
+            applyWaypointsCircleLayer(context, features, libreMap)
+        }
     }
 }
 
@@ -638,6 +658,7 @@ private fun applyWaypointsLineLayer(
 ) {
     if (libreMap == null) return
 
+
     val waypointsLineSourceId = "task-waypoints-line-geojson-source--"
     val waypointsLineLayerId = "task-waypoints-line-layer--"
 
@@ -664,15 +685,15 @@ private fun applyWaypointsLineLayer(
             Feature.fromGeometry(lineString)
         )
     ).also {
+        libreMap.style?.transition = TransitionOptions(500, 500, true)
         libreMap.style?.addLayer(
             LineLayer(
                 waypointsLineLayerId,
                 waypointsLineSourceId,
             ).apply {
 
-                withProperties(
+                withProperties()
 
-                )
                 val propertyValues = mutableListOf<PropertyValue<*>>()
 
                 propertyValues.addAll(
@@ -696,9 +717,13 @@ private fun applyWaypointsLineLayer(
                 withProperties(*propertyValues.toTypedArray())
             }
         )
+
+
     }
 
+
     applyWaypointsArrowLayer(context, coordinates, libreMap)
+
 }
 
 private fun applyWaypointsArrowLayer(
@@ -707,6 +732,7 @@ private fun applyWaypointsArrowLayer(
     libreMap: MapLibreMap? = null
 ) {
     if (libreMap == null) return
+
     if (coordinates.size < 4) return
 
     val waypointsArrowIndicatorSourceId = "task-waypoints-arrow-indicator-geojson-source--"
