@@ -28,7 +28,10 @@ fun ProjectGeometry.toFeatureJsonStr(properties: Map<*, *>? = null): String {
             "project_boundary" to true
         )),
         "geometry" to mapOf(
-            "type" to geometry?.type,
+            "type" to if(geometry?.type.equals("ST_Polygon")) "Polygon"
+            else if(geometry?.type.equals("ST_MultiPolygon")) "MultiPolygon"
+            else if(geometry?.type.equals("ST_Point")) "Point"
+            else geometry?.type,
             "coordinates" to geometry?.coordinates
         )
     )

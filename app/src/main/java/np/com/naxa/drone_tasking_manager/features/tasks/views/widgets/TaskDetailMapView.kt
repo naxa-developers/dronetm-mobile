@@ -2,7 +2,6 @@ package np.com.naxa.drone_tasking_manager.features.tasks.views.widgets
 
 
 import android.Manifest
-import android.R.style
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PointF
@@ -10,7 +9,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.Keep
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,12 +36,12 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
 import com.google.gson.JsonObject
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.R
 import np.com.naxa.drone_tasking_manager.core.widgets.MaplibreCompose
 import np.com.naxa.drone_tasking_manager.core.widgets.rememberCameraPosition
+import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectGeometry
+import np.com.naxa.drone_tasking_manager.features.projects.models.toFeatureJsonStr
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskWayPointsOrWayLinesState
@@ -57,7 +55,9 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.OnMapClickListener
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
+import org.maplibre.android.style.layers.FillLayer
 import org.maplibre.android.style.layers.LineLayer
+import org.maplibre.android.style.layers.PaintPropertyValue
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.layers.PropertyValue
 import org.maplibre.android.style.layers.SymbolLayer
@@ -275,6 +275,71 @@ fun TaskDetailMapView(
         }
     }
 
+
+    fun addTaskFillLayer(context: Context, libreMap: MapLibreMap?, task: ProjectTask, ) {
+
+        if (libreMap == null) return
+
+        val sourceId = "task-perimeter-geometry---"
+        val tasksFillLayerId = "task-perimeter-fill-layer---"
+        val boundaryLineLayerId = "task-perimeter-boundary-line-layer---"
+
+        if (libreMap.style?.getSource(sourceId) != null) {
+
+            if (libreMap.style?.getLayer(tasksFillLayerId) != null) {
+                libreMap.style?.removeLayer(tasksFillLayerId)
+            }
+
+            if (libreMap.style?.getLayer(boundaryLineLayerId) != null) {
+                libreMap.style?.removeLayer(boundaryLineLayerId)
+            }
+
+            libreMap.style?.removeSource(sourceId)
+        }
+
+        val features = mutableListOf<Feature>()
+        if (task.geometry?.geometry != null) {
+            features.add(Feature.fromJson(task.geometry. toFeatureJsonStr()))
+        }
+        libreMap.style?.addSource(
+            GeoJsonSource(
+                sourceId,
+                features = FeatureCollection.fromFeatures(features),
+            )
+        ).also {
+            libreMap.style?.addLayer(
+                FillLayer(
+                    tasksFillLayerId,
+                    sourceId,
+                ).apply {
+
+                    val propertyValues = mutableListOf<PropertyValue<*>>()
+
+                    propertyValues.add(PaintPropertyValue("fill-color", "#D73F3F"))
+                    propertyValues.add(PaintPropertyValue("fill-opacity", 0.2))
+
+                    withProperties(*propertyValues.toTypedArray())
+                }
+            )
+
+            libreMap.style?.addLayer(
+                LineLayer(
+                    boundaryLineLayerId,
+                    sourceId,
+                ).apply {
+
+                    val propertyValues = mutableListOf<PropertyValue<*>>()
+
+                    propertyValues.add(PaintPropertyValue("line-color", "#D73F3F"))
+
+                    withProperties(*propertyValues.toTypedArray())
+                    withFilter(Expression.has("project_boundary"))
+                }
+            )
+        }
+    }
+
+
     Box(modifier = modifier) {
         MaplibreCompose(
             modifier = Modifier
@@ -378,6 +443,9 @@ fun TaskDetailMapView(
                         500
                     )
                 }
+
+                addTaskFillLayer(context, libreMap, task)
+
             }
         )
 
