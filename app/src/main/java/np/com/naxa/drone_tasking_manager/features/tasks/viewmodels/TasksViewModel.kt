@@ -556,24 +556,34 @@ class TasksViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val rotated = centroid?.let {
                 FeatureCollection.fromFeatures(
-                    _changeableFeatureCollection?.features()?.filter{feature ->
-
+                    _changeableFeatureCollection?.features()?.mapIndexed { index, feature ->
+                        // Pair the feature with its index for filtering
+                        index to feature
+                    }?.filter{(index, feature) ->
+                        // Filter out index 0 (Takeoff point) and apply point rotation check
                         when(val geometry = feature.geometry()){
                             is Point -> {
-                                LatLngUtils.isPointInsidePolygonWithBuffer(geometry.rotate(
-                                    Point.fromLngLat(
-                                        it.coordinates.first(),
-                                        it.coordinates.last()
-                                    ), angle.toDouble()
+                                if(index != 0) {
+                                    LatLngUtils.isPointInsidePolygonWithBuffer(
+                                        geometry.rotate(
+                                            Point.fromLngLat(
+                                                it.coordinates.first(),
+                                                it.coordinates.last()
+                                            ), angle.toDouble()
 
-                                ), taskPolygon)
+                                        ), taskPolygon
+                                    )
+                                }else{
+                                    true
+                                }
                             }else -> true
                         }
-                    }?.map { feature ->
+                    }?.map { (index, feature) ->
 
                         Feature.fromGeometry(
                             when (val geometry = feature.geometry()) {
                                 is Point -> {
+                                    if(index != 0){
                                         geometry.rotate(
                                             Point.fromLngLat(
                                                 it.coordinates.first(),
@@ -581,6 +591,10 @@ class TasksViewModel @Inject constructor(
                                             ), angle.toDouble()
 
                                         )
+                                    }else {
+                                        geometry
+                                    }
+
                                 }
 
                                 else -> geometry
