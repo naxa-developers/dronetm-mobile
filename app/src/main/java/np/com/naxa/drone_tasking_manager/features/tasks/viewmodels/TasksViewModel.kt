@@ -268,7 +268,8 @@ class TasksViewModel @Inject constructor(
                 downloadTaskFlightPlan(
                     taskId = event.taskId,
                     projectId = event.projectId,
-                    isWayPoints = event.isWayPoints ?: _isWayPoints ?: true
+                    isWayPoints = event.isWayPoints ?: _isWayPoints ?: true,
+                    rotationAngle = event.rotationAngle
                 )
             }
         }
@@ -772,6 +773,7 @@ class TasksViewModel @Inject constructor(
         taskId: String,
         projectId: String,
         isWayPoints: Boolean = true,
+        rotationAngle: Int
     ) {
         viewModelScope.launch(Dispatchers.IO) {
 
@@ -781,6 +783,7 @@ class TasksViewModel @Inject constructor(
                 taskId = taskId,
                 projectId = projectId,
                 mode = if (isWayPoints) "waypoints" else "waylines",
+                rotationAngle = rotationAngle
             ).collect { result ->
                 when (result) {
                     is DownloadResponse.Downloading -> {

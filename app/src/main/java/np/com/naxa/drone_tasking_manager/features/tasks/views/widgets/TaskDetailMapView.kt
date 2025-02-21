@@ -78,7 +78,8 @@ import kotlin.random.Random
 fun TaskDetailMapView(
     modifier: Modifier = Modifier,
     task: ProjectTask,
-    onWaypointsLoaded: (Int?) -> Unit = {}
+    onWaypointsLoaded: (Int?) -> Unit = {},
+    onRotationAngleChanged: (Int) -> Unit = {}
 ) {
 
     val context = LocalContext.current
@@ -271,6 +272,14 @@ fun TaskDetailMapView(
                 val error = (waypointsOrWayLinesState as TaskWayPointsOrWayLinesState.Error).message
                 Toast.makeText(context, error, Toast.LENGTH_LONG).show()
             }
+        }
+    }
+
+    LaunchedEffect(angle) {
+        angle.let {
+            onRotationAngleChanged.invoke(it.roundToInt())
+            Log.d("TaskDetailsMapView", "Rotation angle Changed ===TaskDetailsMapView=== Angle: $it")
+//            Toast.makeText(context, "Rotation angle Changed ====== Angle: $it", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -478,7 +487,6 @@ fun TaskDetailMapView(
             TaskWaypointAngleSlider(
                 onAngleChanged = {
 
-
                     tasksViewModel.triggerEvent(
                         TasksEvent.RotateWayPointsOrWayLines(
                             angle = it,
@@ -496,7 +504,8 @@ fun TaskDetailMapView(
                     )
                     angle = it
                 },
-                onSaved = { angle ->
+                onSaved = { angle1 ->
+                    angle = angle1
                     scope.launch {
                         if (task.id == null || task.projectId == null) return@launch
 
@@ -504,7 +513,7 @@ fun TaskDetailMapView(
                             TasksEvent.FetchWayPointsOrWayLines(
                                 taskId = task.id,
                                 projectId = task.projectId,
-                                rotationAngle = angle.roundToInt(),
+                                rotationAngle = angle1.roundToInt(),
                                 download = false,
                                 isWayPoints = isWaypoints,
                                 forceRefresh = true

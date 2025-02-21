@@ -200,5 +200,6 @@ interface TasksRepository {
         taskId: String,
         projectId: String,
         mode: String = "waypoints",
+        rotationAngle: Int
     ): Flow<DownloadResponse>
 }
