@@ -24,6 +24,7 @@ import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskFl
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskLockOrUnlockState
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskUnFlyableRequestState
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskWayPointsOrWayLinesState
+import np.com.naxa.drone_tasking_manager.utils.LatLngUtils
 import np.com.naxa.drone_tasking_manager.utils.rotate
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.geojson.Feature
@@ -33,6 +34,16 @@ import java.io.File
 import javax.inject.Inject
 import kotlin.Double
 import kotlin.collections.ArrayList
+import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.acos
+import kotlin.math.asin
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.min
+import kotlin.math.pow
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 @HiltViewModel
 class TasksViewModel @Inject constructor(
@@ -505,56 +516,6 @@ class TasksViewModel @Inject constructor(
     }
 
 
-    /**
-     * Determines whether a given point lies inside a polygon using the ray-casting algorithm.
-     *
-     * This function checks if a point is within a polygon by counting the number of times a ray
-     * originating from the point intersects the polygon's edges. If the number of intersections is odd,
-     * the point is inside; otherwise, it's outside. This implementation specifically handles
-     * polygons defined by their outer boundary.
-     *
-     * @param point The point (represented as LatLng) to be checked.
-     * @param polygon The polygon (represented as a serialized polygon with no holes) to check against.
-     * @return `true` if the point is inside the polygon, `false` otherwise.
-     *
-     * @throws IllegalArgumentException if the polygon does not have at least 3 coordinates or if the polygon is null
-     * @throws IllegalStateException if the polygon's coordinates are not valid LatLng points
-     *
-     * @sample
-     * val polygon = Polygon(listOf(
-     *     LatLng(40.0, -70.0),
-     *     LatLng(41.0, -70.0),
-     *     LatLng(41.0, -71.0),
-     *     LatLng(40.0, -71.0),
-     *     LatLng(40.0, -70.0)
-     * ))
-     * val pointInside = LatLng(40.5, -70.5)
-     * val pointOutside = LatLng(39.0, -70.5)
-     * println("Point inside: ${isPointInsidePolygonManual(pointInside, polygon)}") // Output: Point inside: true
-     * println("Point outside: ${isPointInsidePolygonManual(pointOutside, polygon)}") // Output: Point outside: false
-     */
-    fun isPointInsidePolygon(point: Point, taskPolygon: ArrayList<ArrayList<ArrayList<Double>>>): Boolean {
-        val coordinates = taskPolygon[0] // Outer boundary
-        var inside = false
-        var j = coordinates.size - 1
-
-        for (i in coordinates.indices) {
-            val xi = coordinates[i][0]
-            val yi = coordinates[i][1]
-            val xj = coordinates[j][0]
-            val yj = coordinates[j][1]
-
-            if ((yi > point.latitude()) != (yj > point.latitude()) &&
-                (point.longitude() < (xj - xi) * (point.latitude() - yi) / (yj - yi) + xi)
-            ) {
-                inside = !inside
-            }
-            j = i
-        }
-
-        return inside
-    }
-
 
     /**
      * Rotates the features in the current feature collection around a given centroid by a specified angle.
@@ -598,7 +559,7 @@ class TasksViewModel @Inject constructor(
 
                         when(val geometry = feature.geometry()){
                             is Point -> {
-                                isPointInsidePolygon(geometry.rotate(
+                                LatLngUtils.isPointInsidePolygonWithBuffer(geometry.rotate(
                                     Point.fromLngLat(
                                         it.coordinates.first(),
                                         it.coordinates.last()
