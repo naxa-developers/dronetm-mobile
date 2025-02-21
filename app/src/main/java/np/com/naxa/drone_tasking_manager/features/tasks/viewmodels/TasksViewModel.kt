@@ -31,6 +31,8 @@ import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.Point
 import java.io.File
 import javax.inject.Inject
+import kotlin.Double
+import kotlin.collections.ArrayList
 
 @HiltViewModel
 class TasksViewModel @Inject constructor(
@@ -213,6 +215,7 @@ class TasksViewModel @Inject constructor(
                 rotate(
                     angle = event.angle,
                     centroid = event.centroid,
+                    taskPolygon = event.taskPolygon,
                     onRotatedSuccess = event.onRotatedSuccess
                 )
             }
@@ -501,6 +504,58 @@ class TasksViewModel @Inject constructor(
         }
     }
 
+
+    /**
+     * Determines whether a given point lies inside a polygon using the ray-casting algorithm.
+     *
+     * This function checks if a point is within a polygon by counting the number of times a ray
+     * originating from the point intersects the polygon's edges. If the number of intersections is odd,
+     * the point is inside; otherwise, it's outside. This implementation specifically handles
+     * polygons defined by their outer boundary.
+     *
+     * @param point The point (represented as LatLng) to be checked.
+     * @param polygon The polygon (represented as a serialized polygon with no holes) to check against.
+     * @return `true` if the point is inside the polygon, `false` otherwise.
+     *
+     * @throws IllegalArgumentException if the polygon does not have at least 3 coordinates or if the polygon is null
+     * @throws IllegalStateException if the polygon's coordinates are not valid LatLng points
+     *
+     * @sample
+     * val polygon = Polygon(listOf(
+     *     LatLng(40.0, -70.0),
+     *     LatLng(41.0, -70.0),
+     *     LatLng(41.0, -71.0),
+     *     LatLng(40.0, -71.0),
+     *     LatLng(40.0, -70.0)
+     * ))
+     * val pointInside = LatLng(40.5, -70.5)
+     * val pointOutside = LatLng(39.0, -70.5)
+     * println("Point inside: ${isPointInsidePolygonManual(pointInside, polygon)}") // Output: Point inside: true
+     * println("Point outside: ${isPointInsidePolygonManual(pointOutside, polygon)}") // Output: Point outside: false
+     */
+    fun isPointInsidePolygon(point: Point, taskPolygon: ArrayList<ArrayList<ArrayList<Double>>>): Boolean {
+        val coordinates = taskPolygon[0] // Outer boundary
+        var inside = false
+        var j = coordinates.size - 1
+
+        for (i in coordinates.indices) {
+            val xi = coordinates[i][0]
+            val yi = coordinates[i][1]
+            val xj = coordinates[j][0]
+            val yj = coordinates[j][1]
+
+            if ((yi > point.latitude()) != (yj > point.latitude()) &&
+                (point.longitude() < (xj - xi) * (point.latitude() - yi) / (yj - yi) + xi)
+            ) {
+                inside = !inside
+            }
+            j = i
+        }
+
+        return inside
+    }
+
+
     /**
      * Rotates the features in the current feature collection around a given centroid by a specified angle.
      *
@@ -519,6 +574,7 @@ class TasksViewModel @Inject constructor(
     private fun rotate(
         angle: Float,
         centroid: Centroid? = null,
+        taskPolygon: ArrayList<ArrayList<ArrayList<Double>>>,
         onRotatedSuccess: (FeatureCollection) -> Unit
     ) {
         if (angle == 0f) {
@@ -538,15 +594,32 @@ class TasksViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val rotated = centroid?.let {
                 FeatureCollection.fromFeatures(
-                    _changeableFeatureCollection?.features()?.map { feature ->
-                        Feature.fromGeometry(
-                            when (val geometry = feature.geometry()) {
-                                is Point -> geometry.rotate(
+                    _changeableFeatureCollection?.features()?.filter{feature ->
+
+                        when(val geometry = feature.geometry()){
+                            is Point -> {
+                                isPointInsidePolygon(geometry.rotate(
                                     Point.fromLngLat(
                                         it.coordinates.first(),
                                         it.coordinates.last()
                                     ), angle.toDouble()
-                                )
+
+                                ), taskPolygon)
+                            }else -> true
+                        }
+                    }?.map { feature ->
+
+                        Feature.fromGeometry(
+                            when (val geometry = feature.geometry()) {
+                                is Point -> {
+                                        geometry.rotate(
+                                            Point.fromLngLat(
+                                                it.coordinates.first(),
+                                                it.coordinates.last()
+                                            ), angle.toDouble()
+
+                                        )
+                                }
 
                                 else -> geometry
                             },
@@ -554,6 +627,7 @@ class TasksViewModel @Inject constructor(
                             feature.id(),
                             feature.bbox()
                         )
+
                     }?.toTypedArray() ?: emptyArray()
                 )
             }

@@ -40,7 +40,6 @@ import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.R
 import np.com.naxa.drone_tasking_manager.core.widgets.MaplibreCompose
 import np.com.naxa.drone_tasking_manager.core.widgets.rememberCameraPosition
-import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectGeometry
 import np.com.naxa.drone_tasking_manager.features.projects.models.toFeatureJsonStr
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
@@ -276,7 +275,26 @@ fun TaskDetailMapView(
     }
 
 
-    fun addTaskFillLayer(context: Context, libreMap: MapLibreMap?, task: ProjectTask, ) {
+    /**
+     * Adds a fill layer and a boundary line layer to the map representing the perimeter of a given project task.
+     *
+     * This function handles the following:
+     * 1. **Checks for Map Availability:** Ensures that a valid `MapLibreMap` instance is provided. If not, it returns early.
+     * 2. **Layer and Source Management:** Checks if a source or layers with specific IDs related to task perimeters already exist. If they do, it removes them before adding new ones to prevent duplication.
+     *    - Source ID: "task-perimeter-geometry---"
+     *    - Fill Layer ID: "task-perimeter-fill-layer---"
+     *    - Boundary Line Layer ID: "task-perimeter-boundary-line-layer---"
+     * 3. **Feature Creation:** Extracts the geometry data from the `ProjectTask` object and converts it into a `Feature` to be added to the map.
+     * 4. **GeoJSON Source Creation:** Creates a `GeoJsonSource` using the extracted `Feature` and adds it to the map's style.
+     * 5. **Fill Layer Creation:** Adds a `FillLayer` to the map to visually represent the task's perimeter.
+     *    - Fill Color: #D0BCFF (light purple)
+     *    - Fill Opacity: 0.3 (semi-transparent)
+     * 6. **Boundary Line Layer Creation:** Adds a `LineLayer` to the map to represent the boundary line of the task's perimeter.
+     *    - Line Color: #D0BCFF (light purple)
+     *    - Filter: Only includes features with the property "project_boundary"
+     *
+     * @param libreMap The `Map */
+    fun addTaskFillLayer(libreMap: MapLibreMap?, task: ProjectTask ) {
 
         if (libreMap == null) return
 
@@ -315,8 +333,8 @@ fun TaskDetailMapView(
 
                     val propertyValues = mutableListOf<PropertyValue<*>>()
 
-                    propertyValues.add(PaintPropertyValue("fill-color", "#D73F3F"))
-                    propertyValues.add(PaintPropertyValue("fill-opacity", 0.2))
+                    propertyValues.add(PaintPropertyValue("fill-color", "#D0BCFF"))
+                    propertyValues.add(PaintPropertyValue("fill-opacity", 0.3))
 
                     withProperties(*propertyValues.toTypedArray())
                 }
@@ -330,7 +348,7 @@ fun TaskDetailMapView(
 
                     val propertyValues = mutableListOf<PropertyValue<*>>()
 
-                    propertyValues.add(PaintPropertyValue("line-color", "#D73F3F"))
+                    propertyValues.add(PaintPropertyValue("line-color", "#D0BCFF"))
 
                     withProperties(*propertyValues.toTypedArray())
                     withFilter(Expression.has("project_boundary"))
@@ -444,7 +462,7 @@ fun TaskDetailMapView(
                     )
                 }
 
-                addTaskFillLayer(context, libreMap, task)
+                addTaskFillLayer(libreMap, task)
 
             }
         )
@@ -465,6 +483,7 @@ fun TaskDetailMapView(
                         TasksEvent.RotateWayPointsOrWayLines(
                             angle = it,
                             centroid = task.centroid,
+                            taskPolygon = task.geometry?.geometry?.coordinates!!,
                             onRotatedSuccess = { features ->
 
                                 debouncedFeatures = features
