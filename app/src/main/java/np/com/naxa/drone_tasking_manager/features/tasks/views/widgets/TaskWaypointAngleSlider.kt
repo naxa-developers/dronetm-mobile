@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import np.com.naxa.drone_tasking_manager.core.widgets.CircularAngleSlider
+import np.com.naxa.drone_tasking_manager.utils.DebouncedAction
 import np.com.naxa.drone_tasking_manager.utils.round
 
 @Composable
@@ -41,11 +42,19 @@ fun TaskWaypointAngleSlider(
     modifier: Modifier = Modifier,
     onAngleChanged: ((Float) -> Unit)? = null,
     onSaved: ((Float) -> Unit)? = null,
-    onCanceled: (() -> Unit)? = null
+    onCanceled: (() -> Unit)? = null,
+    delay: Long = 25L
 ) {
 
     var visible by remember { mutableStateOf(false) }
     var angle by remember { mutableFloatStateOf(0f) }
+
+    DebouncedAction(
+        input = { angle },
+        debounceMillis = delay
+    ) { n ->
+        onAngleChanged?.invoke(n)
+    }
 
     Column(
         modifier = modifier,
@@ -79,7 +88,6 @@ fun TaskWaypointAngleSlider(
                     trackWidth = 14.dp,
                     onAngleChanged = {
                         angle = it
-                        onAngleChanged?.invoke(it)
                     }
                 )
 

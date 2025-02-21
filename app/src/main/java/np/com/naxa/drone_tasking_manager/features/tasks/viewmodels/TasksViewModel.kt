@@ -31,6 +31,7 @@ import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.Point
 import java.io.File
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 @HiltViewModel
 class TasksViewModel @Inject constructor(
@@ -138,6 +139,21 @@ class TasksViewModel @Inject constructor(
 
 
     /**
+     * The rotation of the object in radians.
+     *
+     * A value of `null` indicates that the object has no defined rotation.
+     * Otherwise, the value represents the rotation angle in radians.
+     *
+     * Rotation is typically applied around the Z-axis (for 2D) or around a defined
+     * axis in 3D space.  The interpretation of this rotation depends on the
+     * specific context in which this object is used.
+     */
+    private var _rotation: Int? = null
+    val rotation: Int?
+        get() = _rotation
+    fun updateRotation(angle: Int) = run { _rotation = angle }
+
+    /**
      * Handles events related to projects.
      *
      * This function receives a [TasksEvent] and performs the corresponding action.
@@ -163,6 +179,8 @@ class TasksViewModel @Inject constructor(
             }
 
             is TasksEvent.FetchTaskById -> {
+                _rotation = null
+                _taskPlanFile = null
                 fetchTask(
                     id = event.id,
                     forceRefresh = event.forceRefresh
@@ -189,10 +207,15 @@ class TasksViewModel @Inject constructor(
                     }
 
                     if (event.taskWayPointsOrWayLinesState) {
+                        _changeableFeatureCollection = null
+                        _featureCollection = null
+                        _isWayPoints = null
+                        _rotation = null
                         _taskWayPointsOrWayLinesState.emit(TaskWayPointsOrWayLinesState.Idle)
                     }
 
                     if (event.taskFlightPlanDownloadState) {
+                        _taskPlanFile = null
                         _taskFlightPlanDownloadState.emit(TaskFlightPlanDownloadState.Idle)
                     }
                 }
@@ -202,7 +225,7 @@ class TasksViewModel @Inject constructor(
                 fetchWayPointsOrWayLines(
                     taskId = event.taskId,
                     projectId = event.projectId,
-                    rotationAngle = event.rotationAngle,
+                    rotationAngle = event.rotationAngle ?: rotation ?: 0,
                     download = event.download,
                     isWayPoints = event.isWayPoints,
                     forceRefresh = event.forceRefresh
@@ -236,7 +259,7 @@ class TasksViewModel @Inject constructor(
                 updateTakeOffPoint(
                     taskId = event.taskId,
                     projectId = event.projectId,
-                    rotationAngle = event.rotationAngle,
+                    rotationAngle = event.rotationAngle ?: rotation ?: 0,
                     download = event.download,
                     isWayPoints = event.isWayPoints,
                     latitude = event.latitude,
@@ -396,9 +419,6 @@ class TasksViewModel @Inject constructor(
         forceRefresh: Boolean = false
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-
-            _taskPlanFile = null
-
             fetchTaskDetailUseCase.invoke(
                 taskId = id,
                 forceRefresh = forceRefresh,

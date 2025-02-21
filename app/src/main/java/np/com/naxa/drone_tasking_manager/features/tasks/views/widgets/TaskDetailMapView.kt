@@ -2,7 +2,6 @@ package np.com.naxa.drone_tasking_manager.features.tasks.views.widgets
 
 
 import android.Manifest
-import android.R.style
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PointF
@@ -10,7 +9,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.Keep
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,7 +23,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -38,8 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
 import com.google.gson.JsonObject
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.R
 import np.com.naxa.drone_tasking_manager.core.widgets.MaplibreCompose
@@ -48,7 +43,6 @@ import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskWayPointsOrWayLinesState
 import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
-import np.com.naxa.drone_tasking_manager.utils.DebouncedAction
 import np.com.naxa.drone_tasking_manager.utils.LatLngUtils
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
@@ -91,15 +85,10 @@ fun TaskDetailMapView(
     val waypointsOrWayLinesState by tasksViewModel.taskWayPointsOrWayLinesState.collectAsState()
 
     var isWaypoints by remember { mutableStateOf(false) }
-    var angle by remember { mutableFloatStateOf(0f) }
 
     var infoJsonObject: JsonObject? by remember { mutableStateOf(null) }
     var showInfoBottomSheet by remember { mutableStateOf(false) }
     val infoSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-
-
-    var debouncedFeatures by remember { mutableStateOf(FeatureCollection.fromFeatures(emptyList())) }
-
 
     val cameraPositionState = rememberCameraPosition(
         initialTarget = LatLng(27.82, 85.32),
@@ -391,27 +380,21 @@ fun TaskDetailMapView(
         ) {
             TaskWaypointAngleSlider(
                 onAngleChanged = {
-
-
                     tasksViewModel.triggerEvent(
                         TasksEvent.RotateWayPointsOrWayLines(
                             angle = it,
                             centroid = task.centroid,
                             onRotatedSuccess = { features ->
-
-                                debouncedFeatures = features
-
-//                                applyWaypointsLineLayer(context, features, libreMap)
-//                                applyWaypointsCircleLayer(context, features, libreMap)
-
+                                applyWaypointsLineLayer(context, features, libreMap)
+                                applyWaypointsCircleLayer(context, features, libreMap)
                             }
                         )
                     )
-                    angle = it
                 },
                 onSaved = { angle ->
                     scope.launch {
                         if (task.id == null || task.projectId == null) return@launch
+                        tasksViewModel.updateRotation(angle.roundToInt())
 
                         tasksViewModel.triggerEvent(
                             TasksEvent.FetchWayPointsOrWayLines(
@@ -456,7 +439,6 @@ fun TaskDetailMapView(
                         TasksEvent.FetchWayPointsOrWayLines(
                             taskId = task.id,
                             projectId = task.projectId,
-                            rotationAngle = angle.roundToInt(),
                             download = false,
                             isWayPoints = !wayLines,
                             forceRefresh = false
@@ -504,7 +486,6 @@ fun TaskDetailMapView(
                             projectId = task.projectId,
                             latitude = updatedTakeOffPointLatLng!!.latitude,
                             longitude = updatedTakeOffPointLatLng!!.longitude,
-                            rotationAngle = angle.roundToInt(),
                             download = false,
                             isWayPoints = isWaypoints,
                         )
@@ -537,11 +518,6 @@ fun TaskDetailMapView(
                 }
             }
         )
-
-        DebouncedAction(debouncedFeatures, debounceMillis = 50L) { features ->
-            applyWaypointsLineLayer(context, features, libreMap)
-            applyWaypointsCircleLayer(context, features, libreMap)
-        }
     }
 }
 
