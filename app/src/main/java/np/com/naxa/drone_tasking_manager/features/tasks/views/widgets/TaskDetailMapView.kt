@@ -38,6 +38,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.gson.JsonObject
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.R
+import np.com.naxa.drone_tasking_manager.core.widgets.GestureOverlay
 import np.com.naxa.drone_tasking_manager.core.widgets.MaplibreCompose
 import np.com.naxa.drone_tasking_manager.core.widgets.rememberCameraPosition
 import np.com.naxa.drone_tasking_manager.features.projects.models.toFeatureJsonStr
@@ -79,7 +80,8 @@ fun TaskDetailMapView(
     modifier: Modifier = Modifier,
     task: ProjectTask,
     onWaypointsLoaded: (Int?) -> Unit = {},
-    onRotationAngleChanged: (Int) -> Unit = {}
+    onRotationAngleChanged: (Int) -> Unit = {},
+    onRotationSliderEnabledFromMap: (Boolean) -> Unit = {}
 ) {
 
     val context = LocalContext.current
@@ -96,6 +98,8 @@ fun TaskDetailMapView(
     var infoJsonObject: JsonObject? by remember { mutableStateOf(null) }
     var showInfoBottomSheet by remember { mutableStateOf(false) }
     val infoSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+
+    var isRotationSliderVisible by remember { mutableStateOf(false) }
 
 
     var debouncedFeatures by remember { mutableStateOf(FeatureCollection.fromFeatures(emptyList())) }
@@ -277,11 +281,13 @@ fun TaskDetailMapView(
 
     LaunchedEffect(angle) {
         angle.let {
+//            isRotationSliderVisible = true
             onRotationAngleChanged.invoke(it.roundToInt())
             Log.d("TaskDetailsMapView", "Rotation angle Changed ===TaskDetailsMapView=== Angle: $it")
 //            Toast.makeText(context, "Rotation angle Changed ====== Angle: $it", Toast.LENGTH_SHORT).show()
         }
     }
+
 
 
     /**
@@ -476,6 +482,28 @@ fun TaskDetailMapView(
             }
         )
 
+        GestureOverlay(
+            angle = angle,
+            onRotationChanged = {
+                isRotationSliderVisible = true
+
+                tasksViewModel.triggerEvent(
+                    TasksEvent.RotateWayPointsOrWayLines(
+                        angle = it,
+                        centroid = task.centroid,
+                        taskPolygon = task.geometry?.geometry?.coordinates!!,
+                        onRotatedSuccess = { features ->
+
+                            debouncedFeatures = features
+
+                        }
+                    )
+                )
+                angle = it
+            }
+        )
+
+
         Row(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -485,6 +513,8 @@ fun TaskDetailMapView(
             verticalAlignment = Alignment.Bottom
         ) {
             TaskWaypointAngleSlider(
+//                enableVisibility = isRotationSliderVisible,
+//                initialAngle = angle,
                 onAngleChanged = {
 
                     tasksViewModel.triggerEvent(

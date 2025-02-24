@@ -38,14 +38,17 @@ import np.com.naxa.drone_tasking_manager.utils.round
 
 @Composable
 fun TaskWaypointAngleSlider(
+    enableVisibility: Boolean = false,
+    initialAngle: Float = 0f,
     modifier: Modifier = Modifier,
     onAngleChanged: ((Float) -> Unit)? = null,
     onSaved: ((Float) -> Unit)? = null,
     onCanceled: (() -> Unit)? = null
 ) {
 
-    var visible by remember { mutableStateOf(false) }
-    var angle by remember { mutableFloatStateOf(0f) }
+    var visible by remember { mutableStateOf(enableVisibility) }
+    var angle by remember { mutableFloatStateOf(initialAngle) }
+
 
     Column(
         modifier = modifier,

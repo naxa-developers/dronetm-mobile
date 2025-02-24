@@ -197,6 +197,7 @@ class TasksRepositoryImpl @Inject constructor(
                     projectId = projectId,
                     taskId = taskId,
                     rotationAngle = 360 - rotationAngle, //FE and BE uses 360 - angle to generate new files
+//                    rotationAngle = rotationAngle, //FE and BE uses 360 - angle to generate new files
                     download = download,
                     mode = "waypoints",
                     forceRefresh = forceRefresh
@@ -237,6 +238,7 @@ class TasksRepositoryImpl @Inject constructor(
                     projectId = projectId,
                     taskId = taskId,
                     rotationAngle = 360 - rotationAngle, //FE and BE uses 360 - angle to generate new files
+//                    rotationAngle = rotationAngle, //FE and BE uses 360 - angle to generate new files
                     download = download,
                     mode = "waylines",
                     forceRefresh = forceRefresh
