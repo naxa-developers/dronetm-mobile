@@ -23,7 +23,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -38,15 +37,12 @@ import com.google.android.gms.location.LocationServices
 import com.google.gson.JsonObject
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.R
-import np.com.naxa.drone_tasking_manager.core.widgets.GestureOverlay
 import np.com.naxa.drone_tasking_manager.core.widgets.MaplibreCompose
 import np.com.naxa.drone_tasking_manager.core.widgets.rememberCameraPosition
-import np.com.naxa.drone_tasking_manager.features.projects.models.toFeatureJsonStr
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskWayPointsOrWayLinesState
 import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
-import np.com.naxa.drone_tasking_manager.utils.DebouncedAction
 import np.com.naxa.drone_tasking_manager.utils.LatLngUtils
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
@@ -55,9 +51,7 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.OnMapClickListener
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
-import org.maplibre.android.style.layers.FillLayer
 import org.maplibre.android.style.layers.LineLayer
-import org.maplibre.android.style.layers.PaintPropertyValue
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.layers.PropertyValue
 import org.maplibre.android.style.layers.SymbolLayer
@@ -93,17 +87,12 @@ fun TaskDetailMapView(
     val waypointsOrWayLinesState by tasksViewModel.taskWayPointsOrWayLinesState.collectAsState()
 
     var isWaypoints by remember { mutableStateOf(false) }
-    var angle by remember { mutableFloatStateOf(0f) }
 
     var infoJsonObject: JsonObject? by remember { mutableStateOf(null) }
     var showInfoBottomSheet by remember { mutableStateOf(false) }
     val infoSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
 
     var isRotationSliderVisible by remember { mutableStateOf(false) }
-
-
-    var debouncedFeatures by remember { mutableStateOf(FeatureCollection.fromFeatures(emptyList())) }
-
 
     val cameraPositionState = rememberCameraPosition(
         initialTarget = LatLng(27.82, 85.32),
@@ -278,17 +267,6 @@ fun TaskDetailMapView(
             }
         }
     }
-
-    LaunchedEffect(angle) {
-        angle.let {
-//            isRotationSliderVisible = true
-            onRotationAngleChanged.invoke(it.roundToInt())
-            Log.d("TaskDetailsMapView", "Rotation angle Changed ===TaskDetailsMapView=== Angle: $it")
-//            Toast.makeText(context, "Rotation angle Changed ====== Angle: $it", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-
 
     /**
      * Adds a fill layer and a boundary line layer to the map representing the perimeter of a given project task.
@@ -523,27 +501,22 @@ fun TaskDetailMapView(
                             centroid = task.centroid,
                             taskPolygon = task.geometry?.geometry?.coordinates!!,
                             onRotatedSuccess = { features ->
-
-                                debouncedFeatures = features
-
-//                                applyWaypointsLineLayer(context, features, libreMap)
-//                                applyWaypointsCircleLayer(context, features, libreMap)
-
+                                applyWaypointsLineLayer(context, features, libreMap)
+                                applyWaypointsCircleLayer(context, features, libreMap)
                             }
                         )
                     )
-                    angle = it
                 },
-                onSaved = { angle1 ->
-                    angle = angle1
+                onSaved = { angle ->
                     scope.launch {
                         if (task.id == null || task.projectId == null) return@launch
+                        tasksViewModel.updateRotation(angle.roundToInt())
 
                         tasksViewModel.triggerEvent(
                             TasksEvent.FetchWayPointsOrWayLines(
                                 taskId = task.id,
                                 projectId = task.projectId,
-                                rotationAngle = angle1.roundToInt(),
+                                rotationAngle = angle.roundToInt(),
                                 download = false,
                                 isWayPoints = isWaypoints,
                                 forceRefresh = true
@@ -582,7 +555,6 @@ fun TaskDetailMapView(
                         TasksEvent.FetchWayPointsOrWayLines(
                             taskId = task.id,
                             projectId = task.projectId,
-                            rotationAngle = angle.roundToInt(),
                             download = false,
                             isWayPoints = !wayLines,
                             forceRefresh = false
@@ -630,7 +602,6 @@ fun TaskDetailMapView(
                             projectId = task.projectId,
                             latitude = updatedTakeOffPointLatLng!!.latitude,
                             longitude = updatedTakeOffPointLatLng!!.longitude,
-                            rotationAngle = angle.roundToInt(),
                             download = false,
                             isWayPoints = isWaypoints,
                         )
@@ -663,11 +634,6 @@ fun TaskDetailMapView(
                 }
             }
         )
-
-        DebouncedAction(debouncedFeatures, debounceMillis = 50L) { features ->
-            applyWaypointsLineLayer(context, features, libreMap)
-            applyWaypointsCircleLayer(context, features, libreMap)
-        }
     }
 }
 

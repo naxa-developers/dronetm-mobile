@@ -72,7 +72,8 @@ sealed class TasksEvent {
      *
      * @property taskId The unique identifier of the task associated with the waypoints/waylines.
      * @property projectId The unique identifier of the project associated with the task.
-     * @property rotationAngle The rotation angle (in degrees) to be applied to the waypoints/waylines. Defaults to 0.
+     * @property rotationAngle The rotation angle (in degrees) to be applied to the waypoints/waylines. Defaults is null.
+     * It will be handled on viewmodel.
      * @property download Indicates whether the fetched data should be downloaded. Defaults to false.
      * @property isWayPoints A flag indicating whether waypoints (true) or waylines (false) are being requested.
      * @property forceRefresh If true, forces a refresh of the data, bypassing any cached data. Defaults to false.
@@ -80,7 +81,7 @@ sealed class TasksEvent {
     data class FetchWayPointsOrWayLines(
         val taskId: String,
         val projectId: String,
-        val rotationAngle: Int = 0,
+        val rotationAngle: Int? = null,
         val download: Boolean = false,
         val isWayPoints: Boolean,
         val forceRefresh: Boolean = true
@@ -173,7 +174,7 @@ sealed class TasksEvent {
         val projectId: String,
         val latitude: Double,
         val longitude: Double,
-        val rotationAngle: Int = 0,
+        val rotationAngle: Int? = null,
         val download: Boolean = false,
         val isWayPoints: Boolean = true,
     ) : TasksEvent()
