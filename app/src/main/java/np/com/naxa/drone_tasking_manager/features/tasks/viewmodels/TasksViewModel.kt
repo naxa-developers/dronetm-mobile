@@ -558,7 +558,7 @@ class TasksViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val rotated = centroid?.let {
                 FeatureCollection.fromFeatures(
-                    _changeableFeatureCollection?.features()?.map { feature ->
+                    _featureCollection?.features()?.map { feature ->
                         Feature.fromGeometry(
                             when (val geometry = feature.geometry()) {
                                 is Point -> geometry.rotate(
