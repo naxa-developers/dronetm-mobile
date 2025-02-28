@@ -201,7 +201,7 @@ sealed class TasksEvent {
         val taskId: String,
         val projectId: String,
         val isWayPoints: Boolean? = null,
-        val rotationAngle: Int
+        val rotationAngle: Int? = null
     ) : TasksEvent()
 
     /**

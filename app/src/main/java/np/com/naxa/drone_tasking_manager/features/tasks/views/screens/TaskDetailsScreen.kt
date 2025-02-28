@@ -1,7 +1,5 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.views.screens
 
-import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -28,7 +26,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -41,7 +38,6 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
@@ -63,7 +59,6 @@ fun TaskDetailsScreen(
     taskId: String? = null,
     projectId: String? = null
 ) {
-    val context = LocalContext.current
 
     val scope = rememberCoroutineScope()
     val configuration = LocalConfiguration.current
@@ -80,8 +75,6 @@ fun TaskDetailsScreen(
     var mapViewOffset by remember { mutableFloatStateOf(0f) }
 
     var waypointsCount: Int? by remember { mutableStateOf(null) }
-
-    var rotationAngle by remember { mutableIntStateOf(0) }
 
     val listState = rememberLazyListState()
 
@@ -162,10 +155,6 @@ fun TaskDetailsScreen(
                     onWaypointsLoaded = {
                         waypointsCount = it
                     },
-                    onRotationAngleChanged = {
-                        rotationAngle = it
-                        Log.d("TaskDetailsScreen", "Rotation angle Changed ===TaskDetailsScreen=== Angle: $it")
-                    }
                 )
 
                 Row(
@@ -203,7 +192,6 @@ fun TaskDetailsScreen(
                             task = task.copy(
                                 projectId = projectId
                             ),
-                            rotationAngle = rotationAngle
                         )
                 }
             }

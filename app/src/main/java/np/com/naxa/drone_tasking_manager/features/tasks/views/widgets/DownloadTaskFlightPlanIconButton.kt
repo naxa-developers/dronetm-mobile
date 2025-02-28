@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.Settings
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -28,7 +27,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -54,7 +52,6 @@ import java.io.File
 fun DownloadTaskFlightPlanIconButton(
     modifier: Modifier = Modifier,
     task: ProjectTask,
-    rotationAngle: Int
 ) {
 
     val context = LocalContext.current
@@ -63,7 +60,8 @@ fun DownloadTaskFlightPlanIconButton(
     val downloadState by tasksViewModel.taskFlightPlanDownloadState.collectAsState()
     var downloading by remember { mutableStateOf(false) }
     var progress by remember { mutableFloatStateOf(0f) }
-    val angle = remember{mutableIntStateOf(rotationAngle)}
+
+
     var file: File? by remember {
         mutableStateOf(
             if (task.id != null) TaskActionPlanFileUtils.downloadedFileOf(
@@ -71,11 +69,6 @@ fun DownloadTaskFlightPlanIconButton(
                 task.id
             ) else null
         )
-    }
-
-    // Update angle when rotationAngle changes
-    LaunchedEffect(rotationAngle) {
-        angle.intValue = rotationAngle
     }
 
     var showAlreadyDownloadedAlertDialog by remember { mutableStateOf(false) }
@@ -86,14 +79,11 @@ fun DownloadTaskFlightPlanIconButton(
                 file = null
                 progress = 0f
 
-                Log.d("TaskDetailsScreen", "Rotation angle Changed ===DownloadTaskFlightPlan1=== Angle: ${angle.intValue}")
-
                 tasksViewModel.triggerEvent(
                     TasksEvent.DownloadTaskFlightPlan(
                         taskId = task.id,
                         projectId = task.projectId,
                         isWayPoints = null,
-                        rotationAngle = angle.intValue
                     )
                 )
             }

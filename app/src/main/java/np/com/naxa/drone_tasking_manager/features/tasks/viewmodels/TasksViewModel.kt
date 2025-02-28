@@ -32,18 +32,6 @@ import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.Point
 import java.io.File
 import javax.inject.Inject
-import kotlin.Double
-import kotlin.collections.ArrayList
-import kotlin.math.PI
-import kotlin.math.abs
-import kotlin.math.acos
-import kotlin.math.asin
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.min
-import kotlin.math.pow
-import kotlin.math.sin
-import kotlin.math.sqrt
 
 @HiltViewModel
 class TasksViewModel @Inject constructor(
@@ -151,17 +139,28 @@ class TasksViewModel @Inject constructor(
 
 
     /**
-     * The rotation of the object in radians.
+     * The rotation of the object in radians. It is the real time rotation that
+     * comes from slider or pinch to rotate
      *
      * A value of `null` indicates that the object has no defined rotation.
      * Otherwise, the value represents the rotation angle in radians.
      *
-     * Rotation is typically applied around the Z-axis (for 2D) or around a defined
-     * axis in 3D space.  The interpretation of this rotation depends on the
-     * specific context in which this object is used.
+     */
+    private var _tempRotation: Float? = null
+    val tempRotation: Float?
+        get() = _tempRotation
+    fun updateTempRotation(angle: Float?) = run { _tempRotation = angle }
+
+    /**
+     * The rotation of the object in radians.
+     * It is the rotation value after finally saved and send to the server
+     *
+     * A value of `null` indicates that the object has no defined rotation.
+     * Otherwise, the value represents the rotation angle in radians.
+     *
      */
     private var _rotation: Int? = null
-    val rotation: Int?
+    private val rotation: Int?
         get() = _rotation
     fun updateRotation(angle: Int) = run { _rotation = angle }
 
@@ -291,7 +290,6 @@ class TasksViewModel @Inject constructor(
                     taskId = event.taskId,
                     projectId = event.projectId,
                     isWayPoints = event.isWayPoints ?: _isWayPoints ?: true,
-                    rotationAngle = event.rotationAngle
                 )
             }
         }
@@ -573,7 +571,7 @@ class TasksViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val rotated = centroid?.let {
                 FeatureCollection.fromFeatures(
-                    _changeableFeatureCollection?.features()?.mapIndexed { index, feature ->
+                    _featureCollection?.features()?.mapIndexed { index, feature ->
                         // Pair the feature with its index for filtering
                         index to feature
                     }?.filter{(index, feature) ->
@@ -813,6 +811,7 @@ class TasksViewModel @Inject constructor(
                 taskId = taskId,
                 projectId = projectId,
                 mode = if (isWayPoints) "waypoints" else "waylines",
+                rotationAngle = rotation ?: 0
             ).collect { result ->
                 when (result) {
                     is DownloadResponse.Downloading -> {

@@ -39,18 +39,18 @@ import np.com.naxa.drone_tasking_manager.utils.round
 
 @Composable
 fun TaskWaypointAngleSlider(
-    enableVisibility: Boolean = false,
-    initialAngle: Float = 0f,
     modifier: Modifier = Modifier,
+    initialAngle: Float = 0f,
+    visible: Boolean = false,
     onAngleChanged: ((Float) -> Unit)? = null,
     onSaved: ((Float) -> Unit)? = null,
     onCanceled: (() -> Unit)? = null,
-    delay: Long = 25L
+    delay: Long = 10L,
+    onToggle: ((Boolean) -> Unit)? = null
 ) {
 
-    var visible by remember { mutableStateOf(enableVisibility) }
+    // var visible by remember { mutableStateOf(initialVisibility) }
     var angle by remember { mutableFloatStateOf(initialAngle) }
-
 
     DebouncedAction(
         input = { angle },
@@ -82,6 +82,7 @@ fun TaskWaypointAngleSlider(
 
                 CircularAngleSlider(
                     modifier = Modifier.fillMaxSize(),
+                    initialAngle = angle,
                     thumbColor = MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.primary.copy(
                         alpha = 0.35f
@@ -111,7 +112,8 @@ fun TaskWaypointAngleSlider(
                             contentPadding = PaddingValues(horizontal = 12.dp),
                             onClick = {
                                 onSaved?.invoke(angle)
-                                visible = !visible
+                                // visible = !visible
+                                onToggle?.invoke(!visible)
                             }
                         ) {
                             Text("Save", color = Color.White)
@@ -134,8 +136,9 @@ fun TaskWaypointAngleSlider(
                     .background(MaterialTheme.colorScheme.primary)
                     .clickable {
                         angle = 0f
-                        visible = !visible
-                        if (!visible) onCanceled?.invoke()
+                         val value = !visible
+                        onToggle?.invoke(value)
+                        if (!value) onCanceled?.invoke()
                     },
                 contentAlignment = Alignment.Center
             ) {
