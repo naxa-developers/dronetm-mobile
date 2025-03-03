@@ -43,7 +43,7 @@ fun ProjectGeometry.Geometry.toFeatureJson(): String {
             "id" to null
         ),
         "geometry" to mapOf(
-            "type" to type,
+            "type" to type?.replace("ST_", "")?.trim(),
             "coordinates" to coordinates
         )
     )
