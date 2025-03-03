@@ -36,7 +36,7 @@ import kotlinx.coroutines.flow.*
 @Composable
 fun <T> DebouncedAction(
     input: () -> T,
-    debounceMillis: Long = 300L,
+    debounceMillis: Long = 10L,
     action: suspend (T) -> Unit
 ) {
     LaunchedEffect(Unit) {

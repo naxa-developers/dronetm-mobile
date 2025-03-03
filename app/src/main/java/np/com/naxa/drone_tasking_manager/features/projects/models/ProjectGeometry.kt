@@ -28,7 +28,7 @@ fun ProjectGeometry.toFeatureJsonStr(properties: Map<*, *>? = null): String {
             "project_boundary" to true
         )),
         "geometry" to mapOf(
-            "type" to geometry?.type,
+            "type" to geometry?.type?.replace("ST_", "")?.trim(),
             "coordinates" to geometry?.coordinates
         )
     )

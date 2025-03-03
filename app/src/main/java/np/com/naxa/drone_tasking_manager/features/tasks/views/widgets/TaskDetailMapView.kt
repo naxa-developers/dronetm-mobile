@@ -39,6 +39,7 @@ import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.R
 import np.com.naxa.drone_tasking_manager.core.widgets.MaplibreCompose
 import np.com.naxa.drone_tasking_manager.core.widgets.rememberCameraPosition
+import np.com.naxa.drone_tasking_manager.features.projects.models.toFeatureJsonStr
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskWayPointsOrWayLinesState
@@ -51,7 +52,9 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.OnMapClickListener
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
+import org.maplibre.android.style.layers.FillLayer
 import org.maplibre.android.style.layers.LineLayer
+import org.maplibre.android.style.layers.PaintPropertyValue
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.layers.PropertyValue
 import org.maplibre.android.style.layers.SymbolLayer
@@ -366,6 +369,8 @@ fun TaskDetailMapView(
                         ),
                         500
                     )
+
+                    applyProjectBoundaryLayer(libreMap, task)
                 }
             }
         )
@@ -385,7 +390,12 @@ fun TaskDetailMapView(
                             angle = it,
                             centroid = task.centroid,
                             onRotatedSuccess = { features ->
-                                applyWaypointsLineLayer(context, features, libreMap)
+                                applyWaypointsLineLayer(
+                                    context,
+                                    features,
+                                    libreMap,
+                                    applyArrowLayer = false,
+                                )
                                 applyWaypointsCircleLayer(context, features, libreMap)
                             }
                         )
@@ -630,7 +640,8 @@ private fun applyWaypointsCircleLayer(
 private fun applyWaypointsLineLayer(
     context: Context,
     features: FeatureCollection,
-    libreMap: MapLibreMap? = null
+    libreMap: MapLibreMap? = null,
+    applyArrowLayer: Boolean = true,
 ) {
     if (libreMap == null) return
 
@@ -698,14 +709,15 @@ private fun applyWaypointsLineLayer(
     }
 
 
-    applyWaypointsArrowLayer(context, coordinates, libreMap)
+    applyWaypointsArrowLayer(context, coordinates, libreMap, applyArrowLayer)
 
 }
 
 private fun applyWaypointsArrowLayer(
     context: Context,
     coordinates: List<Point> = emptyList(),
-    libreMap: MapLibreMap? = null
+    libreMap: MapLibreMap? = null,
+    applyArrowLayer: Boolean = true,
 ) {
     if (libreMap == null) return
 
@@ -727,6 +739,8 @@ private fun applyWaypointsArrowLayer(
 
         libreMap.style?.removeSource(waypointsArrowIndicatorSourceId)
     }
+
+    if (!applyArrowLayer) return
 
     val features = mutableListOf<Feature>()
     val numArrows = min(coordinates.size, (coordinates.size / 5))
@@ -786,6 +800,79 @@ private fun applyWaypointsArrowLayer(
                 )
 
                 withProperties(*propertyValues.toTypedArray())
+            }
+        )
+    }
+}
+
+
+/**
+ * Applies a project boundary layer to the provided MapLibreMap.
+ *
+ * This function takes a [MapLibreMap] instance and a [ProjectTask] as input.
+ * It adds or updates a GeoJSON source and two layers (fill and line) representing
+ * the boundary of the project's geometry on the map.
+ *
+ */
+fun applyProjectBoundaryLayer(libreMap: MapLibreMap?, task: ProjectTask) {
+
+    if (libreMap == null) return
+
+    val sourceId = "task-perimeter-geometry---"
+    val tasksFillLayerId = "task-perimeter-fill-layer---"
+    val boundaryLineLayerId = "task-perimeter-boundary-line-layer---"
+
+    if (libreMap.style?.getSource(sourceId) != null) {
+
+        if (libreMap.style?.getLayer(tasksFillLayerId) != null) {
+            libreMap.style?.removeLayer(tasksFillLayerId)
+        }
+
+        if (libreMap.style?.getLayer(boundaryLineLayerId) != null) {
+            libreMap.style?.removeLayer(boundaryLineLayerId)
+        }
+
+        libreMap.style?.removeSource(sourceId)
+    }
+
+    if (task.geometry?.geometry == null) return
+
+    val featureCollection =
+        FeatureCollection.fromFeature(Feature.fromJson(task.geometry.toFeatureJsonStr())) ?: return
+
+    libreMap.style?.addSource(
+        GeoJsonSource(
+            sourceId,
+            features = featureCollection,
+        )
+    ).also {
+        libreMap.style?.addLayer(
+            FillLayer(
+                tasksFillLayerId,
+                sourceId,
+            ).apply {
+
+                val propertyValues = mutableListOf<PropertyValue<*>>()
+
+                propertyValues.add(PaintPropertyValue("fill-color", "#D0BCFF"))
+                propertyValues.add(PaintPropertyValue("fill-opacity", 0.3))
+
+                withProperties(*propertyValues.toTypedArray())
+            }
+        )
+
+        libreMap.style?.addLayer(
+            LineLayer(
+                boundaryLineLayerId,
+                sourceId,
+            ).apply {
+
+                val propertyValues = mutableListOf<PropertyValue<*>>()
+
+                propertyValues.add(PaintPropertyValue("line-color", "#D0BCFF"))
+
+                withProperties(*propertyValues.toTypedArray())
+                withFilter(Expression.has("project_boundary"))
             }
         )
     }

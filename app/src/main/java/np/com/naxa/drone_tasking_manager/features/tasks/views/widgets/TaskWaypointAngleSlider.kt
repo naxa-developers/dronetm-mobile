@@ -43,7 +43,7 @@ fun TaskWaypointAngleSlider(
     onAngleChanged: ((Float) -> Unit)? = null,
     onSaved: ((Float) -> Unit)? = null,
     onCanceled: (() -> Unit)? = null,
-    delay: Long = 25L
+    delay: Long = 5L
 ) {
 
     var visible by remember { mutableStateOf(false) }
