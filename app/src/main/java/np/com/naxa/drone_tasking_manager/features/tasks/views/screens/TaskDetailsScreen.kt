@@ -69,7 +69,7 @@ fun TaskDetailsScreen(
     val state by tasksViewModel.taskDetailState.collectAsState()
 
     val mapViewMaxHeightPx =
-        with(LocalDensity.current) { (configuration.screenHeightDp * 0.5).dp.toPx() }
+        with(LocalDensity.current) { (configuration.screenHeightDp * 0.6).dp.toPx() }
     val mapViewMinHeightPx =
         with(LocalDensity.current) { (configuration.screenHeightDp * 0.25).dp.toPx() }
     var mapViewOffset by remember { mutableFloatStateOf(0f) }
