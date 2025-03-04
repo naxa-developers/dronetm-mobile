@@ -2,6 +2,7 @@ package np.com.naxa.drone_tasking_manager.utils
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
@@ -27,20 +28,22 @@ import kotlinx.coroutines.flow.*
  * - Updating values: When a value is changed frequently, this can avoid too many executions of the action.
  *
  * @param T The type of the input value.
- * @param input The input value that triggers the debounced action.
+ * @param input The lambda that return input value that triggers the debounced action.
  * @param debounceMillis The duration (in milliseconds) to wait for inactivity before executing the action. Defaults to 300ms.
  * @param action The action to execute after the debounce period. This is a suspend function that takes the input value as a parameter.
  */
+@OptIn(FlowPreview::class)
 @Composable
 fun <T> DebouncedAction(
-    input: T,
-    debounceMillis: Long = 300L,
+    input: () -> T,
+    debounceMillis: Long = 10L,
     action: suspend (T) -> Unit
 ) {
-    LaunchedEffect(input) {
-        flowOf(input).debounce(debounceMillis).collect { value ->
-            delay(debounceMillis) // Wait for the specified delay
-            action(value)
-        }
+    LaunchedEffect(Unit) {
+        snapshotFlow { input() }
+            .debounce(debounceMillis)
+            .collect { value ->
+                action(value)
+            }
     }
 }

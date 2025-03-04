@@ -432,7 +432,7 @@ fun List<*>.toJsonArray(): JsonArray {
  */
 fun Point.rotate(centroid: Point, angleDegree: Double): Point {
     // Convert the angle from degrees to radians
-    val angleRadians = Math.toRadians(angleDegree)
+    val angleRadians = Math.toRadians(360 - angleDegree)
 
     // Translate point to origin (centroid as reference)
     val x = longitude() - centroid.longitude()
