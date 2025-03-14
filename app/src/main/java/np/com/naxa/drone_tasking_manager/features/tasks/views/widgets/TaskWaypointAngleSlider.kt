@@ -45,12 +45,19 @@ fun TaskWaypointAngleSlider(
     onAngleChanged: ((Float) -> Unit)? = null,
     onSaved: ((Float) -> Unit)? = null,
     onCanceled: (() -> Unit)? = null,
-    delay: Long = 10L,
+    delay: Long = 5L,
     onToggle: ((Boolean) -> Unit)? = null
 ) {
 
     // var visible by remember { mutableStateOf(initialVisibility) }
-    var angle by remember { mutableFloatStateOf(initialAngle) }
+    var angle by remember { mutableFloatStateOf(0f) }
+
+    DebouncedAction(
+        input = { angle },
+        debounceMillis = delay
+    ) { n ->
+        onAngleChanged?.invoke(n)
+    }
 
     DebouncedAction(
         input = { angle },
@@ -114,6 +121,7 @@ fun TaskWaypointAngleSlider(
                                 onSaved?.invoke(angle)
                                 // visible = !visible
                                 onToggle?.invoke(!visible)
+                                angle = 0f
                             }
                         ) {
                             Text("Save", color = Color.White)

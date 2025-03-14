@@ -79,7 +79,6 @@ fun TaskDetailMapView(
     task: ProjectTask,
     onWaypointsLoaded: (Int?) -> Unit = {},
 ) {
-
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val tasksViewModel = LocalTasksViewModel.current
@@ -374,6 +373,7 @@ fun TaskDetailMapView(
                         ),
                         500
                     )
+
                 }
 
                 addTaskFillLayer(libreMap, task)

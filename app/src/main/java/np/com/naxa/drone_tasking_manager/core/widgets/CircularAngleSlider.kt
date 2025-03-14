@@ -36,7 +36,7 @@ fun CircularAngleSlider(
     trackWidth: Dp = 8.dp,
     thumbRadius: Dp = 10.dp
 ) {
-    var angle by remember { mutableFloatStateOf(initialAngle) }
+    var angle by remember { mutableFloatStateOf(0f) }
     val density = LocalDensity.current
 
     Canvas(

@@ -113,6 +113,9 @@ class TasksViewModel @Inject constructor(
      * If `null`, no features will be displayed.
      */
     private var _featureCollection: FeatureCollection? = null
+    private var _originalFeatureCollection: FeatureCollection? = null
+    private var _oldTaskID: String? = null
+
     private var _changeableFeatureCollection: FeatureCollection? = null
 
 
@@ -154,6 +157,7 @@ class TasksViewModel @Inject constructor(
     /**
      * The rotation of the object in radians.
      * It is the rotation value after finally saved and send to the server
+     * The rotation of the object in radians.
      *
      * A value of `null` indicates that the object has no defined rotation.
      * Otherwise, the value represents the rotation angle in radians.
@@ -161,6 +165,7 @@ class TasksViewModel @Inject constructor(
      */
     private var _rotation: Int? = null
     private val rotation: Int?
+
         get() = _rotation
     fun updateRotation(angle: Int) = run { _rotation = angle }
 
@@ -511,6 +516,13 @@ class TasksViewModel @Inject constructor(
 
                     is Response.Success -> {
                         _featureCollection = result.data
+
+                        // to maintain the original feature collection
+                        if(_oldTaskID == null || _oldTaskID != taskId ){
+                            _originalFeatureCollection = result.data
+                            _oldTaskID = taskId
+                        }
+
                         _isWayPoints = isWayPoints
 
                         if (result.data != null) {
@@ -555,6 +567,7 @@ class TasksViewModel @Inject constructor(
         onRotatedSuccess: (FeatureCollection) -> Unit
     ) {
         if (angle == 0f) {
+//            _featureCollection?.let {
             _featureCollection?.let {
 
                 _changeableFeatureCollection = it
@@ -566,12 +579,12 @@ class TasksViewModel @Inject constructor(
             return
         }
 
-        if (_changeableFeatureCollection == null) _changeableFeatureCollection = _featureCollection
+        if (_changeableFeatureCollection == null) _changeableFeatureCollection = _originalFeatureCollection
 
         viewModelScope.launch(Dispatchers.IO) {
             val rotated = centroid?.let {
                 FeatureCollection.fromFeatures(
-                    _featureCollection?.features()?.mapIndexed { index, feature ->
+                    _originalFeatureCollection?.features()?.mapIndexed { index, feature ->
                         // Pair the feature with its index for filtering
                         index to feature
                     }?.filter{(index, feature) ->
@@ -594,7 +607,6 @@ class TasksViewModel @Inject constructor(
                             }else -> true
                         }
                     }?.map { (index, feature) ->
-
                         Feature.fromGeometry(
                             when (val geometry = feature.geometry()) {
                                 is Point -> {
@@ -651,7 +663,7 @@ class TasksViewModel @Inject constructor(
         if (_changeableFeatureCollection == null) _changeableFeatureCollection = _featureCollection
 
         viewModelScope.launch(Dispatchers.IO) {
-            val updated = _changeableFeatureCollection?.features()?.map { feature ->
+            val updated = _featureCollection?.features()?.map { feature ->
                 val index = if (feature.properties()
                         ?.get("index")?.isJsonPrimitive == true
                 ) feature.properties()?.get("index")?.asJsonPrimitive else null
@@ -761,6 +773,13 @@ class TasksViewModel @Inject constructor(
 
                     is Response.Success -> {
                         _featureCollection = result.data
+
+                        // to maintain the original feature collection
+                        if(_oldTaskID == null || _oldTaskID != taskId ){
+                            _originalFeatureCollection = result.data
+                            _oldTaskID = taskId
+                        }
+
                         _isWayPoints = isWayPoints
 
                         if (result.data != null) {

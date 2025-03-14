@@ -12,6 +12,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -431,6 +432,9 @@ fun List<*>.toJsonArray(): JsonArray {
  * @return A new `Point` representing the rotated coordinate.
  */
 fun Point.rotate(centroid: Point, angleDegree: Double): Point {
+
+//    Log.d("TAG", "rotate: $angleDegree")
+
     // Convert the angle from degrees to radians
     val angleRadians = Math.toRadians(360 - angleDegree)
 
