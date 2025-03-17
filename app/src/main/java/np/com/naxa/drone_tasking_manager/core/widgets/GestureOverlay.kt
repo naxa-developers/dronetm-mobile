@@ -24,6 +24,21 @@ import kotlinx.coroutines.delay
 import kotlin.math.PI
 import kotlin.math.abs
 
+/**
+ * A Composable function that provides a gesture overlay for detecting rotation gestures.
+ *
+ * This function allows users to rotate an element by using a two-finger twist gesture.
+ * It also supports enabling or disabling the gesture detection through the `draggable` parameter.
+ *
+ * @param angle The initial rotation angle in degrees. Defaults to 0f.
+ * @param draggable A boolean indicating whether the gesture detection is enabled.
+ *                  If true, gesture detection is disabled and the Box will not react to touch inputs.
+ *                  If false, gesture detection is active. Defaults to false.
+ * @param onRotationChanged A callback function that is invoked whenever the rotation angle changes.
+ *                          It provides the updated rotation angle in degrees as a parameter.
+ * @param onTransformStopped A callback function that is invoked when the rotation gesture has ended.
+ *                           It provides the final rotation angle in degrees as a parameter.
+ */
 @Composable
 fun GestureOverlay(
     angle: Float = 0f,
