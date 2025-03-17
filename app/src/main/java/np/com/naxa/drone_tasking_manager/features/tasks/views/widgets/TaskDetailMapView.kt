@@ -381,8 +381,10 @@ fun TaskDetailMapView(
             }
         )
 
-        GestureOverlay(
+
+        if(!draggable) {GestureOverlay(
             angle = tasksViewModel.tempRotation ?: 0f,
+            draggable = draggable,
             onRotationChanged = {
 
                 if (sliderVisible) sliderVisible = false
@@ -413,7 +415,7 @@ fun TaskDetailMapView(
                 if (!sliderVisible) sliderVisible = true
                 rotatingByGesture = false
             }
-        )
+        )}
 
 
         Row(
