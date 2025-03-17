@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import np.com.naxa.drone_tasking_manager.core.widgets.CircularAngleSlider
+import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
 import np.com.naxa.drone_tasking_manager.utils.DebouncedAction
 import np.com.naxa.drone_tasking_manager.utils.round
 
@@ -48,9 +50,14 @@ fun TaskWaypointAngleSlider(
     delay: Long = 5L,
     onToggle: ((Boolean) -> Unit)? = null
 ) {
-
     // var visible by remember { mutableStateOf(initialVisibility) }
     var angle by remember { mutableFloatStateOf(0f) }
+
+    LaunchedEffect(initialAngle) {
+        angle = initialAngle
+    }
+
+
 
     DebouncedAction(
         input = { angle },
