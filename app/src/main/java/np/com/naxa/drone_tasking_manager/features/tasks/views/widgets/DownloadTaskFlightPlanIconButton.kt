@@ -60,6 +60,8 @@ fun DownloadTaskFlightPlanIconButton(
     val downloadState by tasksViewModel.taskFlightPlanDownloadState.collectAsState()
     var downloading by remember { mutableStateOf(false) }
     var progress by remember { mutableFloatStateOf(0f) }
+
+
     var file: File? by remember {
         mutableStateOf(
             if (task.id != null) TaskActionPlanFileUtils.downloadedFileOf(
@@ -71,17 +73,17 @@ fun DownloadTaskFlightPlanIconButton(
 
     var showAlreadyDownloadedAlertDialog by remember { mutableStateOf(false) }
 
-
     val initiateDownload = remember(context) {
         {
             if (task.id != null && task.projectId != null && !downloading) {
                 file = null
                 progress = 0f
+
                 tasksViewModel.triggerEvent(
                     TasksEvent.DownloadTaskFlightPlan(
                         taskId = task.id,
                         projectId = task.projectId,
-                        null
+                        isWayPoints = null,
                     )
                 )
             }

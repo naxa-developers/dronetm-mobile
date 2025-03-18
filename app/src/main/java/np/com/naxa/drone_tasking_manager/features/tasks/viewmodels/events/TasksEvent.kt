@@ -109,7 +109,8 @@ sealed class TasksEvent {
     data class RotateWayPointsOrWayLines(
         val angle: Float,
         val centroid: Centroid? = null,
-        val onRotatedSuccess: (FeatureCollection) -> Unit
+        val onRotatedSuccess: (FeatureCollection) -> Unit,
+        val taskPolygon: ArrayList<ArrayList<ArrayList<Double>>>,
     ) : TasksEvent()
 
     /**
@@ -200,6 +201,7 @@ sealed class TasksEvent {
         val taskId: String,
         val projectId: String,
         val isWayPoints: Boolean? = null,
+        val rotationAngle: Int? = null
     ) : TasksEvent()
 
     /**

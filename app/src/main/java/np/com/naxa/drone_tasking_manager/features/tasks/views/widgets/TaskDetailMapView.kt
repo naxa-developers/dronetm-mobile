@@ -37,6 +37,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.gson.JsonObject
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.R
+import np.com.naxa.drone_tasking_manager.core.widgets.GestureOverlay
 import np.com.naxa.drone_tasking_manager.core.widgets.MaplibreCompose
 import np.com.naxa.drone_tasking_manager.core.widgets.rememberCameraPosition
 import np.com.naxa.drone_tasking_manager.features.projects.models.toFeatureJsonStr
@@ -76,9 +77,8 @@ import kotlin.random.Random
 fun TaskDetailMapView(
     modifier: Modifier = Modifier,
     task: ProjectTask,
-    onWaypointsLoaded: (Int?) -> Unit = {}
+    onWaypointsLoaded: (Int?) -> Unit = {},
 ) {
-
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val tasksViewModel = LocalTasksViewModel.current
@@ -92,6 +92,8 @@ fun TaskDetailMapView(
     var infoJsonObject: JsonObject? by remember { mutableStateOf(null) }
     var showInfoBottomSheet by remember { mutableStateOf(false) }
     val infoSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+
+    var sliderVisible by remember { mutableStateOf(false) }
 
     val cameraPositionState = rememberCameraPosition(
         initialTarget = LatLng(27.82, 85.32),
@@ -110,6 +112,8 @@ fun TaskDetailMapView(
     var showTakeOffPointChangeOptionsBottomSheet by remember { mutableStateOf(false) }
     var takeOffPointChangeOptions by remember { mutableStateOf<TakeOffPointChangeOptions?>(null) }
 
+    // To track the rotation of the way points with rotation gesture
+    var rotatingByGesture by remember { mutableStateOf(false) }
 
     // Define the permissions to request
     val locationPermissions = arrayOf(
@@ -167,7 +171,8 @@ fun TaskDetailMapView(
                             applyWaypointsLineLayer(
                                 context,
                                 features,
-                                libreMap
+                                libreMap,
+                                applyArrow = !sliderVisible && !rotatingByGesture,
                             )
                             applyWaypointsCircleLayer(
                                 context,
@@ -254,7 +259,7 @@ fun TaskDetailMapView(
                     (waypointsOrWayLinesState as TaskWayPointsOrWayLinesState.Success).isWayPoints
                 updatedTakeOffPointLatLng = null
 
-                applyWaypointsLineLayer(context, features, libreMap)
+                applyWaypointsLineLayer(context, features, libreMap, applyArrow = !sliderVisible && !rotatingByGesture)
                 applyWaypointsCircleLayer(context, features, libreMap)
 
                 onWaypointsLoaded.invoke(features.features()?.size)
@@ -322,7 +327,8 @@ fun TaskDetailMapView(
                                                         applyWaypointsLineLayer(
                                                             context,
                                                             features,
-                                                            libreMap
+                                                            libreMap,
+                                                            applyArrow = !sliderVisible && !rotatingByGesture,
                                                         )
                                                         applyWaypointsCircleLayer(
                                                             context,
@@ -334,8 +340,6 @@ fun TaskDetailMapView(
                                             )
                                         }
                                 }
-
-
                             },
                             onDragEnd = {
                                 if (draggedFeatureIndex == 0) {
@@ -370,10 +374,49 @@ fun TaskDetailMapView(
                         500
                     )
 
-                    applyProjectBoundaryLayer(libreMap, task)
                 }
+
+                addTaskFillLayer(libreMap, task)
+
             }
         )
+
+
+        if(!draggable) {GestureOverlay(
+            angle = tasksViewModel.tempRotation ?: 0f,
+            draggable = draggable,
+            onRotationChanged = {
+
+                if (sliderVisible) sliderVisible = false
+                if (!rotatingByGesture) rotatingByGesture = true
+
+
+                // Updating temp rotation to viewmodel
+                tasksViewModel.updateTempRotation(it)
+
+                tasksViewModel.triggerEvent(
+                    TasksEvent.RotateWayPointsOrWayLines(
+                        angle = it,
+                        centroid = task.centroid,
+                        taskPolygon = task.geometry?.geometry?.coordinates!!,
+                        onRotatedSuccess = { features ->
+                            applyWaypointsLineLayer(
+                                context,
+                                features,
+                                libreMap,
+                                applyArrow = !sliderVisible && !rotatingByGesture,
+                            )
+                            applyWaypointsCircleLayer(context, features, libreMap)
+                        }
+                    )
+                )
+            },
+            onTransformStopped = {
+                if (!sliderVisible) sliderVisible = true
+                rotatingByGesture = false
+            }
+        )}
+
 
         Row(
             modifier = Modifier
@@ -384,17 +427,23 @@ fun TaskDetailMapView(
             verticalAlignment = Alignment.Bottom
         ) {
             TaskWaypointAngleSlider(
+                initialAngle = tasksViewModel.tempRotation ?: 0f,
+                visible = sliderVisible,
                 onAngleChanged = {
+                    // Updating temp rotation to viewmodel
+                    tasksViewModel.updateTempRotation(it)
+
                     tasksViewModel.triggerEvent(
                         TasksEvent.RotateWayPointsOrWayLines(
                             angle = it,
                             centroid = task.centroid,
+                            taskPolygon = task.geometry?.geometry?.coordinates!!,
                             onRotatedSuccess = { features ->
                                 applyWaypointsLineLayer(
                                     context,
                                     features,
                                     libreMap,
-                                    applyArrowLayer = false,
+                                    applyArrow = !sliderVisible && !rotatingByGesture,
                                 )
                                 applyWaypointsCircleLayer(context, features, libreMap)
                             }
@@ -419,13 +468,24 @@ fun TaskDetailMapView(
                     }
                 },
                 onCanceled = {
+                    // Updating temp rotation to viewmodel
+                    tasksViewModel.updateTempRotation(null)
+
                     // resetting state to original one
                     tasksViewModel.triggerEvent(
                         TasksEvent.RestoreFeatureCollection { features ->
-                            applyWaypointsLineLayer(context, features, libreMap)
+                            applyWaypointsLineLayer(
+                                context,
+                                features,
+                                libreMap,
+                                applyArrow = !sliderVisible && !rotatingByGesture,
+                            )
                             applyWaypointsCircleLayer(context, features, libreMap)
                         }
                     )
+                },
+                onToggle = {
+                    sliderVisible = it
                 }
             )
 
@@ -478,7 +538,12 @@ fun TaskDetailMapView(
                     if (draggable) {
                         tasksViewModel.triggerEvent(
                             TasksEvent.RestoreFeatureCollection { features ->
-                                applyWaypointsLineLayer(context, features, libreMap)
+                                applyWaypointsLineLayer(
+                                    context,
+                                    features,
+                                    libreMap,
+                                    applyArrow = !sliderVisible && !rotatingByGesture,
+                                )
                                 applyWaypointsCircleLayer(context, features, libreMap)
                             }
                         )
@@ -641,7 +706,7 @@ private fun applyWaypointsLineLayer(
     context: Context,
     features: FeatureCollection,
     libreMap: MapLibreMap? = null,
-    applyArrowLayer: Boolean = true,
+    applyArrow: Boolean = true,
 ) {
     if (libreMap == null) return
 
@@ -709,15 +774,14 @@ private fun applyWaypointsLineLayer(
     }
 
 
-    applyWaypointsArrowLayer(context, coordinates, libreMap, applyArrowLayer)
-
+    applyWaypointsArrowLayer(context, coordinates, libreMap, applyArrow)
 }
 
 private fun applyWaypointsArrowLayer(
     context: Context,
     coordinates: List<Point> = emptyList(),
     libreMap: MapLibreMap? = null,
-    applyArrowLayer: Boolean = true,
+    applyArrow: Boolean = true,
 ) {
     if (libreMap == null) return
 
@@ -740,7 +804,7 @@ private fun applyWaypointsArrowLayer(
         libreMap.style?.removeSource(waypointsArrowIndicatorSourceId)
     }
 
-    if (!applyArrowLayer) return
+    if (!applyArrow) return
 
     val features = mutableListOf<Feature>()
     val numArrows = min(coordinates.size, (coordinates.size / 5))
@@ -805,16 +869,26 @@ private fun applyWaypointsArrowLayer(
     }
 }
 
-
 /**
- * Applies a project boundary layer to the provided MapLibreMap.
+ * Adds a fill layer and a boundary line layer to the map representing the perimeter of a given project task.
  *
- * This function takes a [MapLibreMap] instance and a [ProjectTask] as input.
- * It adds or updates a GeoJSON source and two layers (fill and line) representing
- * the boundary of the project's geometry on the map.
+ * This function handles the following:
+ * 1. **Checks for Map Availability:** Ensures that a valid `MapLibreMap` instance is provided. If not, it returns early.
+ * 2. **Layer and Source Management:** Checks if a source or layers with specific IDs related to task perimeters already exist. If they do, it removes them before adding new ones to prevent duplication.
+ *    - Source ID: "task-perimeter-geometry---"
+ *    - Fill Layer ID: "task-perimeter-fill-layer---"
+ *    - Boundary Line Layer ID: "task-perimeter-boundary-line-layer---"
+ * 3. **Feature Creation:** Extracts the geometry data from the `ProjectTask` object and converts it into a `Feature` to be added to the map.
+ * 4. **GeoJSON Source Creation:** Creates a `GeoJsonSource` using the extracted `Feature` and adds it to the map's style.
+ * 5. **Fill Layer Creation:** Adds a `FillLayer` to the map to visually represent the task's perimeter.
+ *    - Fill Color: #D0BCFF (light purple)
+ *    - Fill Opacity: 0.3 (semi-transparent)
+ * 6. **Boundary Line Layer Creation:** Adds a `LineLayer` to the map to represent the boundary line of the task's perimeter.
+ *    - Line Color: #D0BCFF (light purple)
+ *    - Filter: Only includes features with the property "project_boundary"
  *
- */
-fun applyProjectBoundaryLayer(libreMap: MapLibreMap?, task: ProjectTask) {
+ * @param libreMap The `Map */
+fun addTaskFillLayer(libreMap: MapLibreMap?, task: ProjectTask) {
 
     if (libreMap == null) return
 
@@ -835,15 +909,14 @@ fun applyProjectBoundaryLayer(libreMap: MapLibreMap?, task: ProjectTask) {
         libreMap.style?.removeSource(sourceId)
     }
 
-    if (task.geometry?.geometry == null) return
-
-    val featureCollection =
-        FeatureCollection.fromFeature(Feature.fromJson(task.geometry.toFeatureJsonStr())) ?: return
-
+    val features = mutableListOf<Feature>()
+    if (task.geometry?.geometry != null) {
+        features.add(Feature.fromJson(task.geometry.toFeatureJsonStr()))
+    }
     libreMap.style?.addSource(
         GeoJsonSource(
             sourceId,
-            features = featureCollection,
+            features = FeatureCollection.fromFeatures(features),
         )
     ).also {
         libreMap.style?.addLayer(

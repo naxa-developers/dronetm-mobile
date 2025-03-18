@@ -86,7 +86,7 @@ fun ProjectDetailsScreen(
     val unlockTaskState by tasksViewModel.taskUnlockState.collectAsState()
 
     val mapViewMaxHeightPx =
-        with(LocalDensity.current) { (configuration.screenHeightDp * 0.5).dp.toPx() }
+        with(LocalDensity.current) { (configuration.screenHeightDp * 0.65).dp.toPx() }
     val mapViewMinHeightPx =
         with(LocalDensity.current) { (configuration.screenHeightDp * 0.25).dp.toPx() }
     var mapViewOffset by remember { mutableFloatStateOf(0f) }

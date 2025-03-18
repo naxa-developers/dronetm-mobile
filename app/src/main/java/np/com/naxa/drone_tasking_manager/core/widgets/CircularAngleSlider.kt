@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -36,8 +37,13 @@ fun CircularAngleSlider(
     trackWidth: Dp = 8.dp,
     thumbRadius: Dp = 10.dp
 ) {
-    var angle by remember { mutableFloatStateOf(initialAngle) }
+    var angle by remember { mutableFloatStateOf(0f) }
     val density = LocalDensity.current
+
+    LaunchedEffect(initialAngle) {
+        angle = initialAngle
+    }
+
 
     Canvas(
         modifier = modifier

@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -34,20 +35,36 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import np.com.naxa.drone_tasking_manager.core.widgets.CircularAngleSlider
+import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
 import np.com.naxa.drone_tasking_manager.utils.DebouncedAction
 import np.com.naxa.drone_tasking_manager.utils.round
 
 @Composable
 fun TaskWaypointAngleSlider(
     modifier: Modifier = Modifier,
+    initialAngle: Float = 0f,
+    visible: Boolean = false,
     onAngleChanged: ((Float) -> Unit)? = null,
     onSaved: ((Float) -> Unit)? = null,
     onCanceled: (() -> Unit)? = null,
-    delay: Long = 5L
+    delay: Long = 5L,
+    onToggle: ((Boolean) -> Unit)? = null
 ) {
-
-    var visible by remember { mutableStateOf(false) }
+    // var visible by remember { mutableStateOf(initialVisibility) }
     var angle by remember { mutableFloatStateOf(0f) }
+
+    LaunchedEffect(initialAngle) {
+        angle = initialAngle
+    }
+
+
+
+    DebouncedAction(
+        input = { angle },
+        debounceMillis = delay
+    ) { n ->
+        onAngleChanged?.invoke(n)
+    }
 
     DebouncedAction(
         input = { angle },
@@ -79,6 +96,7 @@ fun TaskWaypointAngleSlider(
 
                 CircularAngleSlider(
                     modifier = Modifier.fillMaxSize(),
+                    initialAngle = angle,
                     thumbColor = MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.primary.copy(
                         alpha = 0.35f
@@ -108,7 +126,9 @@ fun TaskWaypointAngleSlider(
                             contentPadding = PaddingValues(horizontal = 12.dp),
                             onClick = {
                                 onSaved?.invoke(angle)
-                                visible = !visible
+                                // visible = !visible
+                                onToggle?.invoke(!visible)
+                                angle = 0f
                             }
                         ) {
                             Text("Save", color = Color.White)
@@ -131,8 +151,9 @@ fun TaskWaypointAngleSlider(
                     .background(MaterialTheme.colorScheme.primary)
                     .clickable {
                         angle = 0f
-                        visible = !visible
-                        if (!visible) onCanceled?.invoke()
+                         val value = !visible
+                        onToggle?.invoke(value)
+                        if (!value) onCanceled?.invoke()
                     },
                 contentAlignment = Alignment.Center
             ) {

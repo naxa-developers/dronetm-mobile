@@ -24,6 +24,7 @@ import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskFl
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskLockOrUnlockState
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskUnFlyableRequestState
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskWayPointsOrWayLinesState
+import np.com.naxa.drone_tasking_manager.utils.LatLngUtils
 import np.com.naxa.drone_tasking_manager.utils.rotate
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.geojson.Feature
@@ -31,7 +32,6 @@ import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.Point
 import java.io.File
 import javax.inject.Inject
-import kotlin.math.roundToInt
 
 @HiltViewModel
 class TasksViewModel @Inject constructor(
@@ -113,6 +113,9 @@ class TasksViewModel @Inject constructor(
      * If `null`, no features will be displayed.
      */
     private var _featureCollection: FeatureCollection? = null
+    private var _originalFeatureCollection: FeatureCollection? = null
+    private var _oldTaskID: String? = null
+
     private var _changeableFeatureCollection: FeatureCollection? = null
 
 
@@ -139,17 +142,30 @@ class TasksViewModel @Inject constructor(
 
 
     /**
+     * The rotation of the object in radians. It is the real time rotation that
+     * comes from slider or pinch to rotate
+     *
+     * A value of `null` indicates that the object has no defined rotation.
+     * Otherwise, the value represents the rotation angle in radians.
+     *
+     */
+    private var _tempRotation: Float? = null
+    val tempRotation: Float?
+        get() = _tempRotation
+    fun updateTempRotation(angle: Float?) = run { _tempRotation = angle }
+
+    /**
+     * The rotation of the object in radians.
+     * It is the rotation value after finally saved and send to the server
      * The rotation of the object in radians.
      *
      * A value of `null` indicates that the object has no defined rotation.
      * Otherwise, the value represents the rotation angle in radians.
      *
-     * Rotation is typically applied around the Z-axis (for 2D) or around a defined
-     * axis in 3D space.  The interpretation of this rotation depends on the
-     * specific context in which this object is used.
      */
     private var _rotation: Int? = null
-    val rotation: Int?
+    private val rotation: Int?
+
         get() = _rotation
     fun updateRotation(angle: Int) = run { _rotation = angle }
 
@@ -236,6 +252,7 @@ class TasksViewModel @Inject constructor(
                 rotate(
                     angle = event.angle,
                     centroid = event.centroid,
+                    taskPolygon = event.taskPolygon,
                     onRotatedSuccess = event.onRotatedSuccess
                 )
             }
@@ -277,7 +294,7 @@ class TasksViewModel @Inject constructor(
                 downloadTaskFlightPlan(
                     taskId = event.taskId,
                     projectId = event.projectId,
-                    isWayPoints = event.isWayPoints ?: _isWayPoints ?: true
+                    isWayPoints = event.isWayPoints ?: _isWayPoints ?: true,
                 )
             }
         }
@@ -499,6 +516,13 @@ class TasksViewModel @Inject constructor(
 
                     is Response.Success -> {
                         _featureCollection = result.data
+
+                        // to maintain the original feature collection
+                        if(_oldTaskID == null || _oldTaskID != taskId ){
+                            _originalFeatureCollection = result.data
+                            _oldTaskID = taskId
+                        }
+
                         _isWayPoints = isWayPoints
 
                         if (result.data != null) {
@@ -539,9 +563,11 @@ class TasksViewModel @Inject constructor(
     private fun rotate(
         angle: Float,
         centroid: Centroid? = null,
+        taskPolygon: ArrayList<ArrayList<ArrayList<Double>>>,
         onRotatedSuccess: (FeatureCollection) -> Unit
     ) {
         if (angle == 0f) {
+//            _featureCollection?.let {
             _featureCollection?.let {
 
                 _changeableFeatureCollection = it
@@ -553,20 +579,50 @@ class TasksViewModel @Inject constructor(
             return
         }
 
-        if (_changeableFeatureCollection == null) _changeableFeatureCollection = _featureCollection
+        if (_changeableFeatureCollection == null) _changeableFeatureCollection = _originalFeatureCollection
 
         viewModelScope.launch(Dispatchers.IO) {
             val rotated = centroid?.let {
                 FeatureCollection.fromFeatures(
-                    _featureCollection?.features()?.map { feature ->
+                    _originalFeatureCollection?.features()?.mapIndexed { index, feature ->
+                        // Pair the feature with its index for filtering
+                        index to feature
+                    }?.filter{(index, feature) ->
+                        // Filter out index 0 (Takeoff point) and apply point rotation check
+                        when(val geometry = feature.geometry()){
+                            is Point -> {
+                                if(index != 0) {
+                                    LatLngUtils.isPointInsidePolygonWithBuffer(
+                                        geometry.rotate(
+                                            Point.fromLngLat(
+                                                it.coordinates.first(),
+                                                it.coordinates.last()
+                                            ), angle.toDouble()
+
+                                        ), taskPolygon
+                                    )
+                                }else{
+                                    true
+                                }
+                            }else -> true
+                        }
+                    }?.map { (index, feature) ->
                         Feature.fromGeometry(
                             when (val geometry = feature.geometry()) {
-                                is Point -> geometry.rotate(
-                                    Point.fromLngLat(
-                                        it.coordinates.first(),
-                                        it.coordinates.last()
-                                    ), angle.toDouble()
-                                )
+                                is Point -> {
+                                    if(index != 0){
+                                        geometry.rotate(
+                                            Point.fromLngLat(
+                                                it.coordinates.first(),
+                                                it.coordinates.last()
+                                            ), angle.toDouble()
+
+                                        )
+                                    }else {
+                                        geometry
+                                    }
+
+                                }
 
                                 else -> geometry
                             },
@@ -574,6 +630,7 @@ class TasksViewModel @Inject constructor(
                             feature.id(),
                             feature.bbox()
                         )
+
                     }?.toTypedArray() ?: emptyArray()
                 )
             }
@@ -606,7 +663,7 @@ class TasksViewModel @Inject constructor(
         if (_changeableFeatureCollection == null) _changeableFeatureCollection = _featureCollection
 
         viewModelScope.launch(Dispatchers.IO) {
-            val updated = _changeableFeatureCollection?.features()?.map { feature ->
+            val updated = _featureCollection?.features()?.map { feature ->
                 val index = if (feature.properties()
                         ?.get("index")?.isJsonPrimitive == true
                 ) feature.properties()?.get("index")?.asJsonPrimitive else null
@@ -716,6 +773,13 @@ class TasksViewModel @Inject constructor(
 
                     is Response.Success -> {
                         _featureCollection = result.data
+
+                        // to maintain the original feature collection
+                        if(_oldTaskID == null || _oldTaskID != taskId ){
+                            _originalFeatureCollection = result.data
+                            _oldTaskID = taskId
+                        }
+
                         _isWayPoints = isWayPoints
 
                         if (result.data != null) {
@@ -766,6 +830,7 @@ class TasksViewModel @Inject constructor(
                 taskId = taskId,
                 projectId = projectId,
                 mode = if (isWayPoints) "waypoints" else "waylines",
+                rotationAngle = rotation ?: 0
             ).collect { result ->
                 when (result) {
                     is DownloadResponse.Downloading -> {

@@ -26,10 +26,12 @@ class DownloadTaskFlightPlanUseCase @Inject constructor(private val tasksReposit
         taskId: String,
         projectId: String,
         mode: String = "waypoints",
+        rotationAngle: Int
     ) = tasksRepository.downloadFlightPlanFile(
         taskId = taskId,
         projectId = projectId,
         mode = mode,
+        rotationAngle = rotationAngle
     )
 
 }

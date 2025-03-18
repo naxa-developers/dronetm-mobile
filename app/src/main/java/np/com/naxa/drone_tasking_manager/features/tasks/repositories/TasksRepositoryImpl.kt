@@ -196,6 +196,7 @@ class TasksRepositoryImpl @Inject constructor(
                 val response = apiService.taskWayPointsOrWayLines(
                     projectId = projectId,
                     taskId = taskId,
+//                    rotationAngle = 360 - rotationAngle, //FE and BE uses 360 - angle to generate new files
                     rotationAngle = rotationAngle,
                     download = download,
                     mode = "waypoints",
@@ -236,6 +237,7 @@ class TasksRepositoryImpl @Inject constructor(
                 val response = apiService.taskWayPointsOrWayLines(
                     projectId = projectId,
                     taskId = taskId,
+//                    rotationAngle = 360 - rotationAngle, //FE and BE uses 360 - angle to generate new files
                     rotationAngle = rotationAngle,
                     download = download,
                     mode = "waylines",
@@ -313,7 +315,8 @@ class TasksRepositoryImpl @Inject constructor(
     override suspend fun downloadFlightPlanFile(
         taskId: String,
         projectId: String,
-        mode: String
+        mode: String,
+        rotationAngle: Int
     ): Flow<DownloadResponse> {
         return flow {
             emit(DownloadResponse.Downloading(0f))
@@ -322,7 +325,8 @@ class TasksRepositoryImpl @Inject constructor(
                 val response = apiService.downloadFlightPlan(
                     projectId = projectId,
                     taskId = taskId,
-                    rotationAngle = 0,
+//                    rotationAngle = 360-rotationAngle, //FE and BE uses 360 - angle to generate new files
+                    rotationAngle = rotationAngle,
                     download = true,
                     mode = mode,
                     forceRefresh = true,
