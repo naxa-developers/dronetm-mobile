@@ -27,6 +27,7 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.TimeUnit
+import androidx.core.net.toUri
 
 
 /**
@@ -118,7 +119,7 @@ class FileDownloadHandler(private val context: Context) {
             }
 
             // Get the content length of the response
-            val contentLength = response.body?.contentLength() ?: -1
+            val contentLength = response.body.contentLength()
             // Check if there is enough space to download the file
             if (contentLength > 0 && !checkAvailableSpace(contentLength)) {
                 throw DownloadError.InsufficientSpace("Not enough space to download file")
@@ -129,10 +130,6 @@ class FileDownloadHandler(private val context: Context) {
 
             // Get the response body
             val body = response.body
-            if (body == null) {
-                emit(DownloadResult.Error("Empty response"))
-                return@flow
-            }
 
             var bytesWritten = 0L
 
@@ -185,7 +182,7 @@ class FileDownloadHandler(private val context: Context) {
      */
     private fun createTempFile(context: Context, url: String): File {
         // Extract the file extension from the URL
-        val extension = Uri.parse(url).lastPathSegment?.substringAfterLast('.', "")
+        val extension = url.toUri().lastPathSegment?.substringAfterLast('.', "")
 
         // Create a temp file with the original extension
         val file = if (!extension.isNullOrBlank()) {
@@ -269,7 +266,7 @@ class FileDownloadHandler(private val context: Context) {
     ) {
         onInitiated.invoke()
         val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager?
-        val uri = Uri.parse(url)
+        val uri = url.toUri()
         val filename = filenameIfUrlNotContainsIt(url)
         val request = DownloadManager.Request(uri)
         request.setDestinationInExternalPublicDir(
@@ -351,7 +348,7 @@ class FileDownloadHandler(private val context: Context) {
                 if (success) {
                     // Download successful
                     if (downloadFileUri != null) {
-                        onSuccess.invoke(downloadFileUri!!)
+                        onSuccess.invoke(downloadFileUri)
                     } else {
                         onError.invoke(error)
                     }
@@ -404,7 +401,7 @@ class FileDownloadHandler(private val context: Context) {
             try {
                 var extension = MimeTypeMap.getFileExtensionFromUrl(url)
                 if (!extension.isNullOrBlank()) {
-                    return@withContext Uri.parse(url).lastPathSegment
+                    return@withContext url.toUri().lastPathSegment
                         ?: (15.randomWord() + ".$extension")
                 }
 

@@ -50,3 +50,25 @@ fun ProjectGeometry.Geometry.toFeatureJson(): String {
 
     return GsonBuilder().setPrettyPrinting().create().toJson(feature)
 }
+
+fun ProjectGeometry.toGeoJsonStr(properties: Map<*, *>? = null): String {
+    val geoJson = mapOf(
+        "type" to "FeatureCollection",
+        "features" to listOf(
+            mapOf(
+                "type" to "Feature",
+                "properties" to (properties ?: mapOf(
+                    "id" to this.properties?.id,
+                    "bbox" to this.properties?.bbox,
+                    "project_boundary" to true
+                )),
+                "geometry" to mapOf(
+                    "type" to geometry?.type?.replace("ST_", "")?.trim(),
+                    "coordinates" to geometry?.coordinates
+                )
+            )
+        )
+    )
+
+    return GsonBuilder().setPrettyPrinting().create().toJson(geoJson)
+}

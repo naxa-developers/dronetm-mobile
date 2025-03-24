@@ -151,9 +151,17 @@ dependencies {
     implementation(libs.coil.compose)
 
     /* *****************************************************
-    **** Image
+    **** Location
     ****************************************************** */
     implementation(libs.play.services.location)
+
+    /* *****************************************************
+    **** Offline Flight Plan Generation
+    ****************************************************** */
+    implementation(libs.jts.core)
+    implementation(libs.proj4j)
+    implementation(libs.jackson.module.kotlin)
+    implementation(libs.gdal)
 
     /* *****************************************************
     **** Testing

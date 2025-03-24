@@ -59,6 +59,12 @@ firebaseBom = "33.8.0"
 coil = "2.6.0"
 playServicesLocation = "21.3.0"
 
+# Offline Flight Plan Generation
+jtsCore = "1.19.0"
+proj4j = "1.1.5"
+gdal = "3.10.1"
+jacksonModuleKotlin = "2.18.2"
+
 [libraries]
 android-sdk = { module = "org.maplibre.gl:android-sdk", version.ref = "androidSdk" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -136,6 +142,11 @@ coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 #Location
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 
+# Offline Flight Plan Generation
+jts-core = { module = "org.locationtech.jts:jts-core", version.ref = "jtsCore" }
+proj4j = { module = "org.locationtech.proj4j:proj4j", version.ref = "proj4j" }
+jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jacksonModuleKotlin" }
+gdal = { module = "org.gdal:gdal", version.ref = "gdal" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
