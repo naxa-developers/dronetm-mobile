@@ -37,7 +37,7 @@ import np.com.naxa.drone_tasking_manager.features.user.auth.refreshtoken.viewmod
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.local_providers.LocalRefreshTokenViewModel
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
-import np.com.naxa.drone_tasking_manager.utils.internetutils.CheckInternetConnectionUtils
+import np.com.naxa.drone_tasking_manager.utils.internetutils.InternetConnectionUtils
 
 @Composable
 fun SplashScreen(
@@ -51,11 +51,11 @@ fun SplashScreen(
     val refreshTokenViewModel = LocalRefreshTokenViewModel.current
     val refreshTokenState by refreshTokenViewModel.state.collectAsState()
 
-    var isInternetAvailable by remember { mutableStateOf(CheckInternetConnectionUtils.isInternetAvailable(context)) }
+    var isInternetAvailable by remember { mutableStateOf(InternetConnectionUtils.isInternetAvailable(context)) }
 
 
     LaunchedEffect(Unit) {
-        isInternetAvailable = CheckInternetConnectionUtils.isInternetAvailable(context)
+        isInternetAvailable = InternetConnectionUtils.isInternetAvailable(context)
 
         alphaAnimation.animateTo(
             targetValue = 1f,

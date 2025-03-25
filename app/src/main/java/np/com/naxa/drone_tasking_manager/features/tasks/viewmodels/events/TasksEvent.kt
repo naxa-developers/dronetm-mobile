@@ -1,6 +1,7 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events
 
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects_centroid.Centroid
+import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.geojson.FeatureCollection
 
@@ -70,22 +71,22 @@ sealed class TasksEvent {
      * rotation angle, whether to download data, whether to fetch waypoints or waylines,
      * and whether to force a refresh of the data.
      *
-     * @property taskId The unique identifier of the task associated with the waypoints/waylines.
-     * @property projectId The unique identifier of the project associated with the task.
+     * @property task The task for which waypoints or waylines are being requested.
      * @property rotationAngle The rotation angle (in degrees) to be applied to the waypoints/waylines. Defaults is null.
      * It will be handled on viewmodel.
      * @property download Indicates whether the fetched data should be downloaded. Defaults to false.
      * @property isWayPoints A flag indicating whether waypoints (true) or waylines (false) are being requested.
-     * @property forceRefresh If true, forces a refresh of the data, bypassing any cached data. Defaults to false.
+     * @property takeOffPoint The take-off point (LatLng) associated with the task. Defaults to null.
+     * @property offline Indicates whether the data should be downloaded offline. Defaults to false.
      */
     data class FetchWayPointsOrWayLines(
-        val taskId: String,
-        val projectId: String,
+        val task: ProjectTask,
         val rotationAngle: Int? = null,
         val download: Boolean = false,
         val isWayPoints: Boolean,
-        val forceRefresh: Boolean = true
-    ) : TasksEvent()
+        val takeOffPoint: LatLng? = null,
+        val offline: Boolean = false,
+        ) : TasksEvent()
 
     /**
      * Represents an event to rotate waypoints or waylines.
@@ -146,37 +147,22 @@ sealed class TasksEvent {
      * longitude), and optional parameters for rotation angle, download behavior, and
      * whether the location is part of waypoints.
      *
-     * @property taskId The unique identifier of the task.
-     * @property projectId The unique identifier of the project the task belongs to.
+     * @property task The task for which the take-off point is being updated.
      * @property latitude The latitude coordinate of the take-off point.
      * @property longitude The longitude coordinate of the take-off point.
      * @property rotationAngle The rotation angle (in degrees) associated with the take-off point. Defaults to 0.
      * @property download A flag indicating whether associated data should be downloaded. Defaults to false.
      * @property isWayPoints A flag indicating whether this take-off point is part of a sequence of waypoints. Defaults to true.
+     * @property offline A flag indicating whether the take-off point should be downloaded offline. Defaults to false.
      *
-     * @constructor Creates an [UpdateTakeOffPoint] object.
-     *
-     * Example usage:
-     * ```
-     * val updateEvent = UpdateTakeOffPoint(
-     *     taskId = "task123",
-     *     projectId = "project456",
-     *     latitude = 34.0522,
-     *     longitude = -118.2437,
-     *     rotationAngle = 90,
-     *     download = true,
-     *     isWayPoints = false
-     * )
-     * ```
      */
     data class UpdateTakeOffPoint(
-        val taskId: String,
-        val projectId: String,
-        val latitude: Double,
-        val longitude: Double,
+        val task: ProjectTask,
+        val takeOffPoint: LatLng,
         val rotationAngle: Int? = null,
         val download: Boolean = false,
         val isWayPoints: Boolean = true,
+        val offline: Boolean = false,
     ) : TasksEvent()
 
     /**
@@ -185,23 +171,23 @@ sealed class TasksEvent {
      * This data class encapsulates the necessary information to define a download task,
      * specifically related to downloading data related to a flight plan. It includes:
      *
-     * @property taskId The unique identifier for the download task. This ID is used to
-     *                  track and manage the specific download operation.
-     * @property projectId The identifier of the project to which this download task belongs.
-     *                    This is used for organization and to group related downloads.
+     * @property task The task for which the flight plan is being downloaded.
      * @property isWayPoints Indicates whether the task involves downloading waypoints.
      *                       Defaults to `true`, meaning the task is for waypoints by default.
      *                       Set to `false` if the task is for downloading other data
      *                       associated with the flight plan (e.g., flight path, telemetry).
+     * @property rotationAngle The rotation angle (in degrees) associated with the flight plan.
+     * @property offline Indicates whether the flight plan should be downloaded offline.
      *
      * This class extends [TasksEvent], suggesting that it's part of a larger system
      * that manages events related to various tasks.
      */
     data class DownloadTaskFlightPlan(
-        val taskId: String,
-        val projectId: String,
+        val task: ProjectTask,
         val isWayPoints: Boolean? = null,
-        val rotationAngle: Int? = null
+        val rotationAngle: Int? = null,
+        val takeOffPoint: LatLng? = null,
+        val offline: Boolean = false,
     ) : TasksEvent()
 
     /**

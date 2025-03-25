@@ -10,7 +10,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import np.com.naxa.drone_tasking_manager.core.utils.DownloadResponse
 import np.com.naxa.drone_tasking_manager.core.utils.Response
+import np.com.naxa.drone_tasking_manager.features.projects.dto.project.NoFlyZones
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects_centroid.Centroid
+import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectGeometry
+import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.DownloadTaskFlightPlanUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.FetchTaskDetailUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.LockTaskUseCase
@@ -18,6 +21,7 @@ import np.com.naxa.drone_tasking_manager.features.tasks.usecases.TaskWayPointsOr
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.UnFlyableTaskUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.UnlockTaskUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.UpdateTakeOffPointUseCase
+import np.com.naxa.drone_tasking_manager.features.tasks.utils.flight_plan_creator.Mode
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskDetailState
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskFlightPlanDownloadState
@@ -152,6 +156,7 @@ class TasksViewModel @Inject constructor(
     private var _tempRotation: Float? = null
     val tempRotation: Float?
         get() = _tempRotation
+
     fun updateTempRotation(angle: Float?) = run { _tempRotation = angle }
 
     /**
@@ -165,8 +170,8 @@ class TasksViewModel @Inject constructor(
      */
     private var _rotation: Int? = null
     private val rotation: Int?
-
         get() = _rotation
+
     fun updateRotation(angle: Int) = run { _rotation = angle }
 
     /**
@@ -238,14 +243,30 @@ class TasksViewModel @Inject constructor(
             }
 
             is TasksEvent.FetchWayPointsOrWayLines -> {
-                fetchWayPointsOrWayLines(
-                    taskId = event.taskId,
-                    projectId = event.projectId,
-                    rotationAngle = event.rotationAngle ?: rotation ?: 0,
-                    download = event.download,
-                    isWayPoints = event.isWayPoints,
-                    forceRefresh = event.forceRefresh
-                )
+                if (event.offline) {
+                    generateWaypointsOrLines(
+                        task = event.task,
+                        noFlyZones = null,
+                        rotationAngle = event.rotationAngle ?: rotation ?: 0,
+                        takeOffPoint = event.takeOffPoint?.let {
+                            listOf(
+                                it.longitude,
+                                it.latitude
+                            )
+                        },
+                        isWayPoints = event.isWayPoints,
+                    )
+                } else {
+                    fetchWayPointsOrWayLines(
+                        taskId = event.task.id!!,
+                        projectId = event.task.projectId!!,
+                        rotationAngle = event.rotationAngle ?: rotation ?: 0,
+                        download = event.download,
+                        isWayPoints = event.isWayPoints,
+                        forceRefresh = true
+                    )
+                }
+
             }
 
             is TasksEvent.RotateWayPointsOrWayLines -> {
@@ -273,15 +294,28 @@ class TasksViewModel @Inject constructor(
             }
 
             is TasksEvent.UpdateTakeOffPoint -> {
-                updateTakeOffPoint(
-                    taskId = event.taskId,
-                    projectId = event.projectId,
-                    rotationAngle = event.rotationAngle ?: rotation ?: 0,
-                    download = event.download,
-                    isWayPoints = event.isWayPoints,
-                    latitude = event.latitude,
-                    longitude = event.longitude
-                )
+                if (event.offline) {
+                    generateWaypointsOrLines(
+                        task = event.task,
+                        noFlyZones = null,
+                        rotationAngle = event.rotationAngle ?: rotation ?: 0,
+                        takeOffPoint = listOf(
+                            event.takeOffPoint.longitude,
+                            event.takeOffPoint.latitude
+                        ),
+                        isWayPoints = event.isWayPoints,
+                    )
+                } else {
+                    updateTakeOffPoint(
+                        taskId = event.task.id!!,
+                        projectId = event.task.projectId!!,
+                        rotationAngle = event.rotationAngle ?: rotation ?: 0,
+                        download = event.download,
+                        isWayPoints = event.isWayPoints,
+                        latitude = event.takeOffPoint.latitude,
+                        longitude = event.takeOffPoint.longitude
+                    )
+                }
             }
 
             is TasksEvent.RestoreFeatureCollection -> {
@@ -291,11 +325,24 @@ class TasksViewModel @Inject constructor(
             }
 
             is TasksEvent.DownloadTaskFlightPlan -> {
-                downloadTaskFlightPlan(
-                    taskId = event.taskId,
-                    projectId = event.projectId,
-                    isWayPoints = event.isWayPoints ?: _isWayPoints ?: true,
-                )
+                if (event.offline) {
+                    generateTaskFlightPlan(
+                        task = event.task,
+                        takeOffPoint = event.takeOffPoint?.let {
+                            listOf(
+                                it.longitude,
+                                it.latitude
+                            )
+                        },
+                        isWayPoints = (event.isWayPoints ?: _isWayPoints) != false,
+                    )
+                } else {
+                    downloadTaskFlightPlan(
+                        taskId = event.task.id!!,
+                        projectId = event.task.projectId!!,
+                        isWayPoints = (event.isWayPoints ?: _isWayPoints) != false,
+                    )
+                }
             }
         }
     }
@@ -518,7 +565,80 @@ class TasksViewModel @Inject constructor(
                         _featureCollection = result.data
 
                         // to maintain the original feature collection
-                        if(_oldTaskID == null || _oldTaskID != taskId ){
+                        if (_oldTaskID == null || _oldTaskID != taskId) {
+                            _originalFeatureCollection = result.data
+                            _oldTaskID = taskId
+                        }
+
+                        _isWayPoints = isWayPoints
+
+                        if (result.data != null) {
+                            _taskWayPointsOrWayLinesState.emit(
+                                TaskWayPointsOrWayLinesState.Success(
+                                    result.data!!,
+                                    isWayPoints
+                                )
+                            )
+
+                            return@collect
+                        }
+
+                        _taskWayPointsOrWayLinesState.emit(
+                            TaskWayPointsOrWayLinesState.Error("No task ${if (isWayPoints) "waypoints" else "waylines"} found with the given id")
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Generates waypoints or waylines for a given task based on the provided parameters.
+     *
+     * This function utilizes the `wayPointsOrWayLinesUseCase` to asynchronously generate either
+     * waypoints or waylines based on the `isWayPoints` flag. It handles the different states
+     * of the response (Loading, Error, Success) and updates the relevant state variables and
+     * emits the updated state through `_taskWayPointsOrWayLinesState`.
+     *
+     */
+    private fun generateWaypointsOrLines(
+        task: ProjectTask,
+        noFlyZones: NoFlyZones? = null,
+        rotationAngle: Int = 0,
+        takeOffPoint: List<Double>? = null,
+        isWayPoints: Boolean,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            (if (takeOffPoint != null) updateTakeOffPointUseCase.invoke(
+                task = task,
+                noFlyZones = noFlyZones,
+                rotationAngle = rotationAngle,
+                takeOffPoint = takeOffPoint,
+                mode = if (isWayPoints) Mode.WayPoints else Mode.WayLines
+            ) else wayPointsOrWayLinesUseCase.invoke(
+                task = task,
+                noFlyZones = noFlyZones,
+                rotationAngle = rotationAngle,
+                mode = if (isWayPoints) Mode.WayPoints else Mode.WayLines
+            )).collect { result ->
+                when (result) {
+                    is Response.Loading -> {
+                        _featureCollection = null
+                        _isWayPoints = null
+                        _changeableFeatureCollection = null
+                        _taskWayPointsOrWayLinesState.emit(TaskWayPointsOrWayLinesState.Loading)
+                    }
+
+                    is Response.Error -> {
+                        _taskWayPointsOrWayLinesState.emit(TaskWayPointsOrWayLinesState.Error(result.message))
+                    }
+
+                    is Response.Success -> {
+                        _featureCollection = result.data
+                        val taskId = task.id
+
+                        // to maintain the original feature collection
+                        if (_oldTaskID == null || _oldTaskID != taskId) {
                             _originalFeatureCollection = result.data
                             _oldTaskID = taskId
                         }
@@ -579,7 +699,8 @@ class TasksViewModel @Inject constructor(
             return
         }
 
-        if (_changeableFeatureCollection == null) _changeableFeatureCollection = _originalFeatureCollection
+        if (_changeableFeatureCollection == null) _changeableFeatureCollection =
+            _originalFeatureCollection
 
         viewModelScope.launch(Dispatchers.IO) {
             val rotated = centroid?.let {
@@ -587,11 +708,11 @@ class TasksViewModel @Inject constructor(
                     _originalFeatureCollection?.features()?.mapIndexed { index, feature ->
                         // Pair the feature with its index for filtering
                         index to feature
-                    }?.filter{(index, feature) ->
+                    }?.filter { (index, feature) ->
                         // Filter out index 0 (Takeoff point) and apply point rotation check
-                        when(val geometry = feature.geometry()){
+                        when (val geometry = feature.geometry()) {
                             is Point -> {
-                                if(index != 0) {
+                                if (index != 0) {
                                     LatLngUtils.isPointInsidePolygonWithBuffer(
                                         geometry.rotate(
                                             Point.fromLngLat(
@@ -601,16 +722,18 @@ class TasksViewModel @Inject constructor(
 
                                         ), taskPolygon
                                     )
-                                }else{
+                                } else {
                                     true
                                 }
-                            }else -> true
+                            }
+
+                            else -> true
                         }
                     }?.map { (index, feature) ->
                         Feature.fromGeometry(
                             when (val geometry = feature.geometry()) {
                                 is Point -> {
-                                    if(index != 0){
+                                    if (index != 0) {
                                         geometry.rotate(
                                             Point.fromLngLat(
                                                 it.coordinates.first(),
@@ -618,7 +741,7 @@ class TasksViewModel @Inject constructor(
                                             ), angle.toDouble()
 
                                         )
-                                    }else {
+                                    } else {
                                         geometry
                                     }
 
@@ -775,7 +898,7 @@ class TasksViewModel @Inject constructor(
                         _featureCollection = result.data
 
                         // to maintain the original feature collection
-                        if(_oldTaskID == null || _oldTaskID != taskId ){
+                        if (_oldTaskID == null || _oldTaskID != taskId) {
                             _originalFeatureCollection = result.data
                             _oldTaskID = taskId
                         }
@@ -801,6 +924,7 @@ class TasksViewModel @Inject constructor(
             }
         }
     }
+
 
     /**
      * Downloads the flight plan associated with a specific task.
@@ -830,6 +954,51 @@ class TasksViewModel @Inject constructor(
                 taskId = taskId,
                 projectId = projectId,
                 mode = if (isWayPoints) "waypoints" else "waylines",
+                rotationAngle = rotation ?: 0
+            ).collect { result ->
+                when (result) {
+                    is DownloadResponse.Downloading -> {
+                        _taskFlightPlanDownloadState.emit(
+                            TaskFlightPlanDownloadState.Downloading(
+                                result.progress
+                            )
+                        )
+                    }
+
+                    is DownloadResponse.Completed -> {
+                        _taskPlanFile = result.file
+                        _taskFlightPlanDownloadState.emit(
+                            TaskFlightPlanDownloadState.DownloadCompleted(
+                                result.file
+                            )
+                        )
+                    }
+
+                    is DownloadResponse.Error -> {
+                        _taskFlightPlanDownloadState.emit(
+                            TaskFlightPlanDownloadState.DownloadError(
+                                result.message
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun generateTaskFlightPlan(
+        task: ProjectTask,
+        takeOffPoint: List<Double>? = null,
+        isWayPoints: Boolean = true,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+
+            _taskPlanFile = null
+
+            downloadTaskFlightPlanUseCase.invoke(
+                task = task,
+                takeOffPoint = takeOffPoint,
+                mode = if (isWayPoints) Mode.WayPoints else Mode.WayLines,
                 rotationAngle = rotation ?: 0
             ).collect { result ->
                 when (result) {

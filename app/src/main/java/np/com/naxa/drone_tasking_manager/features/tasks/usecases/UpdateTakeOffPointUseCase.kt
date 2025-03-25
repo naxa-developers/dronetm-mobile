@@ -3,23 +3,34 @@ package np.com.naxa.drone_tasking_manager.features.tasks.usecases
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import np.com.naxa.drone_tasking_manager.features.projects.dto.project.NoFlyZones
+import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
+import np.com.naxa.drone_tasking_manager.features.tasks.repositories.OfflineFlightPlanRepository
 import np.com.naxa.drone_tasking_manager.features.tasks.repositories.TasksRepository
+import np.com.naxa.drone_tasking_manager.features.tasks.utils.flight_plan_creator.Mode
 import javax.inject.Inject
 
 
 /**
- * This use case class is responsible for updating the take-off point of a task.
+ * [UpdateTakeOffPointUseCase]
  *
- * It interacts with the [TasksRepository] to persist the updated take-off point information.
- * The take-off point is defined by its latitude, longitude, and optionally a rotation angle.
- * It also allows options like forcing a refresh of the data, downloading related resources, and changing mode.
+ * This class provides use cases for updating the takeoff point of a task, either online or offline.
+ * It handles the logic for updating the takeoff point through either the [TasksRepository] for online
+ * tasks or the [OfflineFlightPlanRepository] for offline tasks.
  *
- * @property tasksRepository The repository responsible for interacting with the data layer
- *                           to update task information. Injected by Hilt.
+ * It provides two `invoke` methods, each tailored to different scenarios:
+ *   1. Updating a takeoff point for an online task using [TasksRepository].
+ *   2. Updating a takeoff point for an offline task using [OfflineFlightPlanRepository].
+ *
+ * @property tasksRepository Repository for managing online tasks and their data.
+ * @property offlineFlightPlanRepository Repository for managing offline flight plans and their data.
  */
 @Module
 @InstallIn(SingletonComponent::class)
-class UpdateTakeOffPointUseCase @Inject constructor(private val tasksRepository: TasksRepository) {
+class UpdateTakeOffPointUseCase @Inject constructor(
+    private val tasksRepository: TasksRepository,
+    private val offlineFlightPlanRepository: OfflineFlightPlanRepository
+) {
     suspend operator fun invoke(
         taskId: String,
         projectId: String,
@@ -40,4 +51,17 @@ class UpdateTakeOffPointUseCase @Inject constructor(private val tasksRepository:
         longitude = longitude
     )
 
+    suspend operator fun invoke(
+        task: ProjectTask,
+        noFlyZones: NoFlyZones? = null,
+        rotationAngle: Int = 0,
+        takeOffPoint: List<Double>,
+        mode: Mode = Mode.WayPoints,
+    ) = offlineFlightPlanRepository.taskWayPointsOrLines(
+        task = task,
+        noFlyZones = noFlyZones,
+        rotationAngle = rotationAngle,
+        takeOffPoint = takeOffPoint,
+        mode = mode,
+    )
 }

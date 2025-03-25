@@ -28,7 +28,7 @@ object DroneFlightPlan {
     /**
      * Generate a flight plan with the given parameters
      *
-     * @param aoi The area of interest. The area of interest is defined as a GeoJSON Polygon.
+     * @param projectArea The area of interest. The area of interest is defined as a GeoJSON Polygon.
      * @param parameters The parameters of the flight plan.
      * @param outfile The path to the output file. If not given, the output file will be created at /tmp/output.kmz.
      * @param generate3d If true, it will generate waypoints at each point, not at intervals.
@@ -36,13 +36,13 @@ object DroneFlightPlan {
      * @param takeOffPoint The coordinates of the takeoff point. If given, the flight plan will be rotated to include this point.
      * @param rasterDemFilePath The path to the raster DEM file.
      * @param elevatedWaypointsFilePath The path to the elevated waypoints file.
+     * @param noFlyZones Areas where flight is restricted; waypoints are excluded from these zones.
      * @param mode The mode of flight planning.
      * @param wayLinesFileExt The file extension of the waylines file.
      * @return The path to the generated flight plan
      */
     fun create(
-        context: Context,
-        aoi: Map<String, Any>,
+        projectArea: String,
         parameters: Parameters.CalculatedParameters,
         outfile: String,
         generate3d: Boolean = false,
@@ -50,19 +50,21 @@ object DroneFlightPlan {
         takeOffPoint: List<Double>? = null,
         rasterDemFilePath: String? = null,
         elevatedWaypointsFilePath: String? = null,
+        noFlyZones: String? = null,
         mode: Mode = Mode.WayPoints,
         wayLinesFileExt: String = "kml"
     ): String {
 
         // Generate waypoints
         val waypoints = WaypointsOrLines.create(
-            aoi,
+            projectArea,
             parameters,
             rotationAngle,
             generate3d,
             takeOffPoint = takeOffPoint,
             rasterDemFilePath = rasterDemFilePath,
             elevatedWaypointsFilePath = elevatedWaypointsFilePath,
+            noFlyZones = noFlyZones,
             mode = mode
         )
 

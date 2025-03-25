@@ -46,6 +46,7 @@ import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
 import np.com.naxa.drone_tasking_manager.navigation.routes.Routes
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 import np.com.naxa.drone_tasking_manager.utils.PermissionUtils
+import np.com.naxa.drone_tasking_manager.utils.internetutils.InternetConnectionUtils
 import java.io.File
 
 @Composable
@@ -81,9 +82,9 @@ fun DownloadTaskFlightPlanIconButton(
 
                 tasksViewModel.triggerEvent(
                     TasksEvent.DownloadTaskFlightPlan(
-                        taskId = task.id,
-                        projectId = task.projectId,
+                        task = task,
                         isWayPoints = null,
+                        offline = !InternetConnectionUtils.isInternetAvailable(context)
                     )
                 )
             }

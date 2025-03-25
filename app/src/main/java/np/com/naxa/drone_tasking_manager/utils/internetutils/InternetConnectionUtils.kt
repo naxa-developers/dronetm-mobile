@@ -7,7 +7,7 @@ import android.net.NetworkCapabilities
 /**
  * Object providing utility functions for checking internet connectivity.
  */
-object CheckInternetConnectionUtils {
+object InternetConnectionUtils {
     /**
      * Checks if the device has an active internet connection.
      *

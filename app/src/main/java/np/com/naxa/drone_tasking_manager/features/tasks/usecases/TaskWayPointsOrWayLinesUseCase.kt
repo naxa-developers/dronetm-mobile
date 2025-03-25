@@ -3,7 +3,11 @@ package np.com.naxa.drone_tasking_manager.features.tasks.usecases
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import np.com.naxa.drone_tasking_manager.features.projects.dto.project.NoFlyZones
+import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
+import np.com.naxa.drone_tasking_manager.features.tasks.repositories.OfflineFlightPlanRepository
 import np.com.naxa.drone_tasking_manager.features.tasks.repositories.TasksRepository
+import np.com.naxa.drone_tasking_manager.features.tasks.utils.flight_plan_creator.Mode
 import javax.inject.Inject
 
 /**
@@ -19,7 +23,10 @@ import javax.inject.Inject
  */
 @Module
 @InstallIn(SingletonComponent::class)
-class TaskWayPointsOrWayLinesUseCase @Inject constructor(private val tasksRepository: TasksRepository) {
+class TaskWayPointsOrWayLinesUseCase @Inject constructor(
+    private val tasksRepository: TasksRepository,
+    private val offlineFlightPlanRepository: OfflineFlightPlanRepository
+) {
     suspend operator fun invoke(
         taskId: String,
         projectId: String,
@@ -30,5 +37,17 @@ class TaskWayPointsOrWayLinesUseCase @Inject constructor(private val tasksReposi
     ) = if (isWayPoints)
         tasksRepository.taskWayPoints(taskId, projectId, rotationAngle, download, forceRefresh) else
         tasksRepository.taskWayLines(taskId, projectId, rotationAngle, download, forceRefresh)
+
+    suspend operator fun invoke(
+        task: ProjectTask,
+        noFlyZones: NoFlyZones? = null,
+        rotationAngle: Int = 0,
+        mode: Mode = Mode.WayPoints
+    ) = offlineFlightPlanRepository.taskWayPointsOrLines(
+        task = task,
+        noFlyZones = noFlyZones,
+        rotationAngle = rotationAngle,
+        mode = mode
+    )
 
 }

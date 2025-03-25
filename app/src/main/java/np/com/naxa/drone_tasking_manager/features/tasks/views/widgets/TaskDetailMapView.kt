@@ -46,6 +46,7 @@ import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksE
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskWayPointsOrWayLinesState
 import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
 import np.com.naxa.drone_tasking_manager.utils.LatLngUtils
+import np.com.naxa.drone_tasking_manager.utils.internetutils.InternetConnectionUtils
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
@@ -146,12 +147,12 @@ fun TaskDetailMapView(
 
         tasksViewModel.triggerEvent(
             TasksEvent.FetchWayPointsOrWayLines(
-                taskId = task.id,
-                projectId = task.projectId,
+                task = task,
                 rotationAngle = 0,
                 download = false,
                 isWayPoints = true,
-                forceRefresh = true
+                takeOffPoint = updatedTakeOffPointLatLng,
+                offline = !InternetConnectionUtils.isInternetAvailable(context),
             )
         )
     }
@@ -257,7 +258,7 @@ fun TaskDetailMapView(
                     (waypointsOrWayLinesState as TaskWayPointsOrWayLinesState.Success).geoJson
                 isWaypoints =
                     (waypointsOrWayLinesState as TaskWayPointsOrWayLinesState.Success).isWayPoints
-                updatedTakeOffPointLatLng = null
+//                updatedTakeOffPointLatLng = null
 
                 applyWaypointsLineLayer(context, features, libreMap, applyArrow = !sliderVisible && !rotatingByGesture)
                 applyWaypointsCircleLayer(context, features, libreMap)
@@ -457,12 +458,12 @@ fun TaskDetailMapView(
 
                         tasksViewModel.triggerEvent(
                             TasksEvent.FetchWayPointsOrWayLines(
-                                taskId = task.id,
-                                projectId = task.projectId,
+                                task = task,
                                 rotationAngle = angle.roundToInt(),
                                 download = false,
                                 isWayPoints = isWaypoints,
-                                forceRefresh = true
+                                takeOffPoint = updatedTakeOffPointLatLng,
+                                offline = !InternetConnectionUtils.isInternetAvailable(context)
                             )
                         )
                     }
@@ -507,11 +508,11 @@ fun TaskDetailMapView(
 
                     tasksViewModel.triggerEvent(
                         TasksEvent.FetchWayPointsOrWayLines(
-                            taskId = task.id,
-                            projectId = task.projectId,
+                            task = task,
                             download = false,
                             isWayPoints = !wayLines,
-                            forceRefresh = false
+                            takeOffPoint = updatedTakeOffPointLatLng,
+                            offline = !InternetConnectionUtils.isInternetAvailable(context)
                         )
                     )
                 },
@@ -557,12 +558,11 @@ fun TaskDetailMapView(
 
                     tasksViewModel.triggerEvent(
                         TasksEvent.UpdateTakeOffPoint(
-                            taskId = task.id,
-                            projectId = task.projectId,
-                            latitude = updatedTakeOffPointLatLng!!.latitude,
-                            longitude = updatedTakeOffPointLatLng!!.longitude,
+                            task = task,
+                            takeOffPoint = updatedTakeOffPointLatLng!!,
                             download = false,
                             isWayPoints = isWaypoints,
+                            offline = !InternetConnectionUtils.isInternetAvailable(context)
                         )
                     )
                 }

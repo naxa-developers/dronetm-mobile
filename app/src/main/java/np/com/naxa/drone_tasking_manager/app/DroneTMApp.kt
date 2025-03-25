@@ -88,7 +88,7 @@ import np.com.naxa.drone_tasking_manager.navigation.DroneTMAppNavHost
 import np.com.naxa.drone_tasking_manager.navigation.routes.Routes
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.NavigationEventsViewModel
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
-import np.com.naxa.drone_tasking_manager.utils.internetutils.CheckInternetConnectionUtils
+import np.com.naxa.drone_tasking_manager.utils.internetutils.InternetConnectionUtils
 import np.com.naxa.drone_tasking_manager.utils.route
 import np.com.naxa.drone_tasking_manager.utils.widgets.NavigateToTransferFileWidget
 import np.com.naxa.drone_tasking_manager.viewmodel.EventsViewModel
@@ -117,7 +117,7 @@ fun DroneTMApp(
     val backStackEntry by navController.currentBackStackEntryFlow.collectAsState(initial = null)
     val downloadAndTransferState by downloadAndTransferViewModel.downloadAndTransferState.collectAsState()
 
-    var isInternetAvailable by remember { mutableStateOf(CheckInternetConnectionUtils.isInternetAvailable(context)) }
+    var isInternetAvailable by remember { mutableStateOf(InternetConnectionUtils.isInternetAvailable(context)) }
 
 
     val currentRoute by remember {
@@ -158,7 +158,7 @@ fun DroneTMApp(
     }
 
     LaunchedEffect(Unit) {
-        isInternetAvailable = CheckInternetConnectionUtils.isInternetAvailable(context)
+        isInternetAvailable = InternetConnectionUtils.isInternetAvailable(context)
 
         navigationEventsViewModel.appEvents.collect { event ->
             when (event) {
