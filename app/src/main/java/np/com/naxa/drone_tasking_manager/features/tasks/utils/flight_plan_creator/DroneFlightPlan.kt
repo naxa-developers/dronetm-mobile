@@ -1,6 +1,5 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.utils.flight_plan_creator
 
-import android.content.Context
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.w3c.dom.Document
@@ -13,7 +12,6 @@ import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
-import kotlin.collections.get
 
 
 /**
@@ -52,7 +50,7 @@ object DroneFlightPlan {
         elevatedWaypointsFilePath: String? = null,
         noFlyZones: String? = null,
         mode: Mode = Mode.WayPoints,
-        wayLinesFileExt: String = "kml"
+        wayLinesFileExt: String = "wpml"
     ): String {
 
         // Generate waypoints
