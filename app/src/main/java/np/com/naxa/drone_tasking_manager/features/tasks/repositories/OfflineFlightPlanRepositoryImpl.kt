@@ -39,6 +39,7 @@ class OfflineFlightPlanRepositoryImpl @Inject constructor(
         noFlyZones: NoFlyZones?,
         rotationAngle: Int,
         takeOffPoint: List<Double>?,
+        rasterDemFilePath: String?,
         mode: Mode
     ): Flow<Response<FeatureCollection>> {
         return flow {
@@ -58,6 +59,8 @@ class OfflineFlightPlanRepositoryImpl @Inject constructor(
                     parameters = parameters,
                     rotationAngle = 360 - rotationAngle.toDouble(),
                     takeOffPoint = takeOffPoint,
+                    rasterDemFilePath = rasterDemFilePath,
+                    elevatedWaypointsFilePath = context.cacheDir.absolutePath,
                     mode = mode,
                 )
 
@@ -78,6 +81,7 @@ class OfflineFlightPlanRepositoryImpl @Inject constructor(
         noFlyZones: NoFlyZones?,
         rotationAngle: Int,
         takeOffPoint: List<Double>?,
+        rasterDemFilePath: String?,
         mode: Mode,
     ): Flow<DownloadResponse> {
         return flow {
@@ -101,6 +105,8 @@ class OfflineFlightPlanRepositoryImpl @Inject constructor(
                     parameters = parameters,
                     rotationAngle = 360 - rotationAngle.toDouble(),
                     takeOffPoint = takeOffPoint,
+                    rasterDemFilePath = rasterDemFilePath,
+                    elevatedWaypointsFilePath = context.cacheDir.absolutePath,
                     mode = mode,
                 )
 

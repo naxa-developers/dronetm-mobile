@@ -77,6 +77,7 @@ sealed class TasksEvent {
      * @property download Indicates whether the fetched data should be downloaded. Defaults to false.
      * @property isWayPoints A flag indicating whether waypoints (true) or waylines (false) are being requested.
      * @property takeOffPoint The take-off point (LatLng) associated with the task. Defaults to null.
+     * @property rasterDemFilePath The path to the raster DEM file. Defaults to null.
      * @property offline Indicates whether the data should be downloaded offline. Defaults to false.
      */
     data class FetchWayPointsOrWayLines(
@@ -85,8 +86,9 @@ sealed class TasksEvent {
         val download: Boolean = false,
         val isWayPoints: Boolean,
         val takeOffPoint: LatLng? = null,
+        val rasterDemFilePath: String? = null,
         val offline: Boolean = false,
-        ) : TasksEvent()
+    ) : TasksEvent()
 
     /**
      * Represents an event to rotate waypoints or waylines.
@@ -148,11 +150,11 @@ sealed class TasksEvent {
      * whether the location is part of waypoints.
      *
      * @property task The task for which the take-off point is being updated.
-     * @property latitude The latitude coordinate of the take-off point.
-     * @property longitude The longitude coordinate of the take-off point.
+     * @property takeOffPoint The latitude coordinate of the take-off point.
      * @property rotationAngle The rotation angle (in degrees) associated with the take-off point. Defaults to 0.
      * @property download A flag indicating whether associated data should be downloaded. Defaults to false.
      * @property isWayPoints A flag indicating whether this take-off point is part of a sequence of waypoints. Defaults to true.
+     * @property rasterDemFilePath The path to the raster DEM file. Defaults to null.
      * @property offline A flag indicating whether the take-off point should be downloaded offline. Defaults to false.
      *
      */
@@ -162,6 +164,7 @@ sealed class TasksEvent {
         val rotationAngle: Int? = null,
         val download: Boolean = false,
         val isWayPoints: Boolean = true,
+        val rasterDemFilePath: String? = null,
         val offline: Boolean = false,
     ) : TasksEvent()
 
@@ -177,6 +180,8 @@ sealed class TasksEvent {
      *                       Set to `false` if the task is for downloading other data
      *                       associated with the flight plan (e.g., flight path, telemetry).
      * @property rotationAngle The rotation angle (in degrees) associated with the flight plan.
+     * @property takeOffPoint The geographical coordinates (latitude and longitude) of the take-off point.
+     * @property rasterDemFilePath The path to the raster DEM file.
      * @property offline Indicates whether the flight plan should be downloaded offline.
      *
      * This class extends [TasksEvent], suggesting that it's part of a larger system
@@ -187,6 +192,7 @@ sealed class TasksEvent {
         val isWayPoints: Boolean? = null,
         val rotationAngle: Int? = null,
         val takeOffPoint: LatLng? = null,
+        val rasterDemFilePath: String? = null,
         val offline: Boolean = false,
     ) : TasksEvent()
 

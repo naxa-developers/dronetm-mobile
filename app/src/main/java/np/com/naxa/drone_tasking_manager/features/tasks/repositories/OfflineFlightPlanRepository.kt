@@ -19,6 +19,7 @@ interface OfflineFlightPlanRepository {
      * @param noFlyZones The no-fly zones associated with the task, if any.
      * @param rotationAngle An optional integer representing a rotation adjustment to be applied to the waypoints. Defaults to 0 (no rotation).
      * @param takeOffPoint The coordinates of the take-off point.
+     * @param rasterDemFilePath The path to the raster DEM file.
      * @param mode The mode of the flight plan. Defaults to [Mode.WayPoints].
      * @return A [Flow] emitting [Response] objects containing a [FeatureCollection].
      *         - On success, the [Response] will contain the waypoints data in the [FeatureCollection] within the body.
@@ -31,6 +32,7 @@ interface OfflineFlightPlanRepository {
         noFlyZones: NoFlyZones? = null,
         rotationAngle: Int = 0,
         takeOffPoint: List<Double>? = null,
+        rasterDemFilePath: String? = null,
         mode: Mode = Mode.WayPoints
     ): Flow<Response<FeatureCollection>>
 
@@ -46,6 +48,7 @@ interface OfflineFlightPlanRepository {
      * @param noFlyZones The no-fly zones associated with the task, if any.
      * @param rotationAngle The rotation angle of the take-off point in degrees. Defaults to 0.
      * @param takeOffPoint The coordinates of the take-off point.
+     * @param rasterDemFilePath The path to the raster DEM file.
      * @param mode The mode of the flight plan. Defaults to [Mode.WayPoints].
      *
      *
@@ -55,6 +58,7 @@ interface OfflineFlightPlanRepository {
         noFlyZones: NoFlyZones? = null,
         rotationAngle: Int = 0,
         takeOffPoint: List<Double>? = null,
+        rasterDemFilePath: String? = null,
         mode: Mode = Mode.WayPoints,
     ): Flow<DownloadResponse>
 }

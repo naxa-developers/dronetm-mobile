@@ -12,7 +12,6 @@ import np.com.naxa.drone_tasking_manager.core.utils.DownloadResponse
 import np.com.naxa.drone_tasking_manager.core.utils.Response
 import np.com.naxa.drone_tasking_manager.features.projects.dto.project.NoFlyZones
 import np.com.naxa.drone_tasking_manager.features.projects.dto.projects_centroid.Centroid
-import np.com.naxa.drone_tasking_manager.features.projects.models.ProjectGeometry
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.DownloadTaskFlightPlanUseCase
 import np.com.naxa.drone_tasking_manager.features.tasks.usecases.FetchTaskDetailUseCase
@@ -254,6 +253,7 @@ class TasksViewModel @Inject constructor(
                                 it.latitude
                             )
                         },
+                        rasterDemFilePath = event.rasterDemFilePath,
                         isWayPoints = event.isWayPoints,
                     )
                 } else {
@@ -303,6 +303,7 @@ class TasksViewModel @Inject constructor(
                             event.takeOffPoint.longitude,
                             event.takeOffPoint.latitude
                         ),
+                        rasterDemFilePath = event.rasterDemFilePath,
                         isWayPoints = event.isWayPoints,
                     )
                 } else {
@@ -334,6 +335,7 @@ class TasksViewModel @Inject constructor(
                                 it.latitude
                             )
                         },
+                        rasterDemFilePath = event.rasterDemFilePath,
                         isWayPoints = (event.isWayPoints ?: _isWayPoints) != false,
                     )
                 } else {
@@ -606,6 +608,7 @@ class TasksViewModel @Inject constructor(
         noFlyZones: NoFlyZones? = null,
         rotationAngle: Int = 0,
         takeOffPoint: List<Double>? = null,
+        rasterDemFilePath: String? = null,
         isWayPoints: Boolean,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -614,11 +617,14 @@ class TasksViewModel @Inject constructor(
                 noFlyZones = noFlyZones,
                 rotationAngle = rotationAngle,
                 takeOffPoint = takeOffPoint,
+                rasterDemFilePath = rasterDemFilePath,
                 mode = if (isWayPoints) Mode.WayPoints else Mode.WayLines
             ) else wayPointsOrWayLinesUseCase.invoke(
                 task = task,
                 noFlyZones = noFlyZones,
                 rotationAngle = rotationAngle,
+                takeOffPoint = takeOffPoint,
+                rasterDemFilePath = rasterDemFilePath,
                 mode = if (isWayPoints) Mode.WayPoints else Mode.WayLines
             )).collect { result ->
                 when (result) {
@@ -648,7 +654,7 @@ class TasksViewModel @Inject constructor(
                         if (result.data != null) {
                             _taskWayPointsOrWayLinesState.emit(
                                 TaskWayPointsOrWayLinesState.Success(
-                                    result.data!!,
+                                    result.data,
                                     isWayPoints
                                 )
                             )
@@ -989,6 +995,7 @@ class TasksViewModel @Inject constructor(
     private fun generateTaskFlightPlan(
         task: ProjectTask,
         takeOffPoint: List<Double>? = null,
+        rasterDemFilePath: String? = null,
         isWayPoints: Boolean = true,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -999,6 +1006,7 @@ class TasksViewModel @Inject constructor(
                 task = task,
                 takeOffPoint = takeOffPoint,
                 mode = if (isWayPoints) Mode.WayPoints else Mode.WayLines,
+                rasterDemFilePath = rasterDemFilePath,
                 rotationAngle = rotation ?: 0
             ).collect { result ->
                 when (result) {

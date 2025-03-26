@@ -46,12 +46,14 @@ class DownloadTaskFlightPlanUseCase @Inject constructor(
         noFlyZones: NoFlyZones? = null,
         rotationAngle: Int = 0,
         takeOffPoint: List<Double>? = null,
+        rasterDemFilePath: String? = null,
         mode: Mode = Mode.WayPoints,
     ) = offlineFlightPlanRepository.generateFlightPlanFile(
         task = task,
         noFlyZones = noFlyZones,
         rotationAngle = rotationAngle,
         takeOffPoint = takeOffPoint,
+        rasterDemFilePath = rasterDemFilePath,
         mode = mode,
     )
 

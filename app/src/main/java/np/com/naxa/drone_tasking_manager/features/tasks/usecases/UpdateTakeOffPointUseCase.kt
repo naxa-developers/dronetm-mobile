@@ -56,12 +56,14 @@ class UpdateTakeOffPointUseCase @Inject constructor(
         noFlyZones: NoFlyZones? = null,
         rotationAngle: Int = 0,
         takeOffPoint: List<Double>,
+        rasterDemFilePath: String? = null,
         mode: Mode = Mode.WayPoints,
     ) = offlineFlightPlanRepository.taskWayPointsOrLines(
         task = task,
         noFlyZones = noFlyZones,
         rotationAngle = rotationAngle,
         takeOffPoint = takeOffPoint,
+        rasterDemFilePath = rasterDemFilePath,
         mode = mode,
     )
 }
