@@ -133,7 +133,7 @@ fun ProjectDetailsScreen(
     // Fetch project details on screen start
     LaunchedEffect(Unit) {
         if (projectId != null) {
-            viewModel.triggerEvent(ProjectDetailEvent.FetchProjectById(projectId, true))
+            viewModel.triggerEvent(ProjectDetailEvent.FetchProjectById(projectId, true, context))
         }
     }
 
@@ -145,6 +145,7 @@ fun ProjectDetailsScreen(
                 ProjectDetailEvent.FetchProjectById(
                     projectId,
                     forceRefresh = true,
+                    context
                 )
             )
         }
@@ -169,6 +170,7 @@ fun ProjectDetailsScreen(
                 ProjectDetailEvent.FetchProjectById(
                     projectId,
                     forceRefresh = true,
+                    context
                 )
             )
         }

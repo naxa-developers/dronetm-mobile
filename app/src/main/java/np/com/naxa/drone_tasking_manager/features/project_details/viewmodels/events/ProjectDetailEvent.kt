@@ -1,5 +1,7 @@
 package np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.events
 
+import android.content.Context
+
 sealed class ProjectDetailEvent {
     /**
      * Represents an event to fetch a specific project by its ID.
@@ -12,5 +14,5 @@ sealed class ProjectDetailEvent {
      * @constructor Creates a [FetchProjectById] event with the specified project ID.
      * @see ProjectDetailEvent
      */
-    data class FetchProjectById(val id: String, val forceRefresh: Boolean = false) : ProjectDetailEvent()
+    data class FetchProjectById(val id: String, val forceRefresh: Boolean = false, val context: Context) : ProjectDetailEvent()
 }

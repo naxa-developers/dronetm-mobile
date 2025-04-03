@@ -1,5 +1,6 @@
 package np.com.naxa.drone_tasking_manager.features.project_details.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,6 +12,8 @@ import np.com.naxa.drone_tasking_manager.core.utils.Response
 import np.com.naxa.drone_tasking_manager.features.project_details.usecases.FetchProjectDetailUseCase
 import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.events.ProjectDetailEvent
 import np.com.naxa.drone_tasking_manager.features.project_details.viewmodels.states.ProjectDetailState
+import np.com.naxa.drone_tasking_manager.features.tasks.utils.filesdownloaderUtils.downloadFileToAppFolder
+import np.com.naxa.drone_tasking_manager.features.tasks.utils.filesdownloaderUtils.isFileExists
 import javax.inject.Inject
 
 @HiltViewModel
@@ -37,7 +40,7 @@ class ProjectDetailViewModel @Inject constructor(
     fun triggerEvent(event: ProjectDetailEvent) {
         when (event) {
             is ProjectDetailEvent.FetchProjectById -> {
-                fetchProjectById(event.id, event.forceRefresh)
+                fetchProjectById(event.id, event.forceRefresh, event.context)
             }
         }
     }
@@ -66,7 +69,8 @@ class ProjectDetailViewModel @Inject constructor(
      */
     private fun fetchProjectById(
         id: String,
-        forceRefresh: Boolean = false
+        forceRefresh: Boolean = false,
+        context: Context
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             projectUseCase.invoke(
@@ -85,6 +89,15 @@ class ProjectDetailViewModel @Inject constructor(
                     is Response.Success -> {
 
                         if (result.data != null) {
+
+                            if(result.data.name != null){
+                                if(!isFileExists(context, result.data.name)){
+                                    downloadFileToAppFolder(context,
+                                        "https://dev-dronetm.s3.ap-south-1.amazonaws.com/dtm-data/projects/270dca7a-af3a-4f90-986a-daf39f9ca1a3/dem.tif",
+                                        result.data.name, result.data.name, viewModelScope)
+                                }
+                            }
+
                             _projectState.emit(
                                 ProjectDetailState.Success(
                                     result.data!!,
