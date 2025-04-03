@@ -75,7 +75,7 @@ fun downloadFileToAppFolder(
 
 fun isFileExists(context: Context, projectName: String): Boolean {
     val projectFolder = File(context.filesDir, "downloads/TiffFiles/$projectName")
-    val fileName: String = "projectFolder.tif"
+    val fileName: String = "$projectName.tif"
     val file = File(projectFolder, fileName)
 
     return file.exists() // Returns true if the file exists, false otherwise
@@ -85,4 +85,16 @@ fun getFileExtensionFromUrl(url: String): String? {
     val decodedUrl = URLDecoder.decode(url, StandardCharsets.UTF_8.name())
     val extension = MimeTypeMap.getFileExtensionFromUrl(decodedUrl)
     return if (extension.isNullOrEmpty()) null else extension
+}
+
+fun getFileFromSavedLocation(context: Context, projectName: String): File? {
+    val filePath = File(context.filesDir, "downloads/TiffFiles/$projectName")
+    val fileName: String = "$projectName.tif"
+    val file = File(filePath, fileName)
+
+    return if (file.exists()) {
+        file // Return the file object if it exists
+    } else {
+        null // Return null if the file does not exist
+    }
 }
