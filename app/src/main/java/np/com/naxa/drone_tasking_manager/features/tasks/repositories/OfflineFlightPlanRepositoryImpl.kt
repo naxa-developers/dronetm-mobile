@@ -55,9 +55,9 @@ class OfflineFlightPlanRepositoryImpl @Inject constructor(
 
                 val response = WaypointsOrLines.create(
                     projectArea = task.geometry!!.toGeoJsonStr(),
-                    noFlyZones = noFlyZones?.toGeoJsonStr(),
                     parameters = parameters,
                     rotationAngle = 360 - rotationAngle.toDouble(),
+                    noFlyZones = noFlyZones?.toGeoJsonStr(),
                     takeOffPoint = takeOffPoint,
                     rasterDemFilePath = rasterDemFilePath,
                     elevatedWaypointsFilePath = context.cacheDir.absolutePath,

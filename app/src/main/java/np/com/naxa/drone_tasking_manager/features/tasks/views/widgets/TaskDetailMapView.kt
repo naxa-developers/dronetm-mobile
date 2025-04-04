@@ -42,6 +42,7 @@ import np.com.naxa.drone_tasking_manager.core.widgets.MaplibreCompose
 import np.com.naxa.drone_tasking_manager.core.widgets.rememberCameraPosition
 import np.com.naxa.drone_tasking_manager.features.projects.models.toFeatureJsonStr
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
+import np.com.naxa.drone_tasking_manager.features.tasks.utils.filesdownloaderUtils.getFilePath
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskWayPointsOrWayLinesState
 import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
@@ -556,13 +557,16 @@ fun TaskDetailMapView(
 
                     if (task.id == null || task.projectId == null || updatedTakeOffPointLatLng == null) return@UpdateTakeOffPointAlertDialog
 
+
+                    val rasterDemFilePath = getFilePath(context, task.projectName!!)
                     tasksViewModel.triggerEvent(
                         TasksEvent.UpdateTakeOffPoint(
                             task = task,
                             takeOffPoint = updatedTakeOffPointLatLng!!,
                             download = false,
                             isWayPoints = isWaypoints,
-                            offline = !InternetConnectionUtils.isInternetAvailable(context)
+                            offline = !InternetConnectionUtils.isInternetAvailable(context),
+                            rasterDemFilePath = rasterDemFilePath
                         )
                     )
                 }

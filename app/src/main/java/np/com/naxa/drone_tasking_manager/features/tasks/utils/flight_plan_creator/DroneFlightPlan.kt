@@ -50,8 +50,7 @@ object DroneFlightPlan {
         elevatedWaypointsFilePath: String? = null,
         noFlyZones: String? = null,
         mode: Mode = Mode.WayPoints,
-        wayLinesFileExt: String = "wpml"
-    ): String {
+        wayLinesFileExt: String = "wpml"): String {
 
         // Generate waypoints
         val waypoints = WaypointsOrLines.create(
@@ -63,8 +62,7 @@ object DroneFlightPlan {
             rasterDemFilePath = rasterDemFilePath,
             elevatedWaypointsFilePath = elevatedWaypointsFilePath,
             noFlyZones = noFlyZones,
-            mode = mode
-        )
+            mode = mode)
 
         // Parse waypoints with elevation
         val waypointsGeoJson = jacksonObjectMapper().readValue<Map<String, Any>>(waypoints)

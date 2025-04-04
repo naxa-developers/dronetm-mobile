@@ -72,7 +72,7 @@ object WaypointsOrLines {
         takeOffPoint: List<Double>? = null,
         rasterDemFilePath: String? = null,
         elevatedWaypointsFilePath: String? = null,
-        mode: Mode = Mode.WayPoints
+        mode: Mode = Mode.WayPoints,
     ): String {
 
         if (rasterDemFilePath != null) {

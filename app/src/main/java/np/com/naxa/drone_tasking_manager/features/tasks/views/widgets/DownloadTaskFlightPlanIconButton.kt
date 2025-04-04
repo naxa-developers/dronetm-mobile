@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import np.com.naxa.drone_tasking_manager.features.tasks.models.ProjectTask
 import np.com.naxa.drone_tasking_manager.features.tasks.utils.TaskActionPlanFileUtils
+import np.com.naxa.drone_tasking_manager.features.tasks.utils.filesdownloaderUtils.getFilePath
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.events.TasksEvent
 import np.com.naxa.drone_tasking_manager.features.tasks.viewmodels.states.TaskFlightPlanDownloadState
 import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsViewModel
@@ -80,11 +81,13 @@ fun DownloadTaskFlightPlanIconButton(
                 file = null
                 progress = 0f
 
+                val rasterDemFilePath = getFilePath(context, task.projectName!!)
                 tasksViewModel.triggerEvent(
                     TasksEvent.DownloadTaskFlightPlan(
                         task = task,
                         isWayPoints = null,
-                        offline = !InternetConnectionUtils.isInternetAvailable(context)
+                        offline = !InternetConnectionUtils.isInternetAvailable(context),
+                        rasterDemFilePath = rasterDemFilePath
                     )
                 )
             }
