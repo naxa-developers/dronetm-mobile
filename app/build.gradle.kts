@@ -1,3 +1,4 @@
+import com.android.build.api.dsl.Packaging
 import java.util.Properties
 
 @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
@@ -61,9 +62,18 @@ android {
         compose = true
         buildConfig = true
     }
+
+    fun Packaging.() {
+        resources {
+            excludes += setOf("/META-INF/{AL2.0,LGPL2.1}")
+        }
+    }
+
 }
 
 dependencies {
+
+    implementation(fileTree(mapOf("dir" to "/Users/admin/AndroidStudioProjects/android-saf-file-explorer/app/src/main/libs", "include" to listOf("gdal-*.aar"))))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -161,7 +171,7 @@ dependencies {
     implementation(libs.jts.core)
     implementation(libs.proj4j)
     implementation(libs.jackson.module.kotlin)
-    implementation(libs.gdal)
+    // implementation(libs.gdal)
 
     /* *****************************************************
     **** Testing

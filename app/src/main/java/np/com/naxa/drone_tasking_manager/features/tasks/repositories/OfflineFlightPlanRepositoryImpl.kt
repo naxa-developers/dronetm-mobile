@@ -60,7 +60,11 @@ class OfflineFlightPlanRepositoryImpl @Inject constructor(
                     noFlyZones = noFlyZones?.toGeoJsonStr(),
                     takeOffPoint = takeOffPoint,
                     rasterDemFilePath = rasterDemFilePath,
-                    elevatedWaypointsFilePath = context.cacheDir.absolutePath,
+                    elevatedWaypointsFilePath = File.createTempFile(
+                        "elevated_waypoints",
+                        ".geojson",
+                        context.cacheDir
+                    ).absolutePath,
                     mode = mode,
                 )
 
@@ -106,7 +110,11 @@ class OfflineFlightPlanRepositoryImpl @Inject constructor(
                     rotationAngle = 360 - rotationAngle.toDouble(),
                     takeOffPoint = takeOffPoint,
                     rasterDemFilePath = rasterDemFilePath,
-                    elevatedWaypointsFilePath = context.cacheDir.absolutePath,
+                    elevatedWaypointsFilePath = File.createTempFile(
+                        "elevated_waypoints",
+                        ".geojson",
+                        context.cacheDir
+                    ).absolutePath,
                     mode = mode,
                 )
 

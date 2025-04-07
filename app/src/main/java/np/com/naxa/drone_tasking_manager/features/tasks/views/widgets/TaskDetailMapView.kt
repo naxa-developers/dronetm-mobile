@@ -146,6 +146,7 @@ fun TaskDetailMapView(
     LaunchedEffect(task) {
         if (task.id == null || task.projectId == null) return@LaunchedEffect
 
+        val rasterDemFilePath = getFilePath(context, task.projectName!!)
         tasksViewModel.triggerEvent(
             TasksEvent.FetchWayPointsOrWayLines(
                 task = task,
@@ -153,6 +154,7 @@ fun TaskDetailMapView(
                 download = false,
                 isWayPoints = true,
                 takeOffPoint = updatedTakeOffPointLatLng,
+                rasterDemFilePath = rasterDemFilePath,
                 offline = !InternetConnectionUtils.isInternetAvailable(context),
             )
         )
@@ -457,6 +459,7 @@ fun TaskDetailMapView(
                         if (task.id == null || task.projectId == null) return@launch
                         tasksViewModel.updateRotation(angle.roundToInt())
 
+                        val rasterDemFilePath = getFilePath(context, task.projectName!!)
                         tasksViewModel.triggerEvent(
                             TasksEvent.FetchWayPointsOrWayLines(
                                 task = task,
@@ -464,6 +467,7 @@ fun TaskDetailMapView(
                                 download = false,
                                 isWayPoints = isWaypoints,
                                 takeOffPoint = updatedTakeOffPointLatLng,
+                                rasterDemFilePath = rasterDemFilePath,
                                 offline = !InternetConnectionUtils.isInternetAvailable(context)
                             )
                         )
@@ -507,12 +511,14 @@ fun TaskDetailMapView(
                 onToggle = { wayLines ->
                     if (task.id == null || task.projectId == null) return@WayPointsWayLinesSwitcher
 
+                    val rasterDemFilePath = getFilePath(context, task.projectName!!)
                     tasksViewModel.triggerEvent(
                         TasksEvent.FetchWayPointsOrWayLines(
                             task = task,
                             download = false,
                             isWayPoints = !wayLines,
                             takeOffPoint = updatedTakeOffPointLatLng,
+                            rasterDemFilePath = rasterDemFilePath,
                             offline = !InternetConnectionUtils.isInternetAvailable(context)
                         )
                     )
