@@ -73,7 +73,7 @@ android {
 
 dependencies {
 
-    implementation(fileTree(mapOf("dir" to "/Users/admin/AndroidStudioProjects/android-saf-file-explorer/app/src/main/libs", "include" to listOf("gdal-*.aar"))))
+    implementation(fileTree(mapOf("dir" to "src/main/libs", "include" to listOf("gdal-*.aar"))))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
