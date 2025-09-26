@@ -215,7 +215,7 @@ fun DownloadAndTransferFileScreen(modifier: Modifier = Modifier, deviceId: Int?)
                 (downloadAndTransferState as DownloadAndTransferState.SafDirectorySelected).directory
             // Show list of directories
             DownloadAndTransferSafDirectorySelectedStateView(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().padding(top = 56.dp),
                 directory = directory,
                 onDirectorySelected = {
                     downloadAndTransferViewModel.startTransfer(
