@@ -115,43 +115,43 @@ fun LoginScreenWidget(
                 modifier = Modifier.padding(bottom = 24.dp, top = 16.dp)
             )
 
-            // Google Sign In Button
-            OutlinedButton(
-                onClick = {
-                    if (!state.isLoggingIn) {
-                        onGoogleSignInClick(rememberMe)
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth(),
-                enabled = enableView,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                ),
-                shape = RoundedCornerShape(16)
-            ) {
-                if (state.isLoggingIn) CircularProgressIndicator(
-                    color = Color.White,
-                    modifier = Modifier
-                        .size(32.dp),
-                    strokeWidth = 2.dp
-                ) else {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_google_logo),
-                        contentDescription = "Google Icon",
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Continue with Google", style = MaterialTheme.typography.labelLarge)
-                }
-            }
-
-            Text(
-                text = "or",
-                modifier = Modifier.padding(vertical = 16.dp),
-                style = MaterialTheme.typography.bodyMedium
-            )
+//            // Google Sign In Button
+//            OutlinedButton(
+//                onClick = {
+//                    if (!state.isLoggingIn) {
+//                        onGoogleSignInClick(rememberMe)
+//                    }
+//                },
+//                modifier = Modifier
+//                    .fillMaxWidth(),
+//                enabled = enableView,
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = MaterialTheme.colorScheme.surface,
+//                    contentColor = MaterialTheme.colorScheme.onSurface
+//                ),
+//                shape = RoundedCornerShape(16)
+//            ) {
+//                if (state.isLoggingIn) CircularProgressIndicator(
+//                    color = Color.White,
+//                    modifier = Modifier
+//                        .size(32.dp),
+//                    strokeWidth = 2.dp
+//                ) else {
+//                    Image(
+//                        painter = painterResource(id = R.drawable.ic_google_logo),
+//                        contentDescription = "Google Icon",
+//                        modifier = Modifier.size(32.dp)
+//                    )
+//                    Spacer(modifier = Modifier.width(8.dp))
+//                    Text("Continue with Google", style = MaterialTheme.typography.labelLarge)
+//                }
+//            }
+//
+//            Text(
+//                text = "or",
+//                modifier = Modifier.padding(vertical = 16.dp),
+//                style = MaterialTheme.typography.bodyMedium
+//            )
 
             // Email TextField
             OutlinedTextField(

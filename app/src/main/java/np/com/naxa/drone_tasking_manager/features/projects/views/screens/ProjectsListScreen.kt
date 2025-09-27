@@ -136,7 +136,7 @@ fun ProjectsListScreen(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
-            visible = state.projects.isNotEmpty(),
+//            visible = state.projects.isNotEmpty(),
             selected = selectedFilter,
             onSelected = {
                 selectedFilter = it
