@@ -1,0 +1,51 @@
+name: 🔧 Build and Release
+
+on:
+  release:
+    types: [published]
+  # Allow manual trigger (workflow_dispatch)
+  workflow_dispatch:
+
+jobs:
+  build_upload_apk:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    container:
+        image: docker.io/cimg/android:2025.09
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Compile Code
+        run: ./gradlew assembleDebug
+
+      - name: Install Github CLI
+        run: |
+          sudo apt update
+          sudo apt install --no-install-recommends -y gh
+
+      - name: Prod Build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # keystore is base64 encoded secret string, first decode
+          echo "${{ secrets.KEYSTORE_FILE_BASE64 }}" | base64 --decode > "$GITHUB_WORKSPACE/${{ secrets.KEYSTORE_NAME }}"
+
+          # Verify the keystore file is correctly created
+          echo "Current dir: ${PWD}"
+          echo "Keystore location: $GITHUB_WORKSPACE/${{ secrets.KEYSTORE_NAME }}"
+          ls -la "$GITHUB_WORKSPACE"
+
+          ./gradlew assembleRelease \
+            -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/${{ secrets.KEYSTORE_NAME }}" \
+            -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_STOREPASS }} \
+            -Pandroid.injected.signing.key.alias=${{ secrets.KEYSTORE_ALIAS }} \
+            -Pandroid.injected.signing.key.password=${{ secrets.KEYSTORE_KEYPASS }}
+
+          signed_apk_path=$(find ./app/build/outputs/apk/release -name '*.apk' -type f)
+          echo "Generated APK file: ${signed_apk_path}"
+
+          gh release upload ${{ github.event.release.tag_name }} "${signed_apk_path}"
