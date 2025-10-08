@@ -1,5 +1,6 @@
 package np.com.naxa.drone_tasking_manager.core.widgets
 
+import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculateCentroidSize
 import androidx.compose.foundation.gestures.calculatePan
@@ -21,6 +22,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.PI
 import kotlin.math.abs
 
@@ -90,9 +92,11 @@ fun GestureOverlay(
                                     rotation += rotationChange
                                     pan += panChange
 
-                                    val centroidSize = event.calculateCentroidSize(useCurrent = false)
+                                    val centroidSize =
+                                        event.calculateCentroidSize(useCurrent = false)
                                     val zoomMotion = abs(1 - zoom) * centroidSize
-                                    val rotationMotion = abs(rotation * PI.toFloat() * centroidSize / 180f)
+                                    val rotationMotion =
+                                        abs(rotation * PI.toFloat() * centroidSize / 180f)
                                     val panMotion = pan.getDistance()
 
                                     if (zoomMotion > touchSlop ||
@@ -116,8 +120,8 @@ fun GestureOverlay(
                             }
                         } while (event.changes.any { it.pressed })
 
-//                        // Reset transformation state when all pointers are up
-//                        isTransforming = false
+                        //                        // Reset transformation state when all pointers are up
+                        //                        isTransforming = false
                     }
                 }
 
