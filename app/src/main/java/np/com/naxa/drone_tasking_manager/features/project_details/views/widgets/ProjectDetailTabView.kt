@@ -3,7 +3,7 @@ package np.com.naxa.drone_tasking_manager.features.project_details.views.widgets
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,7 +27,7 @@ fun ProjectDetailTabView(
     val tabTitles = listOf("About", "Available Tasks", "Instructions", "Contributions")
 
     Column(modifier = modifier) {
-        ScrollableTabRow(selectedTabIndex = selected, edgePadding = 0.dp) {
+        SecondaryScrollableTabRow(selectedTabIndex = selected, edgePadding = 0.dp) {
             tabTitles.forEachIndexed { index, title ->
                 Tab(
                     selected = selected == index,
