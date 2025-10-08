@@ -129,7 +129,7 @@ class FileDownloadHandler(private val context: Context) {
 
             // Get the response body
             val body = response.body
-            if (body == null) {
+            if (body.contentLength() == 0L) {
                 emit(DownloadResult.Error("Empty response"))
                 return@flow
             }
