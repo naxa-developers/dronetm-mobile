@@ -26,16 +26,18 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 
 @Composable
 fun DownloadAndTransferIdleStateView(
@@ -48,11 +50,11 @@ fun DownloadAndTransferIdleStateView(
 ) {
 
     val context = LocalContext.current
-    val clipboardManager = LocalClipboardManager.current
+    val clipboardManager = LocalClipboard.current
     var downloadUrl by rememberSaveable {
         mutableStateOf("")
     }
-
+    val scope = rememberCoroutineScope()
 
     Box(
         modifier = modifier,
@@ -106,27 +108,32 @@ fun DownloadAndTransferIdleStateView(
                         trailingIcon = {
                             IconButton(
                                 onClick = {
-                                    if (clipboardManager.hasText()) {
-                                        val pastedText =
-                                            clipboardManager.getText().toString()
-                                        if (Patterns.WEB_URL.matcher(pastedText)
-                                                .matches()
-                                        ) {
-                                            downloadUrl = pastedText
+                                    scope.launch {
+                                        if (clipboardManager.getClipEntry() != null && clipboardManager.getClipEntry()?.clipData != null) {
+                                            val pastedText =
+                                                clipboardManager.getClipEntry()?.clipData?.getItemAt(
+                                                    0
+                                                )?.text.toString()
+                                            if (Patterns.WEB_URL.matcher(pastedText)
+                                                    .matches()
+                                            ) {
+                                                downloadUrl = pastedText
+                                            } else {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Clipboard content is not a valid URL",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
                                         } else {
                                             Toast.makeText(
                                                 context,
-                                                "Clipboard content is not a valid URL",
+                                                "Nothing to paste",
                                                 Toast.LENGTH_SHORT
                                             ).show()
                                         }
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            "Nothing to paste",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
                                     }
+
                                 }
                             ) {
                                 Icon(
