@@ -15,6 +15,9 @@ sealed class ProjectsEvent {
      * @property onlyMine A boolean indicating whether to only fetch projects belonging to the current user.
      *                    Defaults to `false`.
      * @property refresh Whether to force a refresh of the project list.
+     *                  Defaults to `false`.
+     * @property onCompleted An optional lambda to be executed when the fetch operation is completed.
+     *                  It will be called after the fetch is either successful or failed.
      *
      * This class is a subclass of [ProjectsEvent], suggesting that it's used within an event-driven
      * architecture for managing project-related actions.
@@ -41,7 +44,8 @@ sealed class ProjectsEvent {
         val size: Int = 20,
         val query: String? = null,
         val onlyMine: Boolean = false,
-        val refresh: Boolean = false
+        val refresh: Boolean = false,
+        val onCompleted: (() -> Unit)? = null
     ) : ProjectsEvent()
 
     /**

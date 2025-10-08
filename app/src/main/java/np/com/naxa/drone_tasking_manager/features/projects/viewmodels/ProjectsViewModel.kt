@@ -60,7 +60,8 @@ class ProjectsViewModel @Inject constructor(
                     size = event.size,
                     query = event.query,
                     onlyMine = event.onlyMine,
-                    refresh = event.refresh
+                    refresh = event.refresh,
+                    onCompleted = event.onCompleted,
                 )
             }
 
@@ -87,7 +88,8 @@ class ProjectsViewModel @Inject constructor(
         size: Int = 20,
         query: String?,
         onlyMine: Boolean = false,
-        refresh: Boolean = false
+        refresh: Boolean = false,
+        onCompleted: (() -> Unit)? = null
     ) {
 
         if (refresh) _projectsResponse = null
@@ -143,6 +145,8 @@ class ProjectsViewModel @Inject constructor(
                     }
                 }
             }
+        }.invokeOnCompletion {
+            onCompleted?.invoke()
         }
     }
 

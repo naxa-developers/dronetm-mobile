@@ -41,6 +41,8 @@ fun ProjectsListScreen(modifier: Modifier = Modifier) {
     val state by viewModel.projectsState.collectAsState()
     val listState = rememberLazyListState()
 
+    var isPulledToRefresh by remember { mutableStateOf(false) }
+
     var selectedFilter by remember { mutableStateOf(if (state.onlyMine) ProjectFilterItem.OnlyMine else ProjectFilterItem.All) }
 
     LaunchedEffect(Unit) {
@@ -70,12 +72,16 @@ fun ProjectsListScreen(modifier: Modifier = Modifier) {
 
     PullToRefreshBox(
         modifier = modifier.fillMaxSize(),
-        isRefreshing = state.refresh,
+        isRefreshing = state.refresh && isPulledToRefresh,
         onRefresh = {
+            isPulledToRefresh = true
             viewModel.triggerEvent(
                 ProjectsEvent.FetchProjects(
                     onlyMine = selectedFilter == ProjectFilterItem.OnlyMine,
-                    refresh = true
+                    refresh = true,
+                    onCompleted = {
+                         isPulledToRefresh = false
+                    }
                 )
             )
         },
