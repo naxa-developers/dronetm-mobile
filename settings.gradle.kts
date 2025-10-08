@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "SAF File Explorer"
+rootProject.name = "dronetm"
 include(":app")
  

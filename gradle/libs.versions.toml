@@ -1,62 +1,62 @@
 [versions]
-agp = "8.7.3"
-androidSdk = "11.8.0"
-kotlin = "2.0.0"
-coreKtx = "1.15.0"
+agp = "8.13.0"
+androidSdk = "12.0.0"
+kotlin = "2.2.0"
+coreKtx = "1.17.0"
 junit = "4.13.2"
-junitVersion = "1.2.1"
-espressoCore = "3.6.1"
-lifecycleRuntimeKtx = "2.8.7"
-activityCompose = "1.10.0"
-composeBom = "2025.01.00"
-navigationCompose = "2.8.5"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
+lifecycleRuntimeKtx = "2.9.4"
+activityCompose = "1.11.0"
+composeBom = "2025.09.01"
+navigationCompose = "2.9.5"
 #okhttp = "4.12.0"
 #runtimeLivedata = "1.7.6"
-documentfile = "1.0.1"
+documentfile = "1.1.0"
 iconExtendedVersion = "1.7.6"
 
 #Dagger-Hilt
-hilt = "2.55"
+hilt = "2.57.2"
 #hilt-work = "1.2.0"
-hilt-compose = "1.2.0"
+hilt-compose = "1.3.0"
 
 #Activity KTX for viewModels()
-activity-ktx = "1.10.0"
+activity-ktx = "1.11.0"
 
 #Lifecycle
-lifecycle-version = "2.8.7"
-runtime-livedata = "1.7.6"
+lifecycle-version = "2.9.4"
+runtime-livedata = "1.9.2"
 lifecycle-extensions = "2.2.0"
 
 #Retrofit2
-retrofit = "2.11.0"
-okhttp = "5.0.0-alpha.14"
+retrofit = "3.0.0"
+okhttp = "5.2.0"
 
 #Storage
-mmkv = "2.0.2"
+mmkv = "2.2.4"
 
 #Coroutines
-coroutines = "1.10.1"
+coroutines = "1.10.2"
 
 #KSP
 #ksp = "1.9.20-1.0.14"
-ksp = "2.0.0-1.0.24"
+ksp = "2.2.0-2.0.2"
 
 ##Accompanist
 accompanist-flowlayout = "0.36.0"
 
 ##Google Signin
-credential = "1.3.0"
-credentials-play-service-auth = "1.3.0"
+credential = "1.5.0"
+credentials-play-service-auth = "1.5.0"
 googleid = "1.1.1"
-gms-play-services-auth = "21.3.0"
-google-services = "4.4.2"
+gms-play-services-auth = "21.4.0"
+google-services = "4.4.3"
 
 ##Firebase
-firebaseBom = "33.8.0"
+firebaseBom = "34.3.0"
 
 ##Image
-coil = "2.6.0"
+coil = "2.7.0"
 playServicesLocation = "21.3.0"
 
 [libraries]

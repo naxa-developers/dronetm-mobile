@@ -21,13 +21,13 @@ if (localPropertiesFile.exists()) {
 
 android {
     namespace = "np.com.naxa.drone_tasking_manager"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "np.com.naxa.drone_tasking_manager"
         minSdk = 24
         // noinspection EditedTargetSdkVersion
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -51,11 +51,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "21"
     }
     buildFeatures {
         compose = true
