@@ -1,6 +1,5 @@
 package np.com.naxa.drone_tasking_manager.features.tasks.views.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -27,21 +25,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -64,24 +59,22 @@ fun TaskDetailsScreen(
 ) {
 
     val scope = rememberCoroutineScope()
-    val configuration = LocalConfiguration.current
+    val windowInfo = LocalWindowInfo.current
     val density = LocalDensity.current
     val navigationEventsViewModel = LocalNavigationEventsViewModel.current
 
     val tasksViewModel = LocalTasksViewModel.current
     val state by tasksViewModel.taskDetailState.collectAsState()
 
-    val mapViewMaxHeightPx =
-        with(LocalDensity.current) { (configuration.screenHeightDp * 0.6).dp.toPx() }
-    val mapViewMinHeightPx =
-        with(LocalDensity.current) { (configuration.screenHeightDp * 0.25).dp.toPx() }
+    val mapViewMaxHeightPx = windowInfo.containerSize.height * 0.6
+    val mapViewMinHeightPx = windowInfo.containerSize.height * 0.25
     var mapViewOffset by remember { mutableFloatStateOf(0f) }
 
     var waypointsCount: Int? by remember { mutableStateOf(null) }
 
     val listState = rememberLazyListState()
 
-    var isScrollable by remember { mutableStateOf(false) }
+    var fullyScrolled by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         if (taskId != null) {
@@ -90,25 +83,19 @@ fun TaskDetailsScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        snapshotFlow { listState.layoutInfo }
-            .collect { layoutInfo ->
-                val totalHeightPx = layoutInfo.visibleItemsInfo.sumOf { it.size }
-                val contentHeight = with(density) { totalHeightPx.toDp() }
-
-                isScrollable =
-                    contentHeight > (configuration.screenHeightDp.dp - with(density) { mapViewMaxHeightPx.toDp() })
-                if (!isScrollable) mapViewOffset = 0f
-            }
-    }
-
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                val delta = available.y
-                val newOffset =
-                    (mapViewOffset + delta).coerceIn(-(mapViewMaxHeightPx - mapViewMinHeightPx), 0f)
-                mapViewOffset = newOffset
+                if (!fullyScrolled) {
+                    val delta = available.y
+
+                    val newOffset =
+                        (mapViewOffset + delta).coerceIn(
+                            (-(mapViewMaxHeightPx - mapViewMinHeightPx)).toFloat(),
+                            0f
+                        )
+                    mapViewOffset = newOffset
+                }
                 return Offset.Zero
             }
         }
@@ -130,30 +117,37 @@ fun TaskDetailsScreen(
             )
 
             Box(modifier = modifier.fillMaxSize()) {
-                LazyColumn(
-                    state = listState,
-                    contentPadding = PaddingValues(top = with(density) { mapViewMaxHeightPx.toDp() }),
+                TaskDetailSectionView(
                     modifier = Modifier
                         .fillMaxSize()
-                        .nestedScroll(nestedScrollConnection),
-                    userScrollEnabled = isScrollable
-                ) {
-                    item {
-                        TaskDetailSectionView(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight()
-                                .padding(16.dp),
-                            task = task,
-                            waypointsCount = waypointsCount
-                        )
+                        .nestedScroll(nestedScrollConnection)
+                        .padding(16.dp),
+                    task = task,
+                    waypointsCount = waypointsCount,
+                    listState = listState,
+                    contentPadding = PaddingValues(top = with(density) {
+                        mapViewMaxHeightPx.roundToInt().toDp()
+                    }),
+                    onLayoutInfoChanged = { layoutInfo ->
+
+                        val height4ScrollableContainer =
+                            windowInfo.containerSize.height - mapViewMaxHeightPx
+
+                        val scrollable =
+                            layoutInfo.viewportSize.height > height4ScrollableContainer
+                        if (!scrollable) mapViewOffset = 0f
+
+                        fullyScrolled =
+                            layoutInfo.visibleItemsInfo.lastOrNull()?.index == (layoutInfo.totalItemsCount - 1)
+
+                        return@TaskDetailSectionView scrollable
                     }
-                }
+                )
 
                 TaskDetailMapView(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(with(density) { mapViewMaxHeightPx.toDp() })
+                        .height(with(density) { mapViewMaxHeightPx.roundToInt().toDp() })
                         .offset { IntOffset(x = 0, y = mapViewOffset.roundToInt()) },
                     task = task,
                     onWaypointsLoaded = {

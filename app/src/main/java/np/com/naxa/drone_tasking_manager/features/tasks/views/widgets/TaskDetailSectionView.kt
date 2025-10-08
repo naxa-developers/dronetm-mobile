@@ -3,12 +3,17 @@ package np.com.naxa.drone_tasking_manager.features.tasks.views.widgets
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListLayoutInfo
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,12 +39,16 @@ import np.com.naxa.drone_tasking_manager.local_providers.LocalNavigationEventsVi
 import np.com.naxa.drone_tasking_manager.local_providers.LocalTasksViewModel
 import np.com.naxa.drone_tasking_manager.navigation.viewmodels.events.DroneTMAppNavigationEvent
 import np.com.naxa.drone_tasking_manager.utils.round
+import kotlin.collections.contains
 
 @Composable
 fun TaskDetailSectionView(
     modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    listState: LazyListState = rememberLazyListState(),
     task: ProjectTask,
-    waypointsCount: Int? = null
+    waypointsCount: Int? = null,
+    onLayoutInfoChanged: (LazyListLayoutInfo) -> Boolean
 ) {
 
     val scope = rememberCoroutineScope()
@@ -49,6 +59,9 @@ fun TaskDetailSectionView(
 
     // Collect the state
     val unFlyableState by tasksViewModel.taskUnFlyableRequestState.collectAsState()
+
+    // Is Scrollable
+    var isScrollable by remember { mutableStateOf(false) }
 
     // Perform tasks based on the state
     LaunchedEffect(unFlyableState) {
@@ -66,175 +79,199 @@ fun TaskDetailSectionView(
         }
     }
 
-    Column(
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { listState.layoutInfo }
+            .collect { layoutInfo ->
+                isScrollable = onLayoutInfoChanged.invoke(layoutInfo)
+            }
+    }
+
+    LazyColumn(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        state = listState,
+        contentPadding = contentPadding,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        userScrollEnabled = isScrollable
     ) {
-        HeadingText(text = "Task Description")
-        Column(
-            modifier = Modifier
-                .wrapContentHeight()
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            task.createdAt?.let {
-                KeyValueText(
-                    key = "Created Date",
-                    value = it.split("T").firstOrNull() ?: it
-                )
-            }
-
-            task.updatedAt?.let {
-                KeyValueText(
-                    key = "Task Locked Date",
-                    value = it.split("T").firstOrNull() ?: it
-                )
-            }
-
-            task.totalAreaSqkm?.let {
-                KeyValueText(
-                    key = "Total Task Area",
-                    value = it.round(2).toString(),
-                    suffix = "km²"
-                )
-            }
-
-            waypointsCount?.let {
-                KeyValueText(
-                    key = "Total Waypoints Count",
-                    value = it.toString(),
-                )
-            }
-
-            task.flightTimeMinutes?.let {
-                KeyValueText(
-                    key = "Est. Flight Time",
-                    value = it.round(2).toString(),
-                    suffix = "minutes"
-                )
-            }
-
-        }
-        HeadingText(text = "Flight Parameters")
-        Column(
-            modifier = Modifier
-                .wrapContentHeight()
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            task.frontOverlap?.let {
-                KeyValueText(
-                    key = "Front Overlap",
-                    value = it.toString(),
-                    suffix = "%",
-                    hasSpaceBetweenSuffix = false
-                )
-            }
-
-            task.sideOverlap?.let {
-                KeyValueText(
-                    key = "Side Overlap",
-                    value = it.toString(),
-                    suffix = "%",
-                    hasSpaceBetweenSuffix = false
-                )
-            }
-
-            task.gsdCmPx?.let {
-                KeyValueText(
-                    key = "GSD",
-                    value = it.toString(),
-                    suffix = "cm"
-                )
-            }
-
-        }
-
-        if (listOf(
-                ProjectTaskState.ImageUploaded,
-                ProjectTaskState.ImageProcessingStarted,
-                ProjectTaskState.ImageProcessingFailed,
-                ProjectTaskState.ImageProcessingFinished,
-            ).contains(task.state)
-        ) {
-            HeadingText(text = "Upload Information")
+        item { HeadingText(text = "Task Description") }
+        item {
             Column(
                 modifier = Modifier
                     .wrapContentHeight()
                     .fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                task.totalImageUploaded?.let {
+                task.createdAt?.let {
                     KeyValueText(
-                        key = "Image Count",
-                        value = it.toString()
+                        key = "Created Date",
+                        value = it.split("T").firstOrNull() ?: it
                     )
                 }
 
-                KeyValueText(
-                    key = "Orthophoto Available",
-                    value = if (task.assetsUrl != null) "Yes" else "No"
-                )
-
-                task.state?.let {
+                task.updatedAt?.let {
                     KeyValueText(
-                        key = "Image Status",
-                        value = it.label,
+                        key = "Task Locked Date",
+                        value = it.split("T").firstOrNull() ?: it
                     )
+                }
+
+                task.totalAreaSqkm?.let {
+                    KeyValueText(
+                        key = "Total Task Area",
+                        value = it.round(2).toString(),
+                        suffix = "km²"
+                    )
+                }
+
+                waypointsCount?.let {
+                    KeyValueText(
+                        key = "Total Waypoints Count",
+                        value = it.toString(),
+                    )
+                }
+
+                task.flightTimeMinutes?.let {
+                    KeyValueText(
+                        key = "Est. Flight Time",
+                        value = it.round(2).toString(),
+                        suffix = "minutes"
+                    )
+                }
+
+            }
+        }
+        if (task.hasFlightParametersData()) {
+            item { HeadingText(text = "Flight Parameters") }
+            item {
+                Column(
+                    modifier = Modifier
+                        .wrapContentHeight()
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    task.frontOverlap?.let {
+                        KeyValueText(
+                            key = "Front Overlap",
+                            value = it.toString(),
+                            suffix = "%",
+                            hasSpaceBetweenSuffix = false
+                        )
+                    }
+
+                    task.sideOverlap?.let {
+                        KeyValueText(
+                            key = "Side Overlap",
+                            value = it.toString(),
+                            suffix = "%",
+                            hasSpaceBetweenSuffix = false
+                        )
+                    }
+
+                    task.gsdCmPx?.let {
+                        KeyValueText(
+                            key = "GSD",
+                            value = it.toString(),
+                            suffix = "cm"
+                        )
+                    }
+
                 }
             }
-        } else {
-            HeadingText(
-                text = "Is this task flyable?",
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            IsTaskFlyableRadioButtonsView(
-                flyable = isTaskFlyable,
-                onValueChange = { flyable ->
-                    isTaskFlyable = flyable
-                }
-            )
-            Crossfade(
-                targetState = isTaskFlyable,
-                label = "isTaskFlyable"
-            ) { flyable ->
-                if (!flyable) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight(),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        HeadingText(text = "Comment", color = MaterialTheme.colorScheme.onSurface)
-                        CommentTextFieldView {
-                            if (task.id == null || task.projectId == null) return@CommentTextFieldView
+        }
 
-                            scope.launch {
-                                tasksViewModel.triggerEvent(
-                                    TasksEvent.FlagTaskAsUnFlyable(
-                                        taskId = task.id,
-                                        projectId = task.projectId,
-                                        comment = it
-                                    )
-                                )
-                            }
-                        }
+        if (task.hasUploadInformationData()) {
+            item { HeadingText(text = "Upload Information") }
+            item {
+                Column(
+                    modifier = Modifier
+                        .wrapContentHeight()
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    task.totalImageUploaded?.let {
+                        KeyValueText(
+                            key = "Image Count",
+                            value = it.toString()
+                        )
                     }
-                } else {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight(),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        HeadingText(text = "Upload Images, GCP, and align.laz")
-                        UploadTaskImageView(
-                            task = task
+
+                    KeyValueText(
+                        key = "Orthophoto Available",
+                        value = if (task.assetsUrl != null) "Yes" else "No"
+                    )
+
+                    task.state?.let {
+                        KeyValueText(
+                            key = "Image Status",
+                            value = it.label,
                         )
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(48.dp))
+        } else {
+            item {
+                HeadingText(
+                    text = "Is this task flyable?",
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+            item {
+                IsTaskFlyableRadioButtonsView(
+                    flyable = isTaskFlyable,
+                    onValueChange = { flyable ->
+                        isTaskFlyable = flyable
+                    }
+                )
+            }
+            item {
+                Crossfade(
+                    targetState = isTaskFlyable,
+                    label = "isTaskFlyable"
+                ) { flyable ->
+                    if (!flyable) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight(),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            HeadingText(
+                                text = "Comment",
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            CommentTextFieldView {
+                                if (task.id == null || task.projectId == null) return@CommentTextFieldView
+
+                                scope.launch {
+                                    tasksViewModel.triggerEvent(
+                                        TasksEvent.FlagTaskAsUnFlyable(
+                                            taskId = task.id,
+                                            projectId = task.projectId,
+                                            comment = it
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight(),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            HeadingText(text = "Upload Images, GCP, and align.laz")
+                            UploadTaskImageView(
+                                task = task
+                            )
+                        }
+                    }
+                }
+            }
+            item {
+                Spacer(modifier = Modifier.height(48.dp))
+            }
         }
     }
 }
@@ -256,11 +293,13 @@ private fun HeadingText(
 
 @Composable
 private fun KeyValueText(
+    modifier: Modifier = Modifier,
     key: String,
     value: String,
     suffix: String? = null,
     hasSpaceBetweenSuffix: Boolean = true
 ) = Row(
+    modifier = modifier,
     verticalAlignment = Alignment.CenterVertically
 ) {
     Text(
@@ -279,4 +318,23 @@ private fun KeyValueText(
         },
         style = MaterialTheme.typography.bodyMedium
     )
+}
+
+/**
+ * Method to check if the task has flight parameters data
+ */
+private fun ProjectTask.hasFlightParametersData(): Boolean {
+    return gsdCmPx != null || sideOverlap != null || frontOverlap != null
+}
+
+/**
+ * Method to check if the task has upload information data
+ */
+private fun ProjectTask.hasUploadInformationData(): Boolean {
+    return listOf(
+        ProjectTaskState.ImageUploaded,
+        ProjectTaskState.ImageProcessingStarted,
+        ProjectTaskState.ImageProcessingFailed,
+        ProjectTaskState.ImageProcessingFinished,
+    ).contains(state)
 }
