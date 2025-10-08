@@ -1,5 +1,6 @@
 package np.com.naxa.drone_tasking_manager.features.project_details.views.screens
 
+
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeGesturesPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -41,12 +42,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.platform.LocalContext
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import kotlinx.coroutines.launch
@@ -72,7 +73,7 @@ fun ProjectDetailsScreen(
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val configuration = LocalConfiguration.current
+    val windowInfo = LocalWindowInfo.current
     val density = LocalDensity.current
     val navigationEventsViewModel = LocalNavigationEventsViewModel.current
 
@@ -85,10 +86,8 @@ fun ProjectDetailsScreen(
     val lockTaskState by tasksViewModel.taskLockState.collectAsState()
     val unlockTaskState by tasksViewModel.taskUnlockState.collectAsState()
 
-    val mapViewMaxHeightPx =
-        with(LocalDensity.current) { (configuration.screenHeightDp * 0.65).dp.toPx() }
-    val mapViewMinHeightPx =
-        with(LocalDensity.current) { (configuration.screenHeightDp * 0.25).dp.toPx() }
+    val mapViewMaxHeightPx by remember { mutableDoubleStateOf(windowInfo.containerSize.height * 0.65) }
+    val mapViewMinHeightPx by remember { mutableDoubleStateOf(windowInfo.containerSize.height * 0.25) }
     var mapViewOffset by remember { mutableFloatStateOf(0f) }
 
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -106,25 +105,41 @@ fun ProjectDetailsScreen(
 
     var isScrollable by remember { mutableStateOf(false) }
 
+    var fullyScrolled by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         snapshotFlow { listState.layoutInfo }
             .collect { layoutInfo ->
-                val totalHeightPx = layoutInfo.visibleItemsInfo.sumOf { it.size }
-                val contentHeight = with(density) { totalHeightPx.toDp() }
+                val height4ScrollableContainer =
+                    windowInfo.containerSize.height - mapViewMaxHeightPx
+
+                val scrollableContentSize = layoutInfo.visibleItemsInfo.firstOrNull()?.size
 
                 isScrollable =
-                    contentHeight > (configuration.screenHeightDp.dp - with(density) { mapViewMaxHeightPx.toDp() })
+                    scrollableContentSize != null && scrollableContentSize > height4ScrollableContainer
+
                 if (!isScrollable) mapViewOffset = 0f
+
+                fullyScrolled =
+                    scrollableContentSize == (layoutInfo.viewportEndOffset - (layoutInfo.visibleItemsInfo.firstOrNull()?.offset
+                        ?: 0))
+
             }
     }
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                val delta = available.y
-                val newOffset =
-                    (mapViewOffset + delta).coerceIn(-(mapViewMaxHeightPx - mapViewMinHeightPx), 0f)
-                mapViewOffset = newOffset
+                if (!fullyScrolled) {
+                    val delta = available.y
+
+                    val newOffset =
+                        (mapViewOffset + delta).coerceIn(
+                            (-(mapViewMaxHeightPx - mapViewMinHeightPx)).toFloat(),
+                            0f
+                        )
+                    mapViewOffset = newOffset
+                }
                 return Offset.Zero
             }
         }
@@ -200,7 +215,9 @@ fun ProjectDetailsScreen(
             Box(modifier = modifier.fillMaxSize()) {
                 LazyColumn(
                     state = listState,
-                    contentPadding = PaddingValues(top = with(density) { mapViewMaxHeightPx.toDp() }),
+                    contentPadding = PaddingValues(top = with(density) {
+                        mapViewMaxHeightPx.roundToInt().toDp()
+                    }),
                     modifier = Modifier
                         .fillMaxSize()
                         .nestedScroll(nestedScrollConnection),
@@ -251,7 +268,7 @@ fun ProjectDetailsScreen(
                 ProjectDetailMapView(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(with(density) { mapViewMaxHeightPx.toDp() })
+                        .height(with(density) { mapViewMaxHeightPx.roundToInt().toDp() })
                         .offset { IntOffset(x = 0, y = mapViewOffset.roundToInt()) },
                     project = project,
                     onFeatureClick = {
