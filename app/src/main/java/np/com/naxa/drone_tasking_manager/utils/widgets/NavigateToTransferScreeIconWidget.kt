@@ -2,7 +2,6 @@ package np.com.naxa.drone_tasking_manager.utils.widgets
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -10,10 +9,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.RichTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults.caretSize
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -38,7 +37,9 @@ fun NavigateToTransferFileWidget(
 
     val navigationEventsViewModel = LocalNavigationEventsViewModel.current
 
-    val tooltipPosition = TooltipDefaults.rememberPlainTooltipPositionProvider()
+    val tooltipPosition = TooltipDefaults.rememberTooltipPositionProvider(
+        positioning = TooltipAnchorPosition.Above
+    )
     val tooltipState = rememberTooltipState(isPersistent = true)
     val scope = rememberCoroutineScope()
 
@@ -50,7 +51,7 @@ fun NavigateToTransferFileWidget(
             tooltip = {
                 RichTooltip(
                     title = { Text("Transfer File?") },
-                    caretSize = caretSize,
+                    // caretSize = caretSize,
                     action = {
                         TextButton(onClick = {
                             scope.launch {
@@ -98,7 +99,7 @@ fun NavigateToTransferFileWidget(
                 tooltip = {
                     RichTooltip(
                         title = { Text("Transfer File?") },
-                        caretSize = caretSize,
+                        // caretSize = caretSize,
                         action = {
                             TextButton(onClick = {
                                 scope.launch {
